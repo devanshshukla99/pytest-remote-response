@@ -1,9 +1,9 @@
 import py.path
 import pytest
 
-from pytest_intercept_remote import remote_status
-from pytest_intercept_remote.fixtures import intercept_skip_conditions, intercept_url  # noqa: F401
-from pytest_intercept_remote.intercept_helpers import (  # noqa: F401
+from pytest_response import remote_status
+from pytest_response.fixtures import intercept_skip_conditions, intercept_url  # noqa: F401
+from pytest_response.intercept_helpers import (  # noqa: F401
     intercept_dump,
     intercept_patch,
     intercepted_urls
