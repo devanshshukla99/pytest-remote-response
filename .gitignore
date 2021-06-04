@@ -55,7 +55,7 @@ htmlcov
 # PyCharm
 .idea
 
-pytest_intercept/_version.py
+*/_version.py
 pip-wheel-metadata/
 
 # vscode
