@@ -4,8 +4,4 @@ import os
 
 from setuptools import setup
 
-setup(
-    use_scm_version={
-        'write_to': os.path.join('pytest_response', '_version.py')
-    }
-)
+setup(use_scm_version={"write_to": os.path.join("pytest_response", "_version.py")})

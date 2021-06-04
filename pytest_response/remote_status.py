@@ -7,11 +7,7 @@ from urllib.request import urlopen
 import pytest
 import requests
 
-__all__ = [
-    "test_urls_urllib",
-    "test_urls_requests",
-    "test_urls_socket"
-]
+__all__ = ["test_urls_urllib", "test_urls_requests", "test_urls_socket"]
 
 
 def pytest_generate_tests(metafunc):
@@ -28,7 +24,8 @@ def pytest_generate_tests(metafunc):
             with open(metafunc.config.getini("intercept_dump_file")) as fd:
                 funcarglist = json.load(fd)
         funcarglist = funcarglist.get(
-            metafunc.function.__name__.replace("test_", ''), [None]) or [None]
+            metafunc.function.__name__.replace("test_", ""), [None]
+        ) or [None]
         metafunc.parametrize("intercept_url", funcarglist, indirect=True)
 
 

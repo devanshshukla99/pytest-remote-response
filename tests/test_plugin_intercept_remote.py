@@ -63,8 +63,9 @@ def test_remote(testdir):
         """
     )
 
-    result = testdir.runpytest("-q", "-p", "no:warnings",
-                               "-o", "intercept_dump_file=test_urls.json")
+    result = testdir.runpytest(
+        "-q", "-p", "no:warnings", "-o", "intercept_dump_file=test_urls.json"
+    )
     result.assert_outcomes(passed=4)
 
 
@@ -100,8 +101,14 @@ def test_intercept_remote(testdir):
         """
     )
 
-    result = testdir.runpytest("-q", "-p", "no:warnings", "--intercept-remote",
-                               "-o", "intercept_dump_file=test_urls.json")
+    result = testdir.runpytest(
+        "-q",
+        "-p",
+        "no:warnings",
+        "--intercept-remote",
+        "-o",
+        "intercept_dump_file=test_urls.json",
+    )
     result.assert_outcomes(xfailed=3, passed=1)
 
 
@@ -114,20 +121,25 @@ def test_remote_status(testdir):
         {
             "urls_urllib": [
                 "https://www.python.org/",
-                "https://www.python.org/invalidpage_404test"
+                "https://www.python.org/invalidpage_404test",
             ],
             "urls_requests": [
                 "https://www.python.org/",
-                "https://www.python.org/invalidpage_404test"
+                "https://www.python.org/invalidpage_404test",
             ],
-            "urls_socket": [
-                ("www.python.org", 80)
-            ]
-        })
+            "urls_socket": [("www.python.org", 80)],
+        }
+    )
     testdir.maketxtfile(_dump_data)
 
-    result = testdir.runpytest("-q", "-p", "no:warnings", "--remote-status",
-                               "-o", "intercept_dump_file=test_remote_status.txt")
+    result = testdir.runpytest(
+        "-q",
+        "-p",
+        "no:warnings",
+        "--remote-status",
+        "-o",
+        "intercept_dump_file=test_remote_status.txt",
+    )
     result.assert_outcomes(passed=3, xfailed=2)
 
 

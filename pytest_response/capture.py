@@ -1,8 +1,14 @@
 import json
+from pytest_response import remote_status
 
 import pytest
 
 from urllib.request import urlopen
+from tinydb import TinyDB, where
+import shutil
+import tempfile
+import datetime
+import hashlib
 
 
 __all__ = [
@@ -12,11 +18,37 @@ __all__ = [
     "response_patch",
 ]
 
-_urls = {
-    "urls_urllib": [],
-    "urls_requests": [],
-    "urls_socket": []
-}
+
+def capture_url_data(remote_urls):
+    db = TinyDB("./db.json")
+    # urlopen
+    links = remote_urls.get("urls_urllib")
+    for link in links:
+        with urlopen(link) as response:
+            with tempfile.NamedTemporaryFile(delete=False, dir="./") as tmp_file:
+                shutil.copyfileobj(response, tmp_file)
+            print(tmp_file.name)
+            # if db.search(where("url") == link):
+            #     db.update()
+            db.upsert(
+                {
+                    "url": link,
+                    "fname": tmp_file.name,
+                    "cache_date": str(datetime.datetime.now()),
+                    "hash": None
+                },
+                where("url") == link)
+            # db.insert(
+            #     {
+            #         "url": link,
+            #         "fname": tmp_file.name,
+            #         "cache_date": str(datetime.datetime.now()),
+            #         "hash": None
+            #     })
+            print("Inserted!")
+
+
+
 
 
 def urlopen_capture(capture_url):

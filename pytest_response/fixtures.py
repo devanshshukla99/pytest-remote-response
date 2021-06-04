@@ -1,10 +1,7 @@
 import py.path
 import pytest
 
-__all__ = [
-    "intercept_url",
-    "intercept_skip_conditions"
-]
+__all__ = ["intercept_url", "intercept_skip_conditions"]
 
 
 @pytest.fixture

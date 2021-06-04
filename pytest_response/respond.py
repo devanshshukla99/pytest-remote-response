@@ -1,6 +1,8 @@
 import json
 
 import pytest
+import pathlib
+from tinydb import TinyDB, where
 
 __all__ = [
     "urlopen_response",
@@ -9,28 +11,27 @@ __all__ = [
     "response_patch",
 ]
 
-_urls = {
-    "urls_urllib": [],
-    "urls_requests": [],
-    "urls_socket": []
-}
-
+db = TinyDB("./db.json")
 
 def urlopen_response(self, http_class, req, **http_conn_args):
     """
     Mock function for urllib.request.urlopen.
     """
-    global _urls
-    _urls.get("urls_urllib").append(req.get_full_url())
+    global db
+    element = db.search(where("url") == req.get_full_url())[0]
+    print(element)
+    fname = pathlib.Path(element.get("fname"))
+    if fname.exists():
+        with open(fname, "rb") as fd:
+            return fd.read()
+    return None
+
 
 
 def requests_response(self, method, url, *args, **kwargs):
     """
     Mock function for urllib3 module.
     """
-    global _urls
-    full_url = f"{self.scheme}://{self.host}{url}"
-    _urls.get("urls_requests").append(full_url)
     pytest.xfail(f"The test was about to {method} {full_url}")
 
 
@@ -50,18 +51,9 @@ def response_patch(mpatch):
     """
     Monkey Patches urllib, urllib3 and socket.
     """
-    mpatch.setattr(
-        "urllib.request.AbstractHTTPHandler.do_open", urlopen_response)
-    mpatch.setattr(
-        "urllib3.connectionpool.HTTPConnectionPool.urlopen", requests_response)
-    mpatch.setattr(
-        "socket.socket.connect", socket_connect_response)
+    mpatch.setattr("urllib.request.AbstractHTTPHandler.do_open", urlopen_response)
+    # mpatch.setattr(
+    #     "urllib3.connectionpool.HTTPConnectionPool.urlopen", requests_response
+    # )
+    # mpatch.setattr("socket.socket.connect", socket_connect_response)
 
-
-@pytest.fixture
-def intercepted_urls():
-    """
-    Pytest fixture to get the list of intercepted urls in a test
-    """
-    global _urls
-    return _urls
