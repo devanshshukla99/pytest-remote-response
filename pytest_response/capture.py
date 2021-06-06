@@ -1,71 +1,58 @@
-import json
-from pytest_response import remote_status
-
+from pytest_response import db
 import pytest
 
 from urllib.request import urlopen
-from tinydb import TinyDB, where
-import shutil
-import tempfile
-import datetime
-import hashlib
-
+import requests
 
 __all__ = [
-    "urlopen_response",
-    "requests_response",
-    "socket_connect_response",
-    "response_patch",
+    "capture_url_data",
+    "capture_requests_data",
+    # "socket_connect_response",
+    # "response_patch",
 ]
 
 
-def capture_url_data(remote_urls):
-    db = TinyDB("./db.json")
+def capture_data(remote_urls):
+    capture_url_data(remote_urls.get("urls_urllib"))
+    capture_requests_data(remote_urls.get("urls_requests"))
+    return
+
+
+def capture_url_data(links):
     # urlopen
-    links = remote_urls.get("urls_urllib")
     for link in links:
-        with urlopen(link) as response:
-            with tempfile.NamedTemporaryFile(delete=False, dir="./") as tmp_file:
-                shutil.copyfileobj(response, tmp_file)
-            print(tmp_file.name)
-            # if db.search(where("url") == link):
-            #     db.update()
-            db.upsert(
+        url = link.get("url")
+        req = link.get("req")
+        with urlopen(url) as response:
+            db.insert(
+                url,
                 {
-                    "url": link,
-                    "fname": tmp_file.name,
-                    "cache_date": str(datetime.datetime.now()),
-                    "hash": None
-                },
-                where("url") == link)
-            # db.insert(
-            #     {
-            #         "url": link,
-            #         "fname": tmp_file.name,
-            #         "cache_date": str(datetime.datetime.now()),
-            #         "hash": None
-            #     })
+                    "url": url,
+                    "request": str(req.header_items()),
+                    "response": response.read().decode("utf-8")
+                })
             print("Inserted!")
 
 
+def capture_requests_data(links):
+    # urlopen
+    for link in links:
+        url = link.get("url")
+        method = link.get("method")
+        args = link.get("args")
+        kwargs = link.get("kwargs")
+        with requests.get(url) as response:
+            db.insert(
+                url,
+                {
+                    "url": url,
+                    "method": method,
+                    "args": str(args),
+                    "kwargs": str(kwargs),
+                    "response": response.content.decode("utf-8")
+                })
+            print("Inserted!")
 
-
-
-def urlopen_capture(capture_url):
-    """
-    Mock function for urllib.request.urlopen.
-    """
-    print(urlopen(capture_url))
-
-
-# def requests_response(self, method, url, *args, **kwargs):
-#     """
-#     Mock function for urllib3 module.
-#     """
-#     global _urls
-#     full_url = f"{self.scheme}://{self.host}{url}"
-#     _urls.get("urls_requests").append(full_url)
-#     pytest.xfail(f"The test was about to {method} {full_url}")
 
 
 # def socket_connect_response(self, addr):
