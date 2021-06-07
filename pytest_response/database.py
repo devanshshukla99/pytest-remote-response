@@ -29,6 +29,7 @@ class _db:
             return b64decode(zlib.decompress(res.encode("utf-8"))), dict.fromkeys(
                 ast.literal_eval(headers)
             )
+        return b"", {}
 
     def all(self):
         return self.db.all()
