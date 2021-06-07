@@ -14,6 +14,7 @@ from pytest_response.remote_helpers import (  # noqa: F401
 from pytest_response.respond import (  # noqa: F401
     response_patch,
 )
+# from gevent import monkey
 
 mpatch = pytest.MonkeyPatch()
 
@@ -68,8 +69,10 @@ def pytest_configure(config):
     #     print(f"Report remote status: {config.option.remote_status}")
 
     if config.option.mock_remote:
+        # monkey.patch_all()
         response_patch(mpatch)
     elif not config.option.remote:
+        # monkey.patch_all()
         remote_patch(mpatch)
 
 
