@@ -8,7 +8,7 @@ DEFAULT_DB = "./db.json"
 TODAY = date.today().strftime("%Y-%m-%d")
 
 
-class _db():
+class _db:
     def __init__(self):
         global DEFAULT_DB, TODAY
         self.db = TinyDB(DEFAULT_DB)
@@ -18,9 +18,7 @@ class _db():
         kwargs.update({"url": url})
         kwargs.update({"cache_date": self.today})
         kwargs.update({"response": b64encode(zlib.compress(response)).decode("utf-8")})
-        self.db.upsert(
-            kwargs,
-            where("url") == url)
+        self.db.upsert(kwargs, where("url") == url)
         return
 
     def get(self, url, **kwargs):
@@ -28,7 +26,9 @@ class _db():
         if element := self.db.search(query):
             res = element[0]["response"]
             headers = element[0]["headers"]
-            return b64decode(zlib.decompress(res.encode("utf-8"))), dict.fromkeys(ast.literal_eval(headers))
+            return b64decode(zlib.decompress(res.encode("utf-8"))), dict.fromkeys(
+                ast.literal_eval(headers)
+            )
 
     def all(self):
         return self.db.all()

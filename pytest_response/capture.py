@@ -23,9 +23,8 @@ def capture_url_data(links):
         try:
             with urlopen(url) as response:
                 db.insert(
-                    url,
-                    response=response.read(),
-                    headers=str(dict(response.headers)))
+                    url, response=response.read(), headers=str(dict(response.headers))
+                )
         except (HTTPError, URLError) as e:
             print(f"capturing failed:{url} status:{e.reason}")
 
@@ -42,11 +41,10 @@ def capture_requests_data(links):
                     url,
                     response=response.content,
                     method=method,
-                    headers=str(response.headers))
+                    headers=str(response.headers),
+                )
         except (HTTPError, URLError):
             print(f"capturing failed:{url}")
-
-
 
 
 # def socket_connect_response(self, addr):

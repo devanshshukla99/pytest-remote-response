@@ -1,5 +1,4 @@
-import json
-import socket
+import _socket
 import pytest
 
 from pytest_response.capture import capture_data
@@ -27,11 +26,7 @@ def urlopen_mock(self, http_class, req, **http_conn_args):
     Mock function for urllib.request.urlopen.
     """
     global _urls, _true_urlopen
-    _urls.get("urls_urllib").append(
-        {
-            "url": req.get_full_url(),
-            "req": req
-            })
+    _urls.get("urls_urllib").append({"url": req.get_full_url(), "req": req})
     return MockHTTPResponse(b"", {})
     # pytest.xfail(f"The test was about to call {req.get_full_url()}")
 
@@ -43,12 +38,8 @@ def requests_mock(self, method, url, *args, **kwargs):
     global _urls
     full_url = f"{self.scheme}://{self.host}{url}"
     _urls.get("urls_requests").append(
-        {
-            "url": full_url,
-            "method": method,
-            "args": args,
-            "kwargs": kwargs
-        })
+        {"url": full_url, "method": method, "args": args, "kwargs": kwargs}
+    )
     return MockHTTPResponse(b"", {})
     # pytest.xfail(f"The test was about to {method} {full_url}")
 
@@ -68,7 +59,7 @@ def socket_connect_mock(self, addr):
 def urlopen(url, **kwargs):
     """Wrapper for `~urllib.request.urlopen`"""
     global _true_urlopen
-    with open("debug.md", 'w') as fd:
+    with open("debug.md", "w") as fd:
         fd.write(str(url))
     # return _true_urlopen(url, **kwargs)
     return None
@@ -78,10 +69,8 @@ def remote_patch(mpatch):
     """
     Monkey Patches urllib, urllib3 and socket.
     """
-    mpatch.setattr(
-    "urllib.request.AbstractHTTPHandler.do_open", urlopen_mock)
-    mpatch.setattr(
-        "urllib3.connectionpool.HTTPConnectionPool.urlopen", requests_mock)
+    mpatch.setattr("urllib.request.AbstractHTTPHandler.do_open", urlopen_mock)
+    mpatch.setattr("urllib3.connectionpool.HTTPConnectionPool.urlopen", requests_mock)
     # mpatch.setattr(
     #     "socket.socket.connect", socket_connect_mock)
 

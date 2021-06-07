@@ -37,7 +37,7 @@ def pytest_addoption(parser):
         action="store_true",
         default=False,
         help="Intercepts outgoing connections requests.",
-    )    
+    )
     # parser.addoption(
     #     "--remote-status",
     #     dest="remote_status",
@@ -83,6 +83,7 @@ def pytest_configure(config):
 #     if not item.config.option.remote:
 #         mpatch.undo()
 #         print("Unmocked!")
+
 
 def pytest_unconfigure(config):
     """

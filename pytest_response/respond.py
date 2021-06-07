@@ -11,7 +11,7 @@ __all__ = [
 ]
 
 
-class MockHTTPResponse():
+class MockHTTPResponse:
     def __init__(self, data, headers):
         self.code = 200
         self.status = 200
@@ -40,11 +40,11 @@ class MockHTTPResponse():
         return self.data[0:n]
 
     def __exit__(self):
-        if hasattr(self, 'fp'):
+        if hasattr(self, "fp"):
             self.fp.close()
 
     def __del__(self):
-        if hasattr(self, 'fp'):
+        if hasattr(self, "fp"):
             self.fp.close()
 
     pass
@@ -54,9 +54,7 @@ def urlopen_response(self, http_class, req, **http_conn_args):
     """
     Mock function for urllib.request.urlopen.
     """
-    data, headers = db.get(
-            url=req.get_full_url(),
-            req=str(req.header_items()))
+    data, headers = db.get(url=req.get_full_url(), req=str(req.header_items()))
     if not data:
         pytest.xfail("No cache found")
     return MockHTTPResponse(data, headers)
@@ -89,9 +87,9 @@ def response_patch(mpatch):
     """
     Monkey Patches urllib, urllib3 and socket.
     """
+    mpatch.setattr("urllib.request.AbstractHTTPHandler.do_open", urlopen_response)
     mpatch.setattr(
-        "urllib.request.AbstractHTTPHandler.do_open", urlopen_response)
-    mpatch.setattr(
-        "urllib3.connectionpool.HTTPConnectionPool.urlopen", requests_response)
+        "urllib3.connectionpool.HTTPConnectionPool.urlopen", requests_response
+    )
     # mpatch.setattr(
     # "socket.socket.connect", socket_connect_response)
