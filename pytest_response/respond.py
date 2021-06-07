@@ -1,7 +1,7 @@
-from pytest_response import db
+from pytest_response.database import db
 import tempfile
 import pytest
-
+import mmap
 
 __all__ = [
     "urlopen_response",
@@ -12,17 +12,20 @@ __all__ = [
 
 
 class MockHTTPResponse():
-    def __init__(self, data):
+    def __init__(self, data, headers):
         self.code = 200
         self.status = 200
         self.msg = "OK"
         self.reason = "OK"
-        self.data = data.encode("utf-8")
+        self.headers = headers
+        self.data = data
         tmpfile = tempfile.NamedTemporaryFile()
-        with open(tmpfile.name, "wb") as fp:
-            fp.write(self.data)
-            fp.flush()
-        self.fp = open(tmpfile.name, "rb")
+        self.fp = open(tmpfile.name, "w+b")
+        self.fp.write(self.data)
+        self.fp.flush()
+        self.fp.seek(0)
+        if self.data:
+            self.fp = mmap.mmap(self.fp.fileno(), length=0)
 
     def info(self):
         return {}
@@ -36,6 +39,14 @@ class MockHTTPResponse():
     def readinto(self, n):
         return self.data[0:n]
 
+    def __exit__(self):
+        if hasattr(self, 'fp'):
+            self.fp.close()
+
+    def __del__(self):
+        if hasattr(self, 'fp'):
+            self.fp.close()
+
     pass
 
 
@@ -43,12 +54,12 @@ def urlopen_response(self, http_class, req, **http_conn_args):
     """
     Mock function for urllib.request.urlopen.
     """
-    data = db.get(
+    data, headers = db.get(
             url=req.get_full_url(),
             req=str(req.header_items()))
     if not data:
         pytest.xfail("No cache found")
-    return MockHTTPResponse(data)
+    return MockHTTPResponse(data, headers)
 
 
 def requests_response(self, method, url, *args, **kwargs):
@@ -56,10 +67,10 @@ def requests_response(self, method, url, *args, **kwargs):
     Mock function for urllib3 module.
     """
     full_url = f"{self.scheme}://{self.host}{url}"
-    data = db.get(url=full_url)
+    data, headers = db.get(url=full_url)
     if not data:
         pytest.xfail("No cache found")
-    return MockHTTPResponse(data)
+    return MockHTTPResponse(data, headers)
 
 
 def socket_connect_response(self, addr):
@@ -84,4 +95,3 @@ def response_patch(mpatch):
         "urllib3.connectionpool.HTTPConnectionPool.urlopen", requests_response)
     # mpatch.setattr(
     # "socket.socket.connect", socket_connect_response)
-

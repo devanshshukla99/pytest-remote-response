@@ -1,14 +1,11 @@
-from pytest_response import db
-import pytest
-
+from pytest_response.database import db
+from urllib.error import URLError, HTTPError
 from urllib.request import urlopen
 import requests
 
 __all__ = [
     "capture_url_data",
     "capture_requests_data",
-    # "socket_connect_response",
-    # "response_patch",
 ]
 
 
@@ -22,16 +19,15 @@ def capture_url_data(links):
     # urlopen
     for link in links:
         url = link.get("url")
-        req = link.get("req")
-        with urlopen(url) as response:
-            db.insert(
-                url,
-                {
-                    "url": url,
-                    "request": str(req.header_items()),
-                    "response": response.read().decode("utf-8")
-                })
-            print("Inserted!")
+        print(f"capturing: {url}")
+        try:
+            with urlopen(url) as response:
+                db.insert(
+                    url,
+                    response=response.read(),
+                    headers=str(dict(response.headers)))
+        except (HTTPError, URLError) as e:
+            print(f"capturing failed:{url} status:{e.reason}")
 
 
 def capture_requests_data(links):
@@ -39,19 +35,17 @@ def capture_requests_data(links):
     for link in links:
         url = link.get("url")
         method = link.get("method")
-        args = link.get("args")
-        kwargs = link.get("kwargs")
-        with requests.get(url) as response:
-            db.insert(
-                url,
-                {
-                    "url": url,
-                    "method": method,
-                    "args": str(args),
-                    "kwargs": str(kwargs),
-                    "response": response.content.decode("utf-8")
-                })
-            print("Inserted!")
+        print(f"capturing: {url}")
+        try:
+            with requests.get(url) as response:
+                db.insert(
+                    url,
+                    response=response.content,
+                    method=method,
+                    headers=str(response.headers))
+        except (HTTPError, URLError):
+            print(f"capturing failed:{url}")
+
 
 
 

@@ -3,6 +3,7 @@ import socket
 import pytest
 
 from pytest_response.capture import capture_data
+from pytest_response.respond import MockHTTPResponse
 
 __all__ = [
     "urlopen_mock",
@@ -31,7 +32,8 @@ def urlopen_mock(self, http_class, req, **http_conn_args):
             "url": req.get_full_url(),
             "req": req
             })
-    pytest.xfail(f"The test was about to call {req.get_full_url()}")
+    return MockHTTPResponse(b"", {})
+    # pytest.xfail(f"The test was about to call {req.get_full_url()}")
 
 
 def requests_mock(self, method, url, *args, **kwargs):
@@ -47,7 +49,8 @@ def requests_mock(self, method, url, *args, **kwargs):
             "args": args,
             "kwargs": kwargs
         })
-    pytest.xfail(f"The test was about to {method} {full_url}")
+    return MockHTTPResponse(b"", {})
+    # pytest.xfail(f"The test was about to {method} {full_url}")
 
 
 def socket_connect_mock(self, addr):

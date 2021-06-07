@@ -38,21 +38,21 @@ def pytest_addoption(parser):
         default=False,
         help="Intercepts outgoing connections requests.",
     )    
-    parser.addoption(
-        "--remote-status",
-        dest="remote_status",
-        action="store",
-        nargs="?",
-        const="show",
-        default="no",
-        help="Reports the status of intercepted urls (show/only/no).",
-    )
-    parser.addini(
-        "intercept_dump_file",
-        "filepath at which intercepted requests are dumped",
-        type="string",
-        default=DEFAULT_DUMP_FILE,
-    )
+    # parser.addoption(
+    #     "--remote-status",
+    #     dest="remote_status",
+    #     action="store",
+    #     nargs="?",
+    #     const="show",
+    #     default="no",
+    #     help="Reports the status of intercepted urls (show/only/no).",
+    # )
+    # parser.addini(
+    #     "intercept_dump_file",
+    #     "filepath at which intercepted requests are dumped",
+    #     type="string",
+    #     default=DEFAULT_DUMP_FILE,
+    # )
 
 
 def pytest_configure(config):
@@ -64,8 +64,8 @@ def pytest_configure(config):
     if not config.option.remote and config.option.verbose:
         print(f"Remote: {config.option.remote}")
 
-    if config.option.remote_status != "no":
-        print(f"Report remote status: {config.option.remote_status}")
+    # if config.option.remote_status != "no":
+    #     print(f"Report remote status: {config.option.remote_status}")
 
     if config.option.mock_remote:
         response_patch(mpatch)
@@ -91,34 +91,34 @@ def pytest_unconfigure(config):
     if not config.option.remote:
         global mpatch
         mpatch.undo()
-        remote_dump(config)
         print("Unmocked!")
+        remote_dump(config)
 
 
-def pytest_collection_modifyitems(session, items, config):
-    """
-    Pytest hook for adding remote status tests from ``remote_status``
-    """
-    if config.option.remote_status != "no":
-        if config.option.remote_status == "only":
-            # deselect all other tests if ``--remote-status=only``
-            items[:] = []
-        report_module = config.hook.pytest_pycollect_makemodule(
-            path=py.path.local(remote_status.__file__), parent=session
-        )
-        _remote_test_functions = [
-            remote_status.test_urls_urllib,
-            remote_status.test_urls_requests,
-            remote_status.test_urls_socket,
-        ]
+# def pytest_collection_modifyitems(session, items, config):
+#     """
+#     Pytest hook for adding remote status tests from ``remote_status``
+#     """
+#     if config.option.remote_status != "no":
+#         if config.option.remote_status == "only":
+#             # deselect all other tests if ``--remote-status=only``
+#             items[:] = []
+#         report_module = config.hook.pytest_pycollect_makemodule(
+#             path=py.path.local(remote_status.__file__), parent=session
+#         )
+#         _remote_test_functions = [
+#             remote_status.test_urls_urllib,
+#             remote_status.test_urls_requests,
+#             remote_status.test_urls_socket,
+#         ]
 
-        remote_tests = []
-        for testfunc in _remote_test_functions:
-            remote_tests.extend(
-                config.hook.pytest_pycollect_makeitem(
-                    collector=report_module, name=testfunc.__name__, obj=testfunc
-                )
-            )
+#         remote_tests = []
+#         for testfunc in _remote_test_functions:
+#             remote_tests.extend(
+#                 config.hook.pytest_pycollect_makeitem(
+#                     collector=report_module, name=testfunc.__name__, obj=testfunc
+#                 )
+#             )
 
-        items.extend(remote_tests)
-    return
+#         items.extend(remote_tests)
+#     return
