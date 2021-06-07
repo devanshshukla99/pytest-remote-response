@@ -3,6 +3,7 @@ import pytest
 
 from pytest_response.capture import capture_data
 from pytest_response.respond import MockHTTPResponse
+
 # import gevent
 # from gevent import socket, monkey
 
@@ -20,6 +21,7 @@ _urls = {"urls_urllib": [], "urls_requests": [], "urls_socket": []}
 
 socket_req = []
 socket_res = []
+
 
 class RemoteBlockedError(RuntimeError):
     def __init__(self, *args, **kwargs):
@@ -109,8 +111,7 @@ def remote_patch(mpatch):
     """
     mpatch.setattr("urllib.request.AbstractHTTPHandler.do_open", urlopen_mock)
     mpatch.setattr("urllib3.connectionpool.HTTPConnectionPool.urlopen", requests_mock)
-    mpatch.setattr(
-        "socket.socket.connect", socket_connect_mock)
+    mpatch.setattr("socket.socket.connect", socket_connect_mock)
     mpatch.setattr("socket.socket.send", socket_send_mock)
     mpatch.setattr("socket.socket.recv", socket_recv_mock)
 

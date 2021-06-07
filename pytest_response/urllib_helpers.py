@@ -13,7 +13,7 @@ class RemoteBlockedError(RuntimeError):
         super(RemoteBlockedError, self).__init__("A test tried to use urllib.request")
 
 
-class ResponseApp():
+class ResponseApp:
     def __init__(self):
         self.requests = {}
         self.responses = {}
@@ -24,14 +24,15 @@ class ResponseHTTPHandler(urllib.request.HTTPHandler):
     Override the default HTTPHandler class with one that uses the
     ResponseHTTPConnection class to open HTTP URLs.
     """
+
     def http_open(self, req):
         return self.do_open(ResponseHTTPConnection, req)
+
     pass
 
 
 class ResponseHTTPConnection(http.client.HTTPConnection):
-    def request(self, method, url, body=None, headers={}, *,
-                encode_chunked=False):
+    def request(self, method, url, body=None, headers={}, *, encode_chunked=False):
         """Send a complete request to the server."""
         self._url = url
         self._send_request(method, url, body, headers, encode_chunked)
@@ -41,13 +42,19 @@ class ResponseHTTPConnection(http.client.HTTPConnection):
         Override the connect() function to intercept calls to certain
         host/ports.
         """
-        sys.stderr.write('connect: %s, %s\n' % (self.host, self.port,))
+        sys.stderr.write(
+            "connect: %s, %s\n"
+            % (
+                self.host,
+                self.port,
+            )
+        )
         try:
-            sys.stderr.write('INTERCEPTING call to %s:%s\n' %
-                                (self.host, self.port))
+            sys.stderr.write("INTERCEPTING call to %s:%s\n" % (self.host, self.port))
             self.sock = Response_FakeSocket(self.host, self.port, self._url)
         except Exception:
             raise
+
     pass
 
 
@@ -99,6 +106,7 @@ class Response_HTTPResponse:
         """
         if hasattr(self, "fp"):
             self.fp.close()
+
     pass
 
 
@@ -116,10 +124,21 @@ class ResponseHTTPSConnection(http.client.HTTPSConnection, ResponseHTTPConnectio
         If no app at host/port has been registered for interception then
         a normal HTTPSConnection is made.
         """
-        sys.stderr.write('connect: %s, %s\n' % (self.host, self.port,))
+        sys.stderr.write(
+            "connect: %s, %s\n"
+            % (
+                self.host,
+                self.port,
+            )
+        )
 
-        sys.stderr.write('INTERCEPTING call to %s:%s\n' %
-                            (self.host, self.port,))
+        sys.stderr.write(
+            "INTERCEPTING call to %s:%s\n"
+            % (
+                self.host,
+                self.port,
+            )
+        )
         self.sock = Response_FakeSocket(self.host, self.port, self._url, https=True)
 
         # super().connect()
@@ -158,10 +177,11 @@ class ResponseHTTPSConnection(http.client.HTTPSConnection, ResponseHTTPConnectio
         #             )
         #         else:
         #             self._check_hostname = self.check_hostname
+
     pass
 
 
-class Response_FakeSocket():
+class Response_FakeSocket:
     def __init__(self, host, port, url, https=False):
         self.host = host
         self.port = port
@@ -184,7 +204,7 @@ class Response_FakeSocket():
         """
         data, headers = db.get(url=self._url)
         status = "200"
-        self.output.write(b"HTTP/1.0 " + status.encode('ISO-8859-1') + b"\n")
+        self.output.write(b"HTTP/1.0 " + status.encode("ISO-8859-1") + b"\n")
         self.output.write(data)
         return Response_HTTPResponse(data=self.output.getvalue(), headers=headers)
 
