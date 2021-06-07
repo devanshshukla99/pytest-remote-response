@@ -68,6 +68,9 @@ class Response_HTTPResponse:
         self.data = data
         self.fp = BytesIO(data)
 
+    def flush(self):
+        self.fp.flush()
+
     def info(self):
         return {}
 
@@ -83,11 +86,11 @@ class Response_HTTPResponse:
         """
         return self.fp.readline(*args, **kwargs)
 
-    def readinto(self, n):
+    def readinto(self, *args, **kwargs):
         """
         Wrapper for _io.BytesIO.readinto
         """
-        return self.data[0:n]
+        return self.fp.readinto(*args, **kwargs)
 
     def __exit__(self):
         """
@@ -193,6 +196,12 @@ class Response_FakeSocket:
         self.requests = []
         self.responses = []
 
+    def settimeout(self, timeout):
+        pass
+
+    def flush(self):
+        pass
+
     def makefile(self, *args, **kwargs):
         """
         1. build response
@@ -221,7 +230,7 @@ class Response_FakeSocket:
 
 
 def install_opener():
-    handlers = [ResponseHTTPSHandler()]
+    handlers = [ResponseHTTPHandler()]
     opener = urllib.request.build_opener(*handlers)
     urllib.request.install_opener(opener)
     return opener

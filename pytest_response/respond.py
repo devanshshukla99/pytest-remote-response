@@ -1,4 +1,7 @@
+import urllib
 from pytest_response.database import db
+from pytest_response import urllib_helpers
+from pytest_response import urllib3_helpers
 import tempfile
 import pytest
 import mmap
@@ -87,9 +90,18 @@ def response_patch(mpatch):
     """
     Monkey Patches urllib, urllib3 and socket.
     """
-    mpatch.setattr("urllib.request.AbstractHTTPHandler.do_open", urlopen_response)
-    mpatch.setattr(
-        "urllib3.connectionpool.HTTPConnectionPool.urlopen", requests_response
-    )
+    # mpatch.setattr("urllib.request.AbstractHTTPHandler.do_open", urlopen_response)
+    # mpatch.setattr(
+    #     "urllib3.connectionpool.HTTPConnectionPool.urlopen", requests_response
+    # )
     # mpatch.setattr(
     # "socket.socket.connect", socket_connect_response)
+
+    print(urllib_helpers.install())
+    print(urllib3_helpers.install())
+    print("INS!")
+
+
+def response_unpatch(mpatch):
+    urllib_helpers.uninstall()
+    urllib3_helpers.uninstall()

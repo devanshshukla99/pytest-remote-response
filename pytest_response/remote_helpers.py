@@ -135,6 +135,6 @@ def remote_dump(config):
     # capture_data(_urls)
     # with open(config.getini("intercept_dump_file"), "w") as fd:
     #     json.dump(_urls, fd)
-    print(socket_req)
-    print(socket_res)
-    print(_urls["urls_socket"])
+    # print(socket_req)
+    # print(socket_res)
+    # print(_urls["urls_socket"])

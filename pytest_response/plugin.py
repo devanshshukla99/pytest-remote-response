@@ -11,9 +11,7 @@ from pytest_response.remote_helpers import (  # noqa: F401
     remote_patch,
     intercepted_urls,
 )
-from pytest_response.respond import (  # noqa: F401
-    response_patch,
-)
+from pytest_response.respond import response_patch, response_unpatch  # noqa: F401
 
 # from gevent import monkey
 
@@ -96,6 +94,7 @@ def pytest_unconfigure(config):
     if not config.option.remote:
         global mpatch
         mpatch.undo()
+        response_unpatch(mpatch)
         print("Unmocked!")
         remote_dump(config)
 
