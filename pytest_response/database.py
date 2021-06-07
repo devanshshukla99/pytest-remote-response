@@ -24,9 +24,9 @@ class _db:
     def get(self, url, **kwargs):
         query = where("url") == url  # and where("request") == "req"
         if element := self.db.search(query):
-            res = element[0]["response"]
-            headers = element[0]["headers"]
-            return b64decode(zlib.decompress(res.encode("utf-8"))), dict.fromkeys(
+            res = element[0].get("response")
+            headers = element[0].get("headers", "[]")
+            return zlib.decompress(b64decode(res.encode("utf-8"))), dict.fromkeys(
                 ast.literal_eval(headers)
             )
         return b"", {}

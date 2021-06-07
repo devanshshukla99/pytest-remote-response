@@ -3,6 +3,7 @@ import urllib
 import http
 import sys
 from io import BytesIO
+from urllib.parse import urljoin
 
 socket_req = []
 socket_res = []
@@ -202,6 +203,11 @@ class Response_FakeSocket:
     def flush(self):
         pass
 
+    def _build_url(self):
+        _scheme = "https://" if self._https else "http://"
+        _url = "".join([_scheme, self.host])
+        return urljoin(_url, self._url)
+
     def makefile(self, *args, **kwargs):
         """
         1. build response
@@ -211,8 +217,12 @@ class Response_FakeSocket:
         """
         Read the response from the data base and construct a Response
         """
-        data, headers = db.get(url=self._url)
-        status = "200"
+        full_url = self._build_url()
+        data, headers = db.get(url=full_url)
+        print(full_url)
+        status = "404"
+        if data:
+            status = "200"
         self.output.write(b"HTTP/1.0 " + status.encode("ISO-8859-1") + b"\n")
         self.output.write(data)
         return Response_HTTPResponse(data=self.output.getvalue(), headers=headers)

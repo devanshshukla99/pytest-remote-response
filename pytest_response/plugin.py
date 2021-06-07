@@ -9,6 +9,7 @@ from pytest_response.fixtures import (
 from pytest_response.remote_helpers import (  # noqa: F401
     remote_dump,
     remote_patch,
+    remote_unpatch,
     intercepted_urls,
 )
 from pytest_response.respond import response_patch, response_unpatch  # noqa: F401
@@ -68,34 +69,20 @@ def pytest_configure(config):
     #     print(f"Report remote status: {config.option.remote_status}")
 
     if config.option.mock_remote:
-        # monkey.patch_all()
         response_patch(mpatch)
     elif not config.option.remote:
-        # monkey.patch_all()
         remote_patch(mpatch)
-
-
-# def pytest_runtest_setup(item):
-#     global mpatch
-#     if not item.config.option.remote:
-#         remote_patch(mpatch)
-
-# def pytest_runtest_teardown(item):
-#     global mpatch
-#     if not item.config.option.remote:
-#         mpatch.undo()
-#         print("Unmocked!")
 
 
 def pytest_unconfigure(config):
     """
     Pytest hook for cleaning up.
     """
-    if not config.option.remote:
-        global mpatch
-        mpatch.undo()
+    global mpatch
+    if config.option.mock_remote:
         response_unpatch(mpatch)
-        print("Unmocked!")
+    if not config.option.remote:
+        remote_unpatch(mpatch)
         remote_dump(config)
 
 

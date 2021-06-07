@@ -111,11 +111,19 @@ def remote_patch(mpatch):
     """
     mpatch.setattr("urllib.request.AbstractHTTPHandler.do_open", urlopen_mock)
     mpatch.setattr("urllib3.connectionpool.HTTPConnectionPool.urlopen", requests_mock)
-    mpatch.setattr("socket.socket.connect", socket_connect_mock)
-    mpatch.setattr("socket.socket.send", socket_send_mock)
-    mpatch.setattr("socket.socket.recv", socket_recv_mock)
+    # mpatch.setattr("socket.socket.connect", socket_connect_mock)
+    # mpatch.setattr("socket.socket.send", socket_send_mock)
+    # mpatch.setattr("socket.socket.recv", socket_recv_mock)
 
     print("Mocked!")
+
+
+def remote_unpatch(mpatch):
+    """
+    Un-Monkey Patches urllib, urllib3 and socket.
+    """
+    mpatch.undo()
+    capture_data(_urls)
 
 
 @pytest.fixture
