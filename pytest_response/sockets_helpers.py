@@ -3,6 +3,7 @@ import _socket
 import pytest
 from pytest_response.database import db
 
+
 class RemoteBlockedError(RuntimeError):
     def __init__(self, *args, **kwargs):
         super(RemoteBlockedError, self).__init__("A test tried to use urllib.request")
@@ -11,9 +12,7 @@ class RemoteBlockedError(RuntimeError):
 class CaptureFakeSocket(_socket.socket):
     def __init__(self, *args, **kwargs):
         self._transaction = {"request": [], "response": []}
-        self.hostport = {
-            "host": None,
-            "port": None}
+        self.hostport = {"host": None, "port": None}
         super(CaptureFakeSocket, self).__init__(*args, **kwargs)
 
     def connect(self, addr):
@@ -43,7 +42,10 @@ class CaptureFakeSocket(_socket.socket):
         # print(self, self.hostport)
         host, port = self.hostport["host"], self.hostport["port"]
         if host:
-            db.insert(url=f"sock://{host}:{port}", response=str(self._transaction).encode("utf-8"))
+            db.insert(
+                url=f"sock://{host}:{port}",
+                response=str(self._transaction).encode("utf-8"),
+            )
 
     def close(self, *args, **kwargs):
         self._dump_transaction()

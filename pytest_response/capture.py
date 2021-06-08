@@ -23,7 +23,10 @@ def capture_url_data(links):
         try:
             with urlopen(url) as response:
                 db.insert(
-                    url, id="urllib", response=response.read(), headers=str(dict(response.headers))
+                    url,
+                    id="urllib",
+                    response=response.read(),
+                    headers=str(dict(response.headers)),
                 )
         except (HTTPError, URLError) as e:
             print(f"capturing failed:{url} status:{e.reason}")
