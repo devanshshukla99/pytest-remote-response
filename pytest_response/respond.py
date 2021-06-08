@@ -2,6 +2,7 @@ import urllib
 from pytest_response.database import db
 from pytest_response import urllib_helpers
 from pytest_response import urllib3_helpers
+from pytest_response import sockets_helpers
 import tempfile
 import pytest
 import mmap
@@ -41,6 +42,10 @@ class MockHTTPResponse:
 
     def readinto(self, n):
         return self.data[0:n]
+
+    def close(self, *args, **kwargs):
+        if hasattr(self, "fp"):
+            self.fp.close()
 
     def __exit__(self):
         if hasattr(self, "fp"):
@@ -97,11 +102,12 @@ def response_patch(mpatch):
     # mpatch.setattr(
     # "socket.socket.connect", socket_connect_response)
 
-    print(urllib_helpers.install())
-    print(urllib3_helpers.install())
-    print("INS!")
+    urllib_helpers.install()
+    urllib3_helpers.install()
+    # sockets_helpers.res_install(mpatch)
 
 
 def response_unpatch(mpatch):
+    mpatch.undo()
     urllib_helpers.uninstall()
     urllib3_helpers.uninstall()

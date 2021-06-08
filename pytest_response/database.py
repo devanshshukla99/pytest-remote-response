@@ -14,6 +14,13 @@ class _db:
         self.db = TinyDB(DEFAULT_DB)
         self.today = TODAY
 
+    def index(self, index):
+        elements = self.db.all()
+        _occurances = []
+        for element in elements:
+            _occurances.append(element.get(index))
+        return _occurances
+
     def insert(self, url, response, **kwargs):
         kwargs.update({"url": url})
         kwargs.update({"cache_date": self.today})

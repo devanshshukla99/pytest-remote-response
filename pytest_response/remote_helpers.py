@@ -3,6 +3,7 @@ import pytest
 
 from pytest_response.capture import capture_data
 from pytest_response.respond import MockHTTPResponse
+from pytest_response import sockets_helpers
 
 # import gevent
 # from gevent import socket, monkey
@@ -55,13 +56,13 @@ def socket_connect_mock(self, addr):
     """
     Mock function for socket.socket.
     """
-    global _urls
-    # self.close()
+    # global _urls
+    # # self.close()
     host = addr[0]
     port = addr[1]
-    _urls.get("urls_socket").append(addr)
-    return _socket.socket.connect(self, addr)
-    # pytest.xfail(f"The test was about to connect to {host}:{port}")
+    # _urls.get("urls_socket").append(addr)
+    # return _socket.socket.connect(self, addr)
+    pytest.xfail(f"The test was about to connect to {host}:{port}")
 
 
 def socket_send_mock(self, data, *args, **kwargs):
@@ -111,6 +112,8 @@ def remote_patch(mpatch):
     """
     mpatch.setattr("urllib.request.AbstractHTTPHandler.do_open", urlopen_mock)
     mpatch.setattr("urllib3.connectionpool.HTTPConnectionPool.urlopen", requests_mock)
+    mpatch.setattr("socket.socket.connect", socket_connect_mock)
+    # sockets_helpers.cap_install(mpatch)
     # mpatch.setattr("socket.socket.connect", socket_connect_mock)
     # mpatch.setattr("socket.socket.send", socket_send_mock)
     # mpatch.setattr("socket.socket.recv", socket_recv_mock)

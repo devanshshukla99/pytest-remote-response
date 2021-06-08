@@ -240,7 +240,8 @@ class Response_FakeSocket:
 
 
 def install_opener():
-    handlers = [ResponseHTTPHandler()]
+    handlers = [ResponseHTTPHandler(),
+                ResponseHTTPSHandler()]
     opener = urllib.request.build_opener(*handlers)
     urllib.request.install_opener(opener)
     return opener
