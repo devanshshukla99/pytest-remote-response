@@ -1,7 +1,9 @@
-from pytest_response.database import db
 from urllib.error import URLError, HTTPError
 from urllib.request import urlopen
+
 import requests
+
+from pytest_response.database import db
 
 __all__ = [
     "capture_url_data",

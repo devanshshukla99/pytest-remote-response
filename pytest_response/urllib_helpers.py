@@ -1,9 +1,10 @@
-from pytest_response.database import db
-import urllib
-import http
 import sys
+import http
+import urllib
 from io import BytesIO
 from urllib.parse import urljoin
+
+from pytest_response.database import db
 
 socket_req = []
 socket_res = []

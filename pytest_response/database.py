@@ -1,8 +1,9 @@
 import ast
-from datetime import date
-from base64 import b64encode, b64decode
-from tinydb import TinyDB, where
 import zlib
+from base64 import b64decode, b64encode
+from datetime import date
+
+from tinydb import TinyDB, where
 
 DEFAULT_DB = "./db.json"
 TODAY = date.today().strftime("%Y-%m-%d")

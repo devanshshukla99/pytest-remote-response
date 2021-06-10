@@ -1,9 +1,9 @@
 import _socket
 import pytest
 
+from pytest_response import sockets_helpers
 from pytest_response.capture import capture_data
 from pytest_response.respond import MockHTTPResponse
-from pytest_response import sockets_helpers
 
 # import gevent
 # from gevent import socket, monkey

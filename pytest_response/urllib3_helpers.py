@@ -1,7 +1,9 @@
 import sys
-from urllib3.connectionpool import HTTPConnectionPool, HTTPSConnectionPool
+
 from urllib3.connection import HTTPConnection, HTTPSConnection
-from pytest_response.urllib_helpers import (
+from urllib3.connectionpool import HTTPConnectionPool, HTTPSConnectionPool
+
+from pytest_response.urllib_interest import (
     ResponseHTTPConnection,
     ResponseHTTPSConnection,
 )

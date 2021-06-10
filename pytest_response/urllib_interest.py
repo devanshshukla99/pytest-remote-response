@@ -1,46 +1,27 @@
-import _socket
-from ast import Bytes
-from pytest_response.database import db
-from socket import _GLOBAL_DEFAULT_TIMEOUT
-import urllib.request
-import http
-import sys
-from urllib.parse import urljoin
 import io
+import sys
+import http
+import urllib.request
 from socket import SocketIO
 
-socket_req = []
-socket_res = []
+import _socket
 
-_UNKNOWN = "UNKNOWN"
-_CAPTURE = False
-
-
-class RemoteBlockedError(RuntimeError):
-    def __init__(self, *args, **kwargs):
-        super(RemoteBlockedError, self).__init__("A test tried to use urllib.request")
+from pytest_response.controller import controller
+from pytest_response.database import db
 
 
 class Response_Socket(_socket.socket):
-    def __init__(self, host, port, url, https=False, capture=_CAPTURE, *args, **kwargs):
+    def __init__(self, host, port, capture=controller.capture, *args, **kwargs):
         self.host = host
         self.port = port
         self._capture = capture
-        self._url = url
-        self._https = https
         self.input = io.BytesIO()
-        self.output = io.BytesIO()
         self._io_refs = 0
         self._closed = False
-        self.headers = []
-        self.requests = []
-        self.responses = []
-        super(_socket.socket, self).__init__()
-        super(Response_Socket, self).__init__()
+        super().__init__()
         self.connect()
 
     def connect(self, *args, **kwargs):
-        self._build_url()
         if self._capture:
             print("Connecting...")
             super().connect((self.host, self.port), *args, **kwargs)
@@ -54,12 +35,6 @@ class Response_Socket(_socket.socket):
         if self._capture:
             super().flush()
         pass
-
-    def _build_url(self):
-        _scheme = "https://" if self._https else "http://"
-        _url = "".join([_scheme, self.host])
-        self.url = urljoin(_url, self._url)
-        return self.url
 
     def makefile(
         self,
@@ -103,12 +78,10 @@ class Response_Socket(_socket.socket):
                 assert writing
                 buffer = io.BufferedWriter(raw, buffering)
             if binary:
-                # self._record_to_db(buffer)
                 return buffer
             text = io.TextIOWrapper(buffer, encoding, errors, newline)
             text.mode = mode
-            return buffer
-        # return Response_HTTPResponse(data=self.output.getvalue(), headers={})
+            return text
 
     def _decref_socketios(self):
         if self._io_refs > 0:
@@ -136,31 +109,30 @@ class Response_Socket(_socket.socket):
 
 class Response_HTTPResponse(http.client.HTTPResponse):
     def __init__(
-        self, sock, debuglevel=0, method=None, url=None, headers=None, capture=_CAPTURE
+        self, sock, debuglevel=0, method=None, headers=None, capture=controller.capture
     ):
         self.sock = sock
         self._capture = capture
-        self.url = url
         self.output = io.BytesIO()
         super().__init__(sock=sock, debuglevel=debuglevel, method=method)
 
     def _dump_to_db(self):
         print("DUMPED?")
-        url = self.sock.url  # self.headers.get('Location')
+        url = controller.url  # self.headers.get('Location')
         db.insert(url=url, response=self.output.getvalue())
         return
 
     def _replace_buffer(self):
         self.output.write(self.fp.read())
-        self.fp = io.BytesIO()
-        self.fp.write(self.output.getvalue())
+        self.fp = self.output
+        self.fp.seek(0)
         self._dump_to_db()
 
     def begin(self, *args, **kwargs):
         print("Beginning///...///")
         if not self._capture:
             self.fp = io.BytesIO()
-            data, headers = db.get(url=self.sock.url)
+            data, headers = db.get(url=controller.url)
             if not data:
                 self.code = self.status = 404
                 self.reason = "Response Not Found (pytest-response)"
@@ -173,6 +145,10 @@ class Response_HTTPResponse(http.client.HTTPResponse):
             self.fp = self.output
             self.fp.seek(0)
         super().begin(*args, **kwargs)
+        # if self._capture:
+        #     self._replace_buffer()
+
+    def close(self, *args, **kwargs):
         if self._capture:
             self._replace_buffer()
 
@@ -180,15 +156,15 @@ class Response_HTTPResponse(http.client.HTTPResponse):
         """
         Wrapper
         """
-        print("Reading...")
-        return self.fp.getvalue()
+        if self._capture:
+            return super().read(*args, **kwargs)
+        return self.fp.read(*args, **kwargs)
 
     def readline(self, *args, **kwargs):
         """
         Wrapper for _io.BytesIO.readline
         """
         if self._capture:
-            print("Reading...")
             return super().readline(*args, **kwargs)
         return self.fp.readline(*args, **kwargs)
 
@@ -197,7 +173,6 @@ class Response_HTTPResponse(http.client.HTTPResponse):
         Wrapper for _io.BytesIO.readinto
         """
         if self._capture:
-            print("Reading...")
             return super().readinto(*args, **kwargs)
         return self.fp.readinto(*args, **kwargs)
 
@@ -209,7 +184,7 @@ class ResponseHTTPConnection(http.client.HTTPConnection):
 
     def request(self, method, url, body=None, headers={}, *, encode_chunked=False):
         """Send a complete request to the server."""
-        self._url = url
+        controller.build_url(self.host, url)
         self._send_request(method, url, body, headers, encode_chunked)
 
     def connect(self):
@@ -217,16 +192,10 @@ class ResponseHTTPConnection(http.client.HTTPConnection):
         Override the connect() function to intercept calls to certain
         host/ports.
         """
-        sys.stderr.write(
-            "connect: %s, %s\n"
-            % (
-                self.host,
-                self.port,
-            )
-        )
+        sys.stderr.write("connect: %s, %s\n" % (self.host, self.port))
         try:
             sys.stderr.write("INTERCEPTING call to %s:%s\n" % (self.host, self.port))
-            self.sock = Response_Socket(self.host, self.port, self._url)
+            self.sock = Response_Socket(self.host, self.port)
         except Exception:
             raise
 
@@ -246,69 +215,25 @@ class ResponseHTTPHandler(urllib.request.HTTPHandler):
 
 
 class ResponseHTTPSConnection(http.client.HTTPSConnection, ResponseHTTPConnection):
-    def __init__(
-        self,
-        host,
-        port=None,
-        key_file=None,
-        cert_file=None,
-        timeout=_GLOBAL_DEFAULT_TIMEOUT,
-        source_address=None,
-        *,
-        context=None,
-        check_hostname=None,
-        blocksize=8192,
-        capture=_CAPTURE,
-        **kwargs
-    ):
-        self._capture = capture
-        super().__init__(
-            host,
-            port=None,
-            key_file=None,
-            cert_file=None,
-            timeout=_GLOBAL_DEFAULT_TIMEOUT,
-            source_address=None,
-            context=None,
-            check_hostname=None,
-            blocksize=8192,
-            **kwargs
-        )
-
     def request(self, method, url, body=None, headers={}, *, encode_chunked=False):
         """Send a complete request to the server."""
-        self._url = url
+        controller.build_url(self.host, url, True)
         self._send_request(method, url, body, headers, encode_chunked)
 
     def connect(self):
-        sys.stderr.write(
-            "connect: %s, %s\n"
-            % (
-                self.host,
-                self.port,
-            )
-        )
-        sys.stderr.write(
-            "INTERCEPTING call to %s:%s\n"
-            % (
-                self.host,
-                self.port,
-            )
-        )
-        # super(ResponseHTTPConnection, self).connect()
+        sys.stderr.write("connect: %s, %s\n" % (self.host, self.port))
+        sys.stderr.write("INTERCEPTING call to %s:%s\n" % (self.host, self.port))
 
         self.sock = Response_Socket(
             host=self.host,
             port=self.port,
-            url=self._url,
             https=True,
             timeout=self.timeout,
             source_address=self.source_address,
         )
         self.sock.setsockopt(_socket.IPPROTO_TCP, _socket.TCP_NODELAY, 1)
-        self.url = self.sock._build_url()
 
-        if self._capture:
+        if controller.capture:
             if self._tunnel_host:
                 self._tunnel()
 
@@ -320,16 +245,15 @@ class ResponseHTTPSConnection(http.client.HTTPSConnection, ResponseHTTPConnectio
             self.sock = self._context.wrap_socket(
                 self.sock, server_hostname=server_hostname
             )
-            self.sock.url = self.url
 
     pass
 
 
 class ResponseHTTPSHandler(urllib.request.HTTPSHandler):
-    def request(self, method, url, body=None, headers={}, *, encode_chunked=False):
-        """Send a complete request to the server."""
-        self._url = url
-        self._send_request(method, url, body, headers, encode_chunked)
+    """
+    Override the default HTTPSHandler class with one that uses the
+    ResponseHTTPSConnection class to open HTTP URLs.
+    """
 
     def https_open(self, req):
         return self.do_open(ResponseHTTPSConnection, req)
@@ -399,6 +323,11 @@ def install_opener():
 
 def uninstall_opener():
     urllib.request.install_opener(None)
+
+
+class RemoteBlockedError(RuntimeError):
+    def __init__(self, *args, **kwargs):
+        super(RemoteBlockedError, self).__init__("A test tried to use urllib.request")
 
 
 install = install_opener

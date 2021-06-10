@@ -7,10 +7,10 @@ from pytest_response.fixtures import (
     intercept_url,
 )  # noqa: F401
 from pytest_response.remote_helpers import (  # noqa: F401
+    intercepted_urls,
     remote_dump,
     remote_patch,
     remote_unpatch,
-    intercepted_urls,
 )
 from pytest_response.respond import response_patch, response_unpatch  # noqa: F401
 

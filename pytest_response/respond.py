@@ -1,11 +1,11 @@
-import urllib
-from pytest_response.database import db
-from pytest_response import urllib_helpers
-from pytest_response import urllib3_helpers
-from pytest_response import sockets_helpers
-import tempfile
-import pytest
 import mmap
+import urllib
+import tempfile
+
+import pytest
+
+from pytest_response import sockets_helpers, urllib3_helpers, urllib_helpers
+from pytest_response.database import db
 
 __all__ = [
     "urlopen_response",
