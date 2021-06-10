@@ -1,11 +1,10 @@
-import os.path
 import pathlib
 from urllib.parse import urljoin, urlparse
-from .logger import _init_log
+from pytest_response.logger import log
 import importlib
 
 
-class control:
+class Controller:
     def __init__(self, capture=True):
         self.capture = capture
         self.url = None
@@ -33,12 +32,13 @@ class control:
 
 class app:
     def __init__(self, path="interceptors", capture=False, log_level="debug") -> None:
-        self.log = _init_log(log_level)
+        log.setLevel(log_level.upper())
         self._capture = capture
         self._basepath = pathlib.Path(__file__).parent
         self._path_to_mocks = pathlib.Path(self._basepath, path)
-        self._available_mocks = list(self._get_available_mocks())
+        self.available_mocks = list(self._get_available_mocks())
         self._registered_mocks = []
+        self._registered_libs = []
         self.control = control(capture)
 
     def _get_available_mocks(self):
@@ -50,16 +50,26 @@ class app:
     def register(self, mock) -> None:
         mock = pathlib.Path(self._path_to_mocks, mock)
         if not mock.suffix:
-            mock.with_suffix(".py")
+            mock = mock.with_suffix(".py")
         if mock in self._get_available_mocks():
-            print("Registered!")
+            log.info(f"{mock.name} registered")
             self._registered_mocks.append(mock)
             return True
         return False
 
+    def unregister(self) -> None:
+        try:
+            for lib in self._registered_libs:
+                lib.uninstall()
+                log.debug(f"{lib.__name__} unregistered")
+        except Exception:
+            raise
+
     def apply(self) -> bool:
         for mock_path in self._registered_mocks:
+            log.debug(f"{mock_path.name} applied")
             mock_lib = importlib.import_module(mock_path)
+            self._registered_libs.append(mock_lib)
             mock_lib.install()
 
 
@@ -73,3 +83,6 @@ class MalformedUrl(Exception):
         super().__init__(reason)
 
     pass
+
+
+control = Controller()
