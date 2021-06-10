@@ -3,13 +3,10 @@ import sys
 from urllib3.connection import HTTPConnection, HTTPSConnection
 from urllib3.connectionpool import HTTPConnectionPool, HTTPSConnectionPool
 
-from pytest_response.urllib_interest import (
+from pytest_response.interceptors.urllib import (
     ResponseHTTPConnection,
     ResponseHTTPSConnection,
 )
-
-socket_req = []
-socket_res = []
 
 
 class RemoteBlockedError(RuntimeError):

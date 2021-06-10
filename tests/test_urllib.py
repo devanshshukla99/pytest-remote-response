@@ -1,7 +1,17 @@
+import pytest
 import urllib.request
 
-from pytest_response.controller import controller
-from pytest_response import urllib_interest
+from pytest_response.app import control, app
+
+
+@pytest.fixture(scope="module", autouse=True)
+def apply_interceptor():
+    pr_app = app()
+    pr_app.register("urllib")
+    pr_app.apply()
+    yield
+    pr_app.unregister()
+    return
 
 
 def test_connection():
@@ -13,8 +23,7 @@ def test_connection():
 
 def test_intercept_ing():
     url = "http://www.testingmcafeesites.com/testcat_ac.html"
-    controller.capture = True
-    urllib_interest.install()
+    control.capture = True
     res = urllib.request.urlopen(url)
     assert res.status == 200
     assert res.read()
@@ -22,8 +31,7 @@ def test_intercept_ing():
 
 def test_intercept_2ing():
     url = "http://www.testingmcafeesites.com/testcat_ac.html"
-    controller.capture = False
-    urllib_interest.install()
+    control.capture = False
     res = urllib.request.urlopen(url)
     assert res.status == 200
     assert res.read()
@@ -31,8 +39,7 @@ def test_intercept_2ing():
 
 def test_intercept_ing_ssl():
     url = "https://www.python.org"
-    urllib_interest.install()
-    controller.capture = True
+    control.capture = True
     res = urllib.request.urlopen(url)
     assert res.status == 200
     assert res.read()
@@ -40,8 +47,7 @@ def test_intercept_ing_ssl():
 
 def test_intercept_2ing_ssl():
     url = "https://www.python.org"
-    controller.capture = False
-    urllib_interest.install()
+    control.capture = False
     res = urllib.request.urlopen(url)
     assert res.status == 200
     assert res.read()

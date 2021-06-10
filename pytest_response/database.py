@@ -5,33 +5,49 @@ from datetime import date
 from collections.abc import MutableMapping
 from tinydb import TinyDB, where
 
-DEFAULT_DB = "./db.json"
-TODAY = date.today().strftime("%Y-%m-%d")
+DEFAULT_DB = "db.json"
 
 
 class _db:
-    def __init__(self):
-        global DEFAULT_DB, TODAY
-        self.db = TinyDB(DEFAULT_DB)
-        self.today = TODAY
+    today = date.today().strftime("%Y-%m-%d")
+    _path = None
+
+    def __call__(self, path=DEFAULT_DB):
+        self._path = path
+        self._database = TinyDB(path)
+        return self
+
+    def __repr__(self):
+        return f"<database {self._path}>"
 
     def index(self, index="url"):
-        elements = self.db.all()
+        """
+        Returns all occurances of the column `index`. Defaults to "urls".
+        """
+        elements = self._database.all()
         _occurances = []
         for element in elements:
             _occurances.append(element.get(index))
         return _occurances
 
     def insert(self, url, response, **kwargs):
+        """
+        Method for dumping url, headers and responses to the database.
+        All additonal kwargs are dumped as well.
+        """
         kwargs.update({"url": url})
         kwargs.update({"cache_date": self.today})
         kwargs.update({"response": b64encode(zlib.compress(response)).decode("utf-8")})
-        self.db.upsert(kwargs, where("url") == url)
+        self._database.upsert(kwargs, where("url") == url)
         return
 
     def get(self, url, **kwargs):
+        """
+        Method for getting response and header for a perticular query `url`.
+        Currently working by locating `url` only; multi-query to be implemented later.
+        """
         query = where("url") == url  # and where("request") == "req"
-        if element := self.db.search(query):
+        if element := self._database.search(query):
             res = element[0].get("response")
             headers = element[0].get("headers", "[]")
             return zlib.decompress(b64decode(res.encode("utf-8"))), dict.fromkeys(
@@ -40,10 +56,14 @@ class _db:
         return b"", {}
 
     def all(self):
-        return self.db.all()
+        """
+        Method to return all records in the database.
+        """
+        return self._database.all()
 
     def __del__(self):
-        self.db.close()
+        if hasattr(self, "db"):
+            self._database.close()
         return
 
     pass
@@ -75,4 +95,4 @@ class MockHeaders(MutableMapping):
     pass
 
 
-db = _db()
+database = _db()
