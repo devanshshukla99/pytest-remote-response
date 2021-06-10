@@ -2,12 +2,13 @@ from urllib.parse import urljoin, urlparse
 
 
 class Controller:
-    def __init__(self, capture=True, response=False):
+    def __init__(self, capture=False, response=False):
         self.capture = capture
         self.response = response
         self.url = None
         self.host = None
         self.https = False
+        self.headers = {}
 
     def build_url(self, host, url, https=False):
         self.url = url

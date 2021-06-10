@@ -3,18 +3,153 @@ import sys
 import http
 import urllib.request
 from socket import SocketIO
+from ssl import SSLContext, SSLObject, SSLSocket
 
 import _socket
 
 from pytest_response.controller import controller
 from pytest_response.database import db
+import errno
+
+EBADF = getattr(errno, "EBADF", 9)
+EAGAIN = getattr(errno, "EAGAIN", 11)
+EWOULDBLOCK = getattr(errno, "EWOULDBLOCK", 11)
+_blocking_errnos = {EAGAIN, EWOULDBLOCK}
+
+
+class ResponseSocketIO(io.RawIOBase):
+    """Raw I/O implementation for stream sockets.
+
+    This class supports the makefile() method on sockets.  It provides
+    the raw I/O interface on top of a socket object.
+    """
+
+    # One might wonder why not let FileIO do the job instead.  There are two
+    # main reasons why FileIO is not adapted:
+    # - it wouldn't work under Windows (where you can't used read() and
+    #   write() on a socket handle)
+    # - it wouldn't work with socket timeouts (FileIO would ignore the
+    #   timeout and consider the socket non-blocking)
+
+    # XXX More docs
+
+    # def read(self, *args, **kwargs):
+    #     return super().read1(*args, **kwargs)
+
+    def __init__(self, sock, mode):
+        if mode not in ("r", "w", "rw", "rb", "wb", "rwb"):
+            raise ValueError("invalid mode: %r" % mode)
+        self.output = io.BytesIO()  # internal buffer
+        io.RawIOBase.__init__(self)
+        self._sock = sock
+        if "b" not in mode:
+            mode += "b"
+        self._mode = mode
+        self._reading = "r" in mode
+        self._writing = "w" in mode
+        self._timeout_occurred = False
+
+    def readinto(self, b):
+        """Read up to len(b) bytes into the writable buffer *b* and return
+        the number of bytes read.  If the socket is non-blocking and no bytes
+        are available, None is returned.
+
+        If *b* is non-empty, a 0 return value indicates that the connection
+        was shutdown at the other end.
+        """
+        self._checkClosed()
+        self._checkReadable()
+        if self._timeout_occurred:
+            raise OSError("cannot read from timed out object")
+        while True:
+            try:
+                _ = self._sock.recv_into(b)
+                self.output.write(b.tobytes())
+                print("\033[32m")
+                print(len(b.tobytes()))
+                print("\033[0m")
+                return _
+
+            except _socket.timeout:
+                self._timeout_occurred = True
+                raise
+            except OSError as e:
+                if e.args[0] in _blocking_errnos:
+                    return None
+                raise
+
+    def write(self, b):
+        """Write the given bytes or bytearray object *b* to the socket
+        and return the number of bytes written.  This can be less than
+        len(b) if not all data could be written.  If the socket is
+        non-blocking and no bytes could be written None is returned.
+        """
+        self._checkClosed()
+        self._checkWritable()
+        try:
+            return self._sock.send(b)
+        except OSError as e:
+            # XXX what about EINTR?
+            if e.args[0] in _blocking_errnos:
+                return None
+            raise
+
+    def readable(self):
+        """True if the SocketIO is open for reading."""
+        if self.closed:
+            raise ValueError("I/O operation on closed socket.")
+        return self._reading
+
+    def writable(self):
+        """True if the SocketIO is open for writing."""
+        if self.closed:
+            raise ValueError("I/O operation on closed socket.")
+        return self._writing
+
+    def seekable(self):
+        """True if the SocketIO is open for seeking."""
+        if self.closed:
+            raise ValueError("I/O operation on closed socket.")
+        return super().seekable()
+
+    def fileno(self):
+        """Return the file descriptor of the underlying socket."""
+        self._checkClosed()
+        return self._sock.fileno()
+
+    @property
+    def name(self):
+        if not self.closed:
+            return self.fileno()
+        else:
+            return -1
+
+    @property
+    def mode(self):
+        return self._mode
+
+    def close(self):
+        """Close the SocketIO object.  This doesn't close the underlying
+        socket, except if all references to it have disappeared.
+        """
+        if self.closed:
+            return
+        io.RawIOBase.close(self)
+        self._sock._decref_socketios()
+        self._sock = None
+
+    def __del__(self):
+        if controller.capture:
+            print("Dumped!!")
+            url = controller.url  # self.headers.get('Location')
+            db.insert(url=url, response=self.output.getvalue())
 
 
 class Response_Socket(_socket.socket):
-    def __init__(self, host, port, capture=controller.capture, *args, **kwargs):
+    def __init__(self, host, port, *args, **kwargs):
         self.host = host
         self.port = port
-        self._capture = capture
+        self._capture = controller.capture
         self.input = io.BytesIO()
         self._io_refs = 0
         self._closed = False
@@ -26,14 +161,7 @@ class Response_Socket(_socket.socket):
             print("Connecting...")
             super().connect((self.host, self.port), *args, **kwargs)
 
-    def settimeout(self, timeout):
-        if self._capture:
-            super().settimeout(timeout)
-        pass
-
-    def flush(self):
-        if self._capture:
-            super().flush()
+    def close(self):
         pass
 
     def makefile(
@@ -98,35 +226,47 @@ class Response_Socket(_socket.socket):
             print("Sending...")
             super().sendall(data, *args, **kwargs)
 
-    def close(self):
-        """
-        NotImplementedYet
-        """
-        if self._capture:
-            super().close()
-        pass
+    # def close(self):
+    #     """
+    #     NotImplementedYet
+    #     """
+    #     # print(self.fileno())
+    #     # if self._capture:
+    #     #     super().close()
+    #     #     print(self.fileno())
+
+    #     pass
+
+
+class Response_SSLSocket(SSLSocket):
+    output = io.BytesIO()
+
+    def recv_into(self, buffer, nbytes=None, flags=0):
+        _ = super().recv_into(buffer, nbytes, flags)
+        self.output.write(buffer.tobytes().rstrip(b"\x00").lstrip(b"\x00"))
+        print("\033[32m")
+        print(len(buffer.tobytes()))
+        print("\033[0m")
+        return _
+
+    def __del__(self):
+        if controller.capture:
+            print("Dumped!!")
+            url = controller.url
+            print("\033[32m")
+            print(self.output.getvalue())
+            db.insert(url=url, response=self.output.getvalue())
+
+    pass
 
 
 class Response_HTTPResponse(http.client.HTTPResponse):
-    def __init__(
-        self, sock, debuglevel=0, method=None, headers=None, capture=controller.capture
-    ):
+    def __init__(self, sock, debuglevel=0, method=None, headers=None):
+
         self.sock = sock
-        self._capture = capture
+        self._capture = controller.capture
         self.output = io.BytesIO()
         super().__init__(sock=sock, debuglevel=debuglevel, method=method)
-
-    def _dump_to_db(self):
-        print("DUMPED?")
-        url = controller.url  # self.headers.get('Location')
-        db.insert(url=url, response=self.output.getvalue())
-        return
-
-    def _replace_buffer(self):
-        self.output.write(self.fp.read())
-        self.fp = self.output
-        self.fp.seek(0)
-        self._dump_to_db()
 
     def begin(self, *args, **kwargs):
         print("Beginning///...///")
@@ -138,8 +278,7 @@ class Response_HTTPResponse(http.client.HTTPResponse):
                 self.reason = "Response Not Found (pytest-response)"
                 self.will_close = True
                 return
-            status = "200"
-            self.output.write(b"HTTP/1.0 " + status.encode("ISO-8859-1") + b"\n")
+            # self.output.write(b"HTTP/1.0 " + status.encode("ISO-8859-1") + b"\n")
             self.output.write(data)
             self.will_close = False
             self.fp = self.output
@@ -147,34 +286,6 @@ class Response_HTTPResponse(http.client.HTTPResponse):
         super().begin(*args, **kwargs)
         # if self._capture:
         #     self._replace_buffer()
-
-    def close(self, *args, **kwargs):
-        if self._capture:
-            self._replace_buffer()
-
-    def read(self, *args, **kwargs):
-        """
-        Wrapper
-        """
-        if self._capture:
-            return super().read(*args, **kwargs)
-        return self.fp.read(*args, **kwargs)
-
-    def readline(self, *args, **kwargs):
-        """
-        Wrapper for _io.BytesIO.readline
-        """
-        if self._capture:
-            return super().readline(*args, **kwargs)
-        return self.fp.readline(*args, **kwargs)
-
-    def readinto(self, *args, **kwargs):
-        """
-        Wrapper for _io.BytesIO.readinto
-        """
-        if self._capture:
-            return super().readinto(*args, **kwargs)
-        return self.fp.readinto(*args, **kwargs)
 
     pass
 
@@ -184,6 +295,7 @@ class ResponseHTTPConnection(http.client.HTTPConnection):
 
     def request(self, method, url, body=None, headers={}, *, encode_chunked=False):
         """Send a complete request to the server."""
+        controller.headers = headers
         controller.build_url(self.host, url)
         self._send_request(method, url, body, headers, encode_chunked)
 
@@ -217,6 +329,7 @@ class ResponseHTTPHandler(urllib.request.HTTPHandler):
 class ResponseHTTPSConnection(http.client.HTTPSConnection, ResponseHTTPConnection):
     def request(self, method, url, body=None, headers={}, *, encode_chunked=False):
         """Send a complete request to the server."""
+        controller.headers = headers
         controller.build_url(self.host, url, True)
         self._send_request(method, url, body, headers, encode_chunked)
 
@@ -241,7 +354,7 @@ class ResponseHTTPSConnection(http.client.HTTPSConnection, ResponseHTTPConnectio
                 server_hostname = self._tunnel_host
             else:
                 server_hostname = self.host
-
+            SSLContext.sslsocket_class = Response_SSLSocket
             self.sock = self._context.wrap_socket(
                 self.sock, server_hostname=server_hostname
             )

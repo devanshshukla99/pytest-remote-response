@@ -15,7 +15,7 @@ class _db:
         self.db = TinyDB(DEFAULT_DB)
         self.today = TODAY
 
-    def index(self, index):
+    def index(self, index="url"):
         elements = self.db.all()
         _occurances = []
         for element in elements:
