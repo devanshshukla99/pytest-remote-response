@@ -2,7 +2,7 @@ import ast
 import zlib
 from base64 import b64decode, b64encode
 from datetime import date
-
+from collections.abc import MutableMapping
 from tinydb import TinyDB, where
 
 DEFAULT_DB = "./db.json"
@@ -45,6 +45,32 @@ class _db:
     def __del__(self):
         self.db.close()
         return
+
+    pass
+
+
+class MockHeaders(MutableMapping):
+    def __init__(self, default_headers={""}, *args, **kwargs):
+        self.store = dict()
+        self.update(dict(*args, **kwargs))
+
+    def __repr__(self):
+        return str(self.store)
+
+    def __getitem__(self, key):
+        return self.store[key]
+
+    def __setitem__(self, key, value):
+        self.store[key] = value
+
+    def __delitem__(self, key):
+        del self.store[key]
+
+    def __iter__(self):
+        return iter(self.store)
+
+    def __len__(self):
+        return len(self.store)
 
     pass
 

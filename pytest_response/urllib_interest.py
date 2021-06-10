@@ -3,7 +3,7 @@ import sys
 import http
 import urllib.request
 from socket import SocketIO
-from ssl import SSLContext, SSLObject, SSLSocket
+from ssl import SSLContext, SSLSocket
 
 import _socket
 
@@ -191,7 +191,7 @@ class Response_Socket(_socket.socket):
                 rawmode += "r"
             if writing:
                 rawmode += "w"
-            raw = SocketIO(self, rawmode)
+            raw = ResponseSocketIO(self, rawmode)
             if not buffering:
                 buffering = io.DEFAULT_BUFFER_SIZE
             if buffering == 0:
@@ -225,17 +225,6 @@ class Response_Socket(_socket.socket):
         if self._capture:
             print("Sending...")
             super().sendall(data, *args, **kwargs)
-
-    # def close(self):
-    #     """
-    #     NotImplementedYet
-    #     """
-    #     # print(self.fileno())
-    #     # if self._capture:
-    #     #     super().close()
-    #     #     print(self.fileno())
-
-    #     pass
 
 
 class Response_SSLSocket(SSLSocket):
@@ -283,9 +272,8 @@ class Response_HTTPResponse(http.client.HTTPResponse):
             self.will_close = False
             self.fp = self.output
             self.fp.seek(0)
+
         super().begin(*args, **kwargs)
-        # if self._capture:
-        #     self._replace_buffer()
 
     pass
 

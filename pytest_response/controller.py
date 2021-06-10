@@ -2,7 +2,7 @@ from urllib.parse import urljoin, urlparse
 
 
 class Controller:
-    def __init__(self, capture=False, response=False):
+    def __init__(self, capture=True, response=False):
         self.capture = capture
         self.response = response
         self.url = None
