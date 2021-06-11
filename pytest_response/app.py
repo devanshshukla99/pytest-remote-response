@@ -85,9 +85,7 @@ class Response:
     ) -> None:
 
         log.setLevel(log_level.upper())
-        log.info(
-            "<------------------------------------------------------------------->"
-        )
+        log.info("<------------------------------------------------------------------->")
         self._basepath = pathlib.Path(__file__).parent
         self._db_path = self._basepath.joinpath(database)
         self._path_to_mocks = self._basepath.joinpath(path)
@@ -165,9 +163,7 @@ class Response:
         if not mock.suffix:
             mock = mock.with_suffix(".py")
         if mock not in self._get_available_mocks():
-            raise InterceptorNotFound(
-                f"Requested interceptor `{mock}` is not available; check `available()`"
-            )
+            raise InterceptorNotFound(f"Requested interceptor `{mock}` is not available; check `available()`")
         spec = importlib.util.spec_from_file_location(mock.name, str(mock))
         mock_lib = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mock_lib)

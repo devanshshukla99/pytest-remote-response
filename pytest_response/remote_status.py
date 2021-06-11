@@ -23,9 +23,7 @@ def pytest_generate_tests(metafunc):
         if isfile(intercept_dump_file) and not intercept_remote:
             with open(metafunc.config.getini("intercept_dump_file")) as fd:
                 funcarglist = json.load(fd)
-        funcarglist = funcarglist.get(
-            metafunc.function.__name__.replace("test_", ""), [None]
-        ) or [None]
+        funcarglist = funcarglist.get(metafunc.function.__name__.replace("test_", ""), [None]) or [None]
         metafunc.parametrize("intercept_url", funcarglist, indirect=True)
 
 

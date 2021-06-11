@@ -49,9 +49,7 @@ class ResponseDB:
         if element := self._database.search(query):
             res = element[0].get("response")
             headers = element[0].get("headers", "[]")
-            return zlib.decompress(b64decode(res.encode("utf-8"))), dict.fromkeys(
-                ast.literal_eval(headers)
-            )
+            return zlib.decompress(b64decode(res.encode("utf-8"))), dict.fromkeys(ast.literal_eval(headers))
         return b"", {}
 
     def all(self):

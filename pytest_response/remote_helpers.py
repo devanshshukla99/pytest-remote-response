@@ -46,9 +46,7 @@ def requests_mock(self, method, url, *args, **kwargs):
     """
     global _urls
     full_url = f"{self.scheme}://{self.host}{url}"
-    _urls.get("urls_requests").append(
-        {"url": full_url, "method": method, "args": args, "kwargs": kwargs}
-    )
+    _urls.get("urls_requests").append({"url": full_url, "method": method, "args": args, "kwargs": kwargs})
     return MockHTTPResponse(b"", {})
     # pytest.xfail(f"The test was about to {method} {full_url}")
 

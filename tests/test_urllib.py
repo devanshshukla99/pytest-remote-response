@@ -16,7 +16,8 @@ def test_remote(testdir):
             assert res.read()
 
         def test_database():
-            assert response.db.index() == ["http://www.testingmcafeesites.com/testcat_ac.html", "https://www.python.org"]
+            assert response.db.index() == ["http://www.testingmcafeesites.com/testcat_ac.html",
+                                           "https://www.python.org"]
         """
     )
     result = testdir.runpytest("-q", "-p", "no:warnings")
@@ -25,9 +26,7 @@ def test_remote(testdir):
     result = testdir.runpytest("-q", "--remote", "-p", "no:warnings")
     result.assert_outcomes(passed=2, failed=1)
 
-    result = testdir.runpytest(
-        "-q", "--remote", "--remote-capture", "-p", "no:warnings"
-    )
+    result = testdir.runpytest("-q", "--remote", "--remote-capture", "-p", "no:warnings")
     result.assert_outcomes(passed=3)
 
     result = testdir.runpytest("-q", "--remote", "--response", "-p", "no:warnings")

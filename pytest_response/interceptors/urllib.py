@@ -87,9 +87,7 @@ class ResponseSocket(_socket.socket):
             raise RemoteBlockedError
 
         if not response.response:
-            log.debug(
-                f"Connecting...to {self.host}:{self.port} response:{response.response}"
-            )
+            log.debug(f"Connecting...to {self.host}:{self.port} response:{response.response}")
             super().connect((self.host, self.port), *args, **kwargs)
 
     def close(self):
@@ -197,9 +195,7 @@ class ResponseHTTPResponse(http.client.HTTPResponse):
             log.error(f"remote:{response.remote}")
             raise RemoteBlockedError
 
-        log.debug(
-            f"begin response fetching/framing capture:{response.capture} response:{response.response}"
-        )
+        log.debug(f"begin response fetching/framing capture:{response.capture} response:{response.response}")
 
         if response.response:
             global CONFIG
@@ -298,9 +294,7 @@ class ResponseHTTPSConnection(http.client.HTTPSConnection, ResponseHTTPConnectio
                 server_hostname = self._tunnel_host
             else:
                 server_hostname = self.host
-            self.sock = self._context.wrap_socket(
-                self.sock, server_hostname=server_hostname
-            )
+            self.sock = self._context.wrap_socket(self.sock, server_hostname=server_hostname)
 
     pass
 
@@ -388,9 +382,7 @@ class RemoteBlockedError(RuntimeError):
 
 class ResponseNotFound(RuntimeError):
     def __init__(self, *args, **kwargs):
-        super(ResponseNotFound, self).__init__(
-            "Response is not available; try capturing first."
-        )
+        super(ResponseNotFound, self).__init__("Response is not available; try capturing first.")
 
 
 install = install_opener
