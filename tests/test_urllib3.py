@@ -1,53 +1,34 @@
-import requests
-import pytest
+def test_remote(testdir):
+    testdir.makepyfile(
+        """
+        import requests
+        from pytest_response import response
+        def test_urllib3():
+            url = "http://www.testingmcafeesites.com/testcat_ac.html"
+            res = requests.get(url)
+            assert res.status_code == 200
+            assert res.content
 
-from pytest_response import response
+        def test_urllib3_ssl():
+            url = "https://www.python.org"
+            res = requests.get(url)
+            assert res.status_code == 200
+            assert res.content
 
+        def test_database():
+            assert response.db.index() == ["http://www.testingmcafeesites.com/testcat_ac.html", "https://www.python.org/"]
+        """
+    )
+    result = testdir.runpytest("-q", "-p", "no:warnings")
+    result.assert_outcomes(failed=3)
 
-# @pytest.fixture(scope="function")
-# def apply_interceptor():
-#     pr_app = app()
-#     pr_app.register("urllib3")
-#     pr_app.apply()
-#     return
+    result = testdir.runpytest("-q", "--remote", "-p", "no:warnings")
+    result.assert_outcomes(passed=2, failed=1)
 
+    result = testdir.runpytest(
+        "-q", "--remote", "--remote-capture", "-p", "no:warnings"
+    )
+    result.assert_outcomes(passed=3)
 
-def test_connection():
-    url = "https://www.python.org"
-    res = requests.get(url)
-    assert res.status_code == 200
-    assert res.content
-
-
-def test_intercept_ing():
-    url = "http://www.testingmcafeesites.com/testcat_ac.html"
-    # response.capture = True
-    res = requests.get(url)
-    assert res.status_code == 200
-    assert res.content
-
-
-def test_intercept_2ing():
-    url = "http://www.testingmcafeesites.com/testcat_ac.html"
-    # response.capture = False
-    # response.response = True
-    res = requests.get(url)
-    assert res.status_code == 200
-    assert res.content
-
-
-def test_intercept_ing_ssl():
-    url = "https://www.python.org"
-    # response.capture = True
-    res = requests.get(url)
-    assert res.status_code == 200
-    assert res.content
-
-
-def test_intercept_2ing_ssl():
-    url = "https://www.python.org"
-    # response.capture = False
-    # response.response = True
-    res = requests.get(url)
-    assert res.status_code == 200
-    assert res.content
+    result = testdir.runpytest("-q", "--remote", "--response", "-p", "no:warnings")
+    result.assert_outcomes(passed=3)

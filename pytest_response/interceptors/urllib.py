@@ -3,10 +3,11 @@ import http
 import urllib.request
 from socket import SocketIO
 from ssl import SSLContext, SSLSocket
+from urllib.parse import urljoin
 
 import _socket
 
-from pytest_response.app import control
+from pytest_response import response
 from pytest_response.logger import log
 import errno
 
@@ -14,6 +15,22 @@ EBADF = getattr(errno, "EBADF", 9)
 EAGAIN = getattr(errno, "EAGAIN", 11)
 EWOULDBLOCK = getattr(errno, "EWOULDBLOCK", 11)
 _blocking_errnos = {EAGAIN, EWOULDBLOCK}
+
+
+CONFIG = {"url": None, "host": None, "https": None, "headers": None}
+
+
+def _build_url(host, url, headers, https=False):
+    """
+    Internal controller method for building urls.
+    """
+    global CONFIG
+    _scheme = "https://" if https else "http://"
+    _url = "".join([_scheme, host])
+    CONFIG["url"] = urljoin(_url, url)
+    CONFIG["https"] = https
+    CONFIG["headers"] = headers
+    return
 
 
 class ResponseSocketIO(SocketIO):
@@ -37,10 +54,11 @@ class ResponseSocketIO(SocketIO):
         return _
 
     def __del__(self):
-        if control.capture and control.remote:
-            log.debug(f"Dumped {control.url}")
-            url = control.url
-            control.insert(url=url, response=self.output.getvalue())
+        if response.capture and response.remote:
+            global CONFIG
+            url = CONFIG.get("url")
+            log.debug(f"dumped {url}")
+            response.insert(url=url, response=self.output.getvalue())
 
 
 class ResponseSocket(_socket.socket):
@@ -64,13 +82,13 @@ class ResponseSocket(_socket.socket):
 
         Wrapper for `_socket.socket.connect`
         """
-        if not control.remote:
-            log.error(f"remote:{control.remote}")
+        if not response.remote:
+            log.error(f"remote:{response.remote}")
             raise RemoteBlockedError
 
-        if not control.response:
+        if not response.response:
             log.debug(
-                f"Connecting...to {self.host}:{self.port} response:{control.response}"
+                f"Connecting...to {self.host}:{self.port} response:{response.response}"
             )
             super().connect((self.host, self.port), *args, **kwargs)
 
@@ -90,7 +108,7 @@ class ResponseSocket(_socket.socket):
         """
         Provides makefile() method which returns a Buffered IO built with `ResponseSocketIO`
         """
-        # if control.capture:
+        # if response.capture:
         writing = "w" in mode
         reading = "r" in mode or not writing
         binary = "b" in mode
@@ -131,7 +149,7 @@ class ResponseSocket(_socket.socket):
         """
         if type(data) is not bytes:
             data = data.encode("utf-8")
-        if control.remote and not control.response:
+        if response.remote and not response.response:
             super().sendall(data, *args, **kwargs)
 
 
@@ -155,10 +173,11 @@ class Response_SSLSocket(SSLSocket):
         return _
 
     def __del__(self):
-        if control.capture and control.remote:
-            log.debug(f"dumped {control.url}")
-            url = control.url
-            control.insert(url=url, response=self.output.getvalue())
+        if response.capture and response.remote:
+            global CONFIG
+            url = CONFIG.get("url")
+            log.debug(f"dumped {url}")
+            response.insert(url=url, response=self.output.getvalue())
 
     pass
 
@@ -174,22 +193,23 @@ class ResponseHTTPResponse(http.client.HTTPResponse):
         super().__init__(sock=sock, debuglevel=debuglevel, method=method)
 
     def begin(self, *args, **kwargs):
-        if not control.remote:
-            log.error(f"remote:{control.remote}")
+        if not response.remote:
+            log.error(f"remote:{response.remote}")
             raise RemoteBlockedError
 
         log.debug(
-            f"begin response fetching/framing capture:{control.capture} response:{control.response}"
+            f"begin response fetching/framing capture:{response.capture} response:{response.response}"
         )
 
-        if control.response:
+        if response.response:
+            global CONFIG
             self.fp = io.BytesIO()
-            data, headers = control.get(url=control.url)
+            data, headers = response.get(url=CONFIG.get("url", ""))
             if not data:
                 self.code = self.status = 404
                 self.reason = "Response Not Found (pytest-response)"
                 self.will_close = True
-                log.error(f"Response not found {control.url}")
+                log.error(f"Response not found {CONFIG.get('url', '')}")
                 raise ResponseNotFound
             # self.output.write(b"HTTP/1.0 " + status.encode("ISO-8859-1") + b"\n")
             self.output.write(data)
@@ -211,17 +231,15 @@ class ResponseHTTPConnection(http.client.HTTPConnection):
 
     def request(self, method, url, body=None, headers={}, *, encode_chunked=False):
         """Send a complete request to the server."""
-        control.headers = headers
-        control.build_url(self.host, url)
+        _build_url(self.host, url, headers, False)
         self._send_request(method, url, body, headers, encode_chunked)
 
     def connect(self):
         """
         Override the connect() function to intercept calls.
         """
-        if not control.remote:
-            log.error(f"Attempt to connect. remote:{control.remote}")
-            print("YO!")
+        if not response.remote:
+            log.error(f"Attempt to connect. remote:{response.remote}")
             raise RemoteBlockedError
         try:
             log.debug("Intercepting call to %s:%s\n" % (self.host, self.port))
@@ -251,13 +269,12 @@ class ResponseHTTPSConnection(http.client.HTTPSConnection, ResponseHTTPConnectio
 
     def request(self, method, url, body=None, headers={}, *, encode_chunked=False):
         """Send a complete request to the server."""
-        control.headers = headers
-        control.build_url(self.host, url, True)
+        _build_url(self.host, url, headers, True)
         self._send_request(method, url, body, headers, encode_chunked)
 
     def connect(self):
-        if not control.remote:
-            log.error(f"Attempting to connect. remote:{control.remote}")
+        if not response.remote:
+            log.error(f"Attempting to connect. remote:{response.remote}")
             raise RemoteBlockedError
 
         log.info("Intercepting call to %s:%s\n" % (self.host, self.port))
@@ -270,10 +287,10 @@ class ResponseHTTPSConnection(http.client.HTTPSConnection, ResponseHTTPConnectio
         )
         self.sock.setsockopt(_socket.IPPROTO_TCP, _socket.TCP_NODELAY, 1)
 
-        if control.capture:
+        if response.capture:
             SSLContext.sslsocket_class = Response_SSLSocket
 
-        if not control.response:
+        if not response.response:
             if self._tunnel_host:
                 self._tunnel()
 

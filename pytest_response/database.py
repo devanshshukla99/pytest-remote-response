@@ -5,22 +5,20 @@ from datetime import date
 from collections.abc import MutableMapping
 from tinydb import TinyDB, where
 
-DEFAULT_DB = "db.json"
 
-
-class _db:
+class ResponseDB:
     today = date.today().strftime("%Y-%m-%d")
     _path = None
 
-    def __call__(self, path=DEFAULT_DB):
+    def __init__(self, path) -> None:
         self._path = path
         self._database = TinyDB(path)
-        return self
+        return
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<database {self._path}>"
 
-    def index(self, index="url"):
+    def index(self, index: str = "url"):
         """
         Returns all occurances of the column `index`. Defaults to "urls".
         """
@@ -30,7 +28,7 @@ class _db:
             _occurances.append(element.get(index))
         return _occurances
 
-    def insert(self, url, response, **kwargs):
+    def insert(self, url: str, response: bytes, **kwargs):
         """
         Method for dumping url, headers and responses to the database.
         All additonal kwargs are dumped as well.
@@ -41,7 +39,7 @@ class _db:
         self._database.upsert(kwargs, where("url") == url)
         return
 
-    def get(self, url, **kwargs):
+    def get(self, url: str, **kwargs):
         """
         Method for getting response and header for a perticular query `url`.
         Currently working by locating `url` only; multi-query to be implemented later.
@@ -97,6 +95,3 @@ class MockHeaders(MutableMapping):
         return len(self.store)
 
     pass
-
-
-database = _db()

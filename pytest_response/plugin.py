@@ -1,8 +1,4 @@
-import py.path
-import pytest
-import tempfile
 from pytest_response import response
-from pytest_response.app import control
 
 
 def pytest_addoption(parser):
@@ -43,9 +39,7 @@ def pytest_configure(config):
         assert (
             not config.option.remote_capture and config.option.response
         )  # either capture or mock_remote
-    tmppath = tempfile.NamedTemporaryFile()
-    control.db.close()
-    response.setup_database(tmppath.name)
+    response.setup_database("basedata.json")
     response.register("urllib")
     response.register("urllib3")
 
@@ -70,7 +64,6 @@ def pytest_unconfigure(config):
     Pytest hook for cleaning up.
     """
     response.unregister()
-    control.db.close()
     # global mpatch
     # if config.option.mock_remote:
     #     response_unpatch(mpatch)
