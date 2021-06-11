@@ -58,5 +58,8 @@ htmlcov
 */_version.py
 pip-wheel-metadata/
 
+# tox
+*/.tmp/
+
 # vscode
 .vscode

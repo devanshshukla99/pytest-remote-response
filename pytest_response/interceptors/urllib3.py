@@ -3,7 +3,7 @@ import sys
 from urllib3.connection import HTTPConnection, HTTPSConnection
 from urllib3.connectionpool import HTTPConnectionPool, HTTPSConnectionPool
 
-from pytest_response.interceptors.urllib import (
+from pytest_response.interceptors.urllib import (  # isort:skip
     ResponseHTTPConnection,
     ResponseHTTPSConnection,
 )

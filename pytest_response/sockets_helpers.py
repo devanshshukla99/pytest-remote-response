@@ -1,3 +1,4 @@
+# flake8:noqa
 import ast
 
 import _socket

@@ -1,3 +1,4 @@
+# flake8:noqa
 import mmap
 import urllib
 import tempfile

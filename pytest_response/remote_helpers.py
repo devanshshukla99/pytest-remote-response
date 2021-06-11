@@ -1,3 +1,4 @@
+# flake8:noqa
 import _socket
 import pytest
 
