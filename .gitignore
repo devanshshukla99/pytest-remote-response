@@ -59,7 +59,7 @@ htmlcov
 pip-wheel-metadata/
 
 # tox
-*/.tmp/
+**/.tmp/*
 
 # vscode
 .vscode
