@@ -2,9 +2,7 @@
 pytest-response
 ===============
 
-|versions|
-
-|license| |build| |coverage| |status|
+|license| |build| |codestyle|
 
 
 This package provides a plugin for ``pytest`` framework for capturing and mocking connection requests during the test run.
@@ -29,42 +27,6 @@ or by:
 
 The plugin will register automatically with ``pytest`` framework and will be ready to use.
 
-Configuration
--------------
-
-.. code-block:: bash
-
-    $ pytest --mock-remote
-
-Usage
------
-
-Intercepting requests
-*********************
-
-The urls can be intercepted using ``--intercept-remote`` option;
-
-.. code-block:: bash
-
-    $ pytest --intercept-remote
-
-
-The tests trying to connect to internet will ``xfail``.
-
-
-Remote status
-*************
-
-Once the requests are intercepted, they can be pinged for their status by using ``--remote-status=[show/only/no]`` option.
-
-- ``--remote-status=show`` will append the ping functions to pytest run;
-
-- ``--remote-status=only`` will only ping the requests and deselect all other tests;
-
-.. code-block:: bash
-
-    $ pytest --remote-status=show
-    $ pytest --remote-status=only
 
 Testing
 -------
@@ -101,3 +63,6 @@ This plugin is licenced under a 3-clause BSD style licence - see the ``LICENCE``
 .. |license| image:: https://img.shields.io/pypi/l/pytest-response.svg
     :target: https://pypi.org/project/pytest-response/
     :alt: License
+
+.. |codestyle| image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/psf/black
