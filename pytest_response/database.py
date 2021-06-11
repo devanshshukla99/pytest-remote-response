@@ -61,8 +61,12 @@ class _db:
         """
         return self._database.all()
 
+    def close(self):
+        if hasattr(self, "_database"):
+            self._database.close()
+
     def __del__(self):
-        if hasattr(self, "db"):
+        if hasattr(self, "_database"):
             self._database.close()
         return
 

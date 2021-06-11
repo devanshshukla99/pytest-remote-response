@@ -11,7 +11,7 @@ from pytest_response.interceptors.urllib import (
 
 class RemoteBlockedError(RuntimeError):
     def __init__(self, *args, **kwargs):
-        super(RemoteBlockedError, self).__init__("A test tried to use urllib.request")
+        super(RemoteBlockedError, self).__init__("A test tried to use `urllib.request`")
 
 
 class _Response_HTTPU3_Intercepter(ResponseHTTPConnection, HTTPConnection):

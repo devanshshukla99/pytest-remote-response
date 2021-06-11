@@ -1,5 +1,4 @@
 import io
-import sys
 import http
 import urllib.request
 from socket import SocketIO
@@ -18,10 +17,9 @@ _blocking_errnos = {EAGAIN, EWOULDBLOCK}
 
 
 class ResponseSocketIO(SocketIO):
-    """Raw I/O implementation for stream sockets.
-
-    This class supports the makefile() method on sockets.  It provides
-    the raw I/O interface on top of a socket object.
+    """
+    Provides a method to write the value of the buffer into another var for dumping.
+    Wrapper for `~socket.SocketIO`.
     """
 
     def __init__(self, sock, mode):
@@ -31,52 +29,49 @@ class ResponseSocketIO(SocketIO):
         super().__init__(sock, mode)
 
     def readinto(self, b):
-        """Read up to len(b) bytes into the writable buffer *b* and return
-        the number of bytes read.  If the socket is non-blocking and no bytes
-        are available, None is returned.
-
-        If *b* is non-empty, a 0 return value indicates that the connection
-        was shutdown at the other end.
         """
-        self._checkClosed()
-        self._checkReadable()
-        if self._timeout_occurred:
-            raise OSError("cannot read from timed out object")
-        while True:
-            try:
-                _ = self._sock.recv_into(b)
-                self.output.write(b.tobytes())
-                return _
-
-            except _socket.timeout:
-                self._timeout_occurred = True
-                raise
-            except OSError as e:
-                if e.args[0] in _blocking_errnos:
-                    return None
-                raise
+        Wrapper function for `socket.SocketIO.readinto`
+        """
+        _ = super().readinto(b)
+        self.output.write(b.tobytes())
+        return _
 
     def __del__(self):
-        if control.capture:
+        if control.capture and control.remote:
             log.debug(f"Dumped {control.url}")
             url = control.url
             control.insert(url=url, response=self.output.getvalue())
 
 
-class Response_Socket(_socket.socket):
+class ResponseSocket(_socket.socket):
+    """
+    Socket implementation of Pytest-Response
+
+    Provides `ResponseSocket.makefile` method to return a buffer built with `ResponseSocketIO`
+    """
+
     def __init__(self, host, port, *args, **kwargs):
         self.host = host
         self.port = port
-        self._capture = control.capture
-        self.input = io.BytesIO()
         self._io_refs = 0
         self._closed = False
         super().__init__()
         self.connect()
 
     def connect(self, *args, **kwargs):
-        if self._capture:
-            log.debug(f"Connecting...to {self.host}:{self.port}")
+        """
+        Connects to host in capturing mode otherwise passes.
+
+        Wrapper for `_socket.socket.connect`
+        """
+        if not control.remote:
+            log.error(f"remote:{control.remote}")
+            raise RemoteBlockedError
+
+        if not control.response:
+            log.debug(
+                f"Connecting...to {self.host}:{self.port} response:{control.response}"
+            )
             super().connect((self.host, self.port), *args, **kwargs)
 
     def close(self):
@@ -93,41 +88,36 @@ class Response_Socket(_socket.socket):
         **kwargs,
     ):
         """
-        1. build response
-        2. build a stream/input file
-        3. build a (request, response) tuple from the input file
+        Provides makefile() method which returns a Buffered IO built with `ResponseSocketIO`
         """
-        """
-        Read the response from the data base and construct a Response
-        """
-        if self._capture:
-            writing = "w" in mode
-            reading = "r" in mode or not writing
-            binary = "b" in mode
-            rawmode = ""
-            if reading:
-                rawmode += "r"
-            if writing:
-                rawmode += "w"
-            raw = ResponseSocketIO(self, rawmode)
-            if not buffering:
-                buffering = io.DEFAULT_BUFFER_SIZE
-            if buffering == 0:
-                if not binary:
-                    raise ValueError("unbuffered streams must be binary")
-                return raw
-            if reading and writing:
-                buffer = io.BufferedRWPair(raw, raw, buffering)
-            elif reading:
-                buffer = io.BufferedReader(raw, buffering)
-            else:
-                assert writing
-                buffer = io.BufferedWriter(raw, buffering)
-            if binary:
-                return buffer
-            text = io.TextIOWrapper(buffer, encoding, errors, newline)
-            text.mode = mode
-            return text
+        # if control.capture:
+        writing = "w" in mode
+        reading = "r" in mode or not writing
+        binary = "b" in mode
+        rawmode = ""
+        if reading:
+            rawmode += "r"
+        if writing:
+            rawmode += "w"
+        raw = ResponseSocketIO(self, rawmode)
+        if not buffering:
+            buffering = io.DEFAULT_BUFFER_SIZE
+        if buffering == 0:
+            if not binary:
+                raise ValueError("unbuffered streams must be binary")
+            return raw
+        if reading and writing:
+            buffer = io.BufferedRWPair(raw, raw, buffering)
+        elif reading:
+            buffer = io.BufferedReader(raw, buffering)
+        else:
+            assert writing
+            buffer = io.BufferedWriter(raw, buffering)
+        if binary:
+            return buffer
+        text = io.TextIOWrapper(buffer, encoding, errors, newline)
+        text.mode = mode
+        return text
 
     def _decref_socketios(self):
         if self._io_refs > 0:
@@ -136,42 +126,63 @@ class Response_Socket(_socket.socket):
             self.close()
 
     def sendall(self, data, *args, **kwargs):
+        """
+        Wrapper for `_socket.socket.sendall`
+        """
         if type(data) is not bytes:
             data = data.encode("utf-8")
-        self.input.write(data)
-
-        if self._capture:
+        if control.remote and not control.response:
             super().sendall(data, *args, **kwargs)
 
 
 class Response_SSLSocket(SSLSocket):
+    """
+    SSLSocket implementation of Pytest-Response
+
+    Provides a wrapper `recv_into` for capturing the response.
+    """
+
     output = io.BytesIO()
 
     def recv_into(self, buffer, nbytes=None, flags=0):
+        """
+        Wrapper for `SSLSocket.recv_into`
+
+        Provides a way to capture the response.
+        """
         _ = super().recv_into(buffer, nbytes, flags)
         self.output.write(buffer.tobytes().rstrip(b"\x00").lstrip(b"\x00"))
         return _
 
     def __del__(self):
-        if control.capture:
-            log.debug(f"Dumped {control.url}")
+        if control.capture and control.remote:
+            log.debug(f"dumped {control.url}")
             url = control.url
             control.insert(url=url, response=self.output.getvalue())
 
     pass
 
 
-class Response_HTTPResponse(http.client.HTTPResponse):
-    def __init__(self, sock, debuglevel=0, method=None, headers=None):
+class ResponseHTTPResponse(http.client.HTTPResponse):
+    """
+    Provides a way to capture or respond with a saved response.
+    """
 
+    def __init__(self, sock, debuglevel=0, method=None, headers=None):
         self.sock = sock
-        self._capture = control.capture
         self.output = io.BytesIO()
         super().__init__(sock=sock, debuglevel=debuglevel, method=method)
 
     def begin(self, *args, **kwargs):
-        log.debug(f"begin response fetching/framing capture:{self._capture}")
-        if not self._capture:
+        if not control.remote:
+            log.error(f"remote:{control.remote}")
+            raise RemoteBlockedError
+
+        log.debug(
+            f"begin response fetching/framing capture:{control.capture} response:{control.response}"
+        )
+
+        if control.response:
             self.fp = io.BytesIO()
             data, headers = control.get(url=control.url)
             if not data:
@@ -179,7 +190,7 @@ class Response_HTTPResponse(http.client.HTTPResponse):
                 self.reason = "Response Not Found (pytest-response)"
                 self.will_close = True
                 log.error(f"Response not found {control.url}")
-                return
+                raise ResponseNotFound
             # self.output.write(b"HTTP/1.0 " + status.encode("ISO-8859-1") + b"\n")
             self.output.write(data)
             self.will_close = False
@@ -192,7 +203,11 @@ class Response_HTTPResponse(http.client.HTTPResponse):
 
 
 class ResponseHTTPConnection(http.client.HTTPConnection):
-    response_class = Response_HTTPResponse
+    """
+    Wrapper for `~http.client.HTTPConnection`
+    """
+
+    response_class = ResponseHTTPResponse
 
     def request(self, method, url, body=None, headers={}, *, encode_chunked=False):
         """Send a complete request to the server."""
@@ -202,12 +217,15 @@ class ResponseHTTPConnection(http.client.HTTPConnection):
 
     def connect(self):
         """
-        Override the connect() function to intercept calls to certain
-        host/ports.
+        Override the connect() function to intercept calls.
         """
+        if not control.remote:
+            log.error(f"Attempt to connect. remote:{control.remote}")
+            print("YO!")
+            raise RemoteBlockedError
         try:
             log.debug("Intercepting call to %s:%s\n" % (self.host, self.port))
-            self.sock = Response_Socket(self.host, self.port)
+            self.sock = ResponseSocket(self.host, self.port)
         except Exception:
             raise
 
@@ -227,6 +245,10 @@ class ResponseHTTPHandler(urllib.request.HTTPHandler):
 
 
 class ResponseHTTPSConnection(http.client.HTTPSConnection, ResponseHTTPConnection):
+    """
+    Override the default `~HTTPSConnection` to use `~ResponseSocket`
+    """
+
     def request(self, method, url, body=None, headers={}, *, encode_chunked=False):
         """Send a complete request to the server."""
         control.headers = headers
@@ -234,9 +256,12 @@ class ResponseHTTPSConnection(http.client.HTTPSConnection, ResponseHTTPConnectio
         self._send_request(method, url, body, headers, encode_chunked)
 
     def connect(self):
-        log.info("Intercepting call to %s:%s\n" % (self.host, self.port))
+        if not control.remote:
+            log.error(f"Attempting to connect. remote:{control.remote}")
+            raise RemoteBlockedError
 
-        self.sock = Response_Socket(
+        log.info("Intercepting call to %s:%s\n" % (self.host, self.port))
+        self.sock = ResponseSocket(
             host=self.host,
             port=self.port,
             https=True,
@@ -246,6 +271,9 @@ class ResponseHTTPSConnection(http.client.HTTPSConnection, ResponseHTTPConnectio
         self.sock.setsockopt(_socket.IPPROTO_TCP, _socket.TCP_NODELAY, 1)
 
         if control.capture:
+            SSLContext.sslsocket_class = Response_SSLSocket
+
+        if not control.response:
             if self._tunnel_host:
                 self._tunnel()
 
@@ -253,7 +281,6 @@ class ResponseHTTPSConnection(http.client.HTTPSConnection, ResponseHTTPConnectio
                 server_hostname = self._tunnel_host
             else:
                 server_hostname = self.host
-            SSLContext.sslsocket_class = Response_SSLSocket
             self.sock = self._context.wrap_socket(
                 self.sock, server_hostname=server_hostname
             )
@@ -339,7 +366,14 @@ def uninstall_opener():
 
 class RemoteBlockedError(RuntimeError):
     def __init__(self, *args, **kwargs):
-        super(RemoteBlockedError, self).__init__("A test tried to use urllib.request")
+        super(RemoteBlockedError, self).__init__("A test tried to connect to internet.")
+
+
+class ResponseNotFound(RuntimeError):
+    def __init__(self, *args, **kwargs):
+        super(ResponseNotFound, self).__init__(
+            "Response is not available; try capturing first."
+        )
 
 
 install = install_opener

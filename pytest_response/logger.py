@@ -4,21 +4,21 @@ import logging
 class CustomFormatter(logging.Formatter):
     """Logging Formatter to add colors and count warning / errors"""
 
-    grey = "\033[38;21m"
-    yellow = "\033[33;21m"
-    red = "\033[31;21m"
+    grey = "\033[38;1m"
+    cyan = "\033[36m"
+    green = "\033[32m"
+    yellow = "\033[33m"
+    red = "\033[31m"
     bold_red = "\033[31;1m"
     reset = "\033[0m"
-    format = (
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
-    )
+    format = "%(asctime)s - %(module)s.%(funcName)s() - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
 
     FORMATS = {
-        logging.DEBUG: grey + format + reset,
-        logging.INFO: grey + format + reset,
-        logging.WARNING: yellow + format + reset,
-        logging.ERROR: red + format + reset,
-        logging.CRITICAL: bold_red + format + reset,
+        logging.DEBUG: "".join([cyan, format, reset]),
+        logging.INFO: "".join([green, format, reset]),
+        logging.WARNING: "".join([yellow, format, reset]),
+        logging.ERROR: "".join([red, format, reset]),
+        logging.CRITICAL: "".join([bold_red, format, reset]),
     }
 
     def format(self, record):
