@@ -3,6 +3,7 @@ import zlib
 from base64 import b64decode, b64encode
 from datetime import date
 from collections.abc import MutableMapping
+
 from tinydb import TinyDB, where
 
 

@@ -1,15 +1,15 @@
 import io
 import http
+import errno
 import urllib.request
+from ssl import SSLSocket, SSLContext
 from socket import SocketIO
-from ssl import SSLContext, SSLSocket
 from urllib.parse import urljoin
 
 import _socket
 
 from pytest_response import response
 from pytest_response.logger import log
-import errno
 
 EBADF = getattr(errno, "EBADF", 9)
 EAGAIN = getattr(errno, "EAGAIN", 11)
