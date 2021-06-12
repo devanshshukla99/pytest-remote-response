@@ -2,7 +2,7 @@
 pytest-response
 ===============
 
-|license| |build| |codestyle|
+|license| |build| |coverage| |codestyle|
 
 
 This package provides a plugin for ``pytest`` framework for capturing and mocking connection requests during the test run.
@@ -48,7 +48,7 @@ This plugin is licenced under a 3-clause BSD style licence - see the ``LICENCE``
 
 .. |build| image:: https://github.com/devanshshukla99/pytest-response/actions/workflows/main.yml/badge.svg
 
-.. |coverage| image:: https://codecov.io/gh/devanshshukla99/pytest-response/branch/main/graph/badge.svg?token=81U29FC82V
+.. |coverage| image:: https://codecov.io/gh/devanshshukla99/pytest-response/branch/main/graph/badge.svg?token=NQMZKNZOB2
     :target: https://codecov.io/gh/devanshshukla99/pytest-response
     :alt: Code coverage
 
