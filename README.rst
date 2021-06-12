@@ -60,7 +60,7 @@ This plugin is licenced under a 3-clause BSD style licence - see the ``LICENCE``
     :target: https://pypi.org/project/coverage/
     :alt: Python versions supported
 
-.. |license| image:: https://img.shields.io/pypi/l/pytest-response.svg
+.. |license| image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg 
     :target: https://pypi.org/project/pytest-response/
     :alt: License
 
