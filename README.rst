@@ -10,15 +10,6 @@ This package provides a plugin for ``pytest`` framework for capturing and mockin
 Installation
 ------------
 
-::
-    The ``pytest-response`` plugin can be installed by using:
-
-    .. code-block:: bash
-        
-        $ pip install pytest-response
-
-or by:
-
 .. code-block:: bash
 
     $ git clone https://github.com/devanshshukla99/pytest-response
@@ -26,6 +17,30 @@ or by:
     $ pip install .
 
 The plugin will register automatically with ``pytest`` framework and will be ready to use.
+
+Usage
+-----
+
+The plugin can be used in three different ways: 
+
+- for preventing all remote requests:
+    by default all requests are blocked; one can enable them using ``--remote`` flag.
+.. code-block:: console
+
+    $ pytest --remote
+
+- for capturing all remote requests:
+    the requests can be captured in a ``json`` database using ``--remote-capture`` flag.
+.. code-block:: console
+
+    $ pytest --remote --remote-capture
+
+- for mocking the captured connetion requests:
+    the requests can be mocked using ``--response`` flag.
+.. code-block:: console
+
+    $ pytest --response
+
 
 
 Testing
