@@ -212,6 +212,7 @@ class ResponseHTTPResponse(http.client.HTTPResponse):
             self.will_close = False
             self.fp = self.output
             self.fp.seek(0)
+            return MockResponse(data=self.fp)
 
         super().begin(*args, **kwargs)
 
@@ -310,13 +311,11 @@ class ResponseHTTPSHandler(urllib.request.HTTPSHandler):
 
 
 class MockResponse:
-    def __init__(self, data, headers):
-        self.code = 200
-        self.status = 200
-        self.msg = "OK"
-        self.reason = "OK"
-        self.headers = headers
-        self.fp = io.BytesIO(data)
+    def __init__(self, data):
+        self.status = self.code = 200
+        self.msg = self.reason = "OK"
+        self.headers = MockHeaders()
+        self.fp = data
         self.will_close = True
 
     def flush(self):
@@ -360,6 +359,32 @@ class MockResponse:
         """
         if hasattr(self, "fp"):
             self.fp.close()
+
+    pass
+
+
+class MockHeaders(MutableMapping):
+    def __init__(self, default_headers={""}, *args, **kwargs):
+        self.store = dict()
+        self.update(dict(*args, **kwargs))
+
+    def __repr__(self):
+        return str(self.store)
+
+    def __getitem__(self, key):
+        return self.store[key]
+
+    def __setitem__(self, key, value):
+        self.store[key] = value
+
+    def __delitem__(self, key):
+        del self.store[key]
+
+    def __iter__(self):
+        return iter(self.store)
+
+    def __len__(self):
+        return len(self.store)
 
     pass
 
