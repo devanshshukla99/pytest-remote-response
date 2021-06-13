@@ -5,6 +5,7 @@ import urllib.request
 from ssl import SSLSocket, SSLContext
 from socket import SocketIO
 from urllib.parse import urljoin
+from collections.abc import MutableMapping
 
 import _socket
 
