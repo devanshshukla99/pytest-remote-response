@@ -213,7 +213,6 @@ class ResponseHTTPResponse(http.client.HTTPResponse):
             self.will_close = False
             self.fp = self.output
             self.fp.seek(0)
-            return MockResponse(data=self.fp)
 
         super().begin(*args, **kwargs)
 

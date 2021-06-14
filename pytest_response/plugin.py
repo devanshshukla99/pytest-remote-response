@@ -38,7 +38,7 @@ def pytest_configure(config):
     if config.option.remote_capture and config.option.response:
         assert not config.option.remote_capture and config.option.response  # either capture or mock_remote
     response.setup_database("basedata.json")
-    response.register("urllib")
+    response.register("urllib_quick")
     response.register("urllib3")
 
     # if config.option.remote_capture:
@@ -47,20 +47,20 @@ def pytest_configure(config):
     response.response = config.option.response
     # if config.option.remote:
     response.remote = config.option.remote
+    response.applyall()
 
 
-def pytest_runtest_setup(item):
-    response.apply()
+# def pytest_runtest_setup(item):
 
 
-def pytest_runtest_teardown(item):
-    response.unapply()
+# def pytest_runtest_teardown(item):
 
 
 def pytest_unconfigure(config):
     """
     Pytest hook for cleaning up.
     """
+    response.unapplyall()
     response.unregister()
     # global mpatch
     # if config.option.mock_remote:

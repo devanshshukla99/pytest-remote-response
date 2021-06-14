@@ -29,7 +29,7 @@ class ResponseDB:
             _occurances.append(element.get(index))
         return _occurances
 
-    def insert(self, url: str, response: bytes, **kwargs):
+    def insert(self, url: str, response: bytes, headers: dict, **kwargs):
         """
         Method for dumping url, headers and responses to the database.
         All additonal kwargs are dumped as well.
@@ -37,6 +37,7 @@ class ResponseDB:
         kwargs.update({"url": url})
         kwargs.update({"cache_date": self.today})
         kwargs.update({"response": b64encode(zlib.compress(response)).decode("utf-8")})
+        kwargs.update({"headers": b64encode(zlib.compress(str(headers).encode("utf-8"))).decode("utf-8")})
         self._database.upsert(kwargs, where("url") == url)
         return
 
@@ -49,7 +50,7 @@ class ResponseDB:
         if element := self._database.search(query):
             res = element[0].get("response")
             headers = element[0].get("headers", "[]")
-            return zlib.decompress(b64decode(res.encode("utf-8"))), dict.fromkeys(ast.literal_eval(headers))
+            return zlib.decompress(b64decode(res.encode("utf-8"))), ast.literal_eval(zlib.decompress(b64decode(headers)).decode("utf-8"))
         return b"", {}
 
     def all(self):
