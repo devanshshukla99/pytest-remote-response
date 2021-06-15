@@ -20,8 +20,8 @@ def pytest_addoption(parser):
         help="Capture connections requests.",
     )
     parser.addoption(
-        "--response",
-        dest="response",
+        "--remote-response",
+        dest="remote_response",
         action="store_true",
         default=False,
         help="Mock connections requests.",
@@ -35,18 +35,19 @@ def pytest_configure(config):
     if not config.option.remote and config.option.verbose:
         print(f"Remote: {config.option.remote}")
 
-    if config.option.remote_capture and config.option.response:
-        assert not config.option.remote_capture and config.option.response  # either capture or mock_remote
+    if config.option.remote_capture and config.option.remote_response:
+        assert not config.option.remote_capture and config.option.remote_response  # either capture or mock_remote
+
     response.setup_database("basedata.json")
     response.register("urllib_quick")
     response.register("requests_quick")
 
-    # if config.option.remote_capture:
-    response.capture = config.option.remote_capture
-    # if config.option.response:
-    response.response = config.option.response
-    # if config.option.remote:
-    response.remote = config.option.remote
+    response.configure(
+        remote=config.option.remote,
+        capture=config.option.remote_capture,
+        response=config.option.remote_response,
+    )
+
     response.applyall()
 
 
@@ -62,9 +63,3 @@ def pytest_unconfigure(config):
     """
     response.unapplyall()
     response.unregister()
-    # global mpatch
-    # if config.option.mock_remote:
-    #     response_unpatch(mpatch)
-    # if not config.option.remote:
-    #     remote_unpatch(mpatch)
-    #     remote_dump(config)

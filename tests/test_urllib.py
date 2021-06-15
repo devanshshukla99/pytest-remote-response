@@ -29,5 +29,5 @@ def test_remote(testdir):
     result = testdir.runpytest("-q", "--remote", "--remote-capture", "-p", "no:warnings")
     result.assert_outcomes(passed=3)
 
-    result = testdir.runpytest("-q", "--remote", "--response", "-p", "no:warnings")
+    result = testdir.runpytest("-q", "--remote", "--remote-response", "-p", "no:warnings")
     result.assert_outcomes(passed=3)

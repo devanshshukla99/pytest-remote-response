@@ -36,9 +36,21 @@ class Response:
 
         self.config = {"url": None, "host": None, "https": None, "headers": None}
 
+        self.remote = remote
         self.capture = capture
         self.response = response
-        self.remote = remote
+
+    @property
+    def remote(self) -> bool:
+        return self._remote
+
+    @remote.setter
+    def remote(self, value: bool) -> None:
+        if type(value) is not bool:
+            raise TypeError(f"Encountered `{type(value)}` instead of bool.")
+        log.info(f"remote:{value}")
+        self._remote = value
+        return
 
     @property
     def capture(self) -> bool:
@@ -65,20 +77,14 @@ class Response:
         return
 
     @property
-    def remote(self) -> bool:
-        return self._remote
-
-    @remote.setter
-    def remote(self, value: bool) -> None:
-        if type(value) is not bool:
-            raise TypeError(f"Encountered `{type(value)}` instead of bool.")
-        log.info(f"remote:{value}")
-        self._remote = value
-        return
-
-    @property
     def available(self) -> List[str]:
         return self.available_mocks
+
+    def configure(self, remote: bool, capture: bool, response: bool) -> None:
+        self.remote = remote
+        self.capture = capture
+        self.response = response
+        return
 
     def setup_database(self, path: str) -> None:
         self._db_path = path
