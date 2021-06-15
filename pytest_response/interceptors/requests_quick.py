@@ -4,6 +4,7 @@ import requests
 import urllib3
 
 from pytest_response import response
+from pytest_response.app import BaseMockResponse
 from pytest_response.exceptions import RemoteBlockedError, ResponseNotFound
 from pytest_response.logger import log
 
@@ -30,36 +31,11 @@ def requests_wrapper(func):
     return inner_func
 
 
-class MockResponse:
+class MockResponse(BaseMockResponse):
     def __init__(self, data, headers={}):
-        self.status = self.code = self.status_code = 200
-        self.msg = self.reason = "OK"
-        self.headers = urllib3.response.HTTPHeaderDict(headers)
-        self.will_close = True
+        headers = urllib3.response.HTTPHeaderDict(headers)
         self.content = data
-        self._fp = None
-
-    def read(self, *args, **kwargs):
-        """
-        Wrapper for _io.BytesIO.read
-        """
-        return self._fp.read(*args, **kwargs)
-
-    def readline(self, *args, **kwargs):
-        """
-        Wrapper for _io.BytesIO.readline
-        """
-        return self._fp.readline(*args, **kwargs)
-
-    def readinto(self, *args, **kwargs):
-        """
-        Wrapper for _io.BytesIO.readinto
-        """
-        return self._fp.readinto(*args, **kwargs)
-
-    def close(self):
-        if hasattr(self, "_fp"):
-            self._fp.close()
+        super().__init__(data, headers)
 
     pass
 
@@ -73,7 +49,6 @@ def install_opener():
 
 def uninstall_opener():
     response.mpatch.undo()
-    # response.mpatch.setattr("urllib.request.urlopen", )
 
 
 install = install_opener
