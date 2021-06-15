@@ -59,7 +59,7 @@ class ResponseSocketIO(SocketIO):
             global CONFIG
             url = CONFIG.get("url")
             log.debug(f"dumped {url}")
-            response.insert(url=url, response=self.output.getvalue())
+            response.insert(url=url, response=self.output.getvalue(), headers={})
 
 
 class ResponseSocket(_socket.socket):
@@ -176,7 +176,7 @@ class Response_SSLSocket(SSLSocket):
             global CONFIG
             url = CONFIG.get("url")
             log.debug(f"dumped {url}")
-            response.insert(url=url, response=self.output.getvalue())
+            response.insert(url=url, response=self.output.getvalue(), headers={})
 
     pass
 
@@ -359,32 +359,6 @@ class MockResponse:
         """
         if hasattr(self, "fp"):
             self.fp.close()
-
-    pass
-
-
-class MockHeaders(MutableMapping):
-    def __init__(self, default_headers={""}, *args, **kwargs):
-        self.store = dict()
-        self.update(dict(*args, **kwargs))
-
-    def __repr__(self):
-        return str(self.store)
-
-    def __getitem__(self, key):
-        return self.store[key]
-
-    def __setitem__(self, key, value):
-        self.store[key] = value
-
-    def __delitem__(self, key):
-        del self.store[key]
-
-    def __iter__(self):
-        return iter(self.store)
-
-    def __len__(self):
-        return len(self.store)
 
     pass
 

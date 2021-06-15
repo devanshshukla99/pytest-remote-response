@@ -1,7 +1,6 @@
 import pathlib
 import importlib.util
 from typing import List
-from functools import lru_cache
 
 from pytest import MonkeyPatch
 

@@ -1,7 +1,8 @@
-import urllib3
-from urllib.parse import urljoin
 from functools import wraps
+from urllib.parse import urljoin
+
 import requests
+import urllib3
 
 from pytest_response import response
 from pytest_response.logger import log
