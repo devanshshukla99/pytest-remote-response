@@ -20,9 +20,13 @@ def urlopen_wrapper(func):
     @wraps(func)
     def inner_func(url, *args, **kwargs):
         if not response.remote:
+            log.error(f"RemoteBlockedError remote:{response.remote}")
             raise RemoteBlockedError
         if response.response:
             data, headers = response.get(url=url)
+            if not data:
+                log.error(f"Response not found url:{url}")
+                raise ResponseNotFound
             return MockResponse(data, headers)
 
         _ = func(url, *args, **kwargs)
@@ -87,7 +91,6 @@ class MockResponse:
 
 
 def install_opener():
-    log.error(":INSTALLED")
     uopen = urllib.request.urlopen
     nurlopen = urlopen_wrapper(uopen)
     response.mpatch.setattr("urllib.request.urlopen", nurlopen)

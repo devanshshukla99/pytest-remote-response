@@ -27,6 +27,7 @@ def requests_wrapper(func):
     @wraps(func)
     def inner_func(url, params=None, **kwargs):
         if not response.remote:
+            log.error(f"RemoteBlockedError remote:{response.remote}")
             raise RemoteBlockedError
         if response.response:
             data, headers = response.get(url=url)

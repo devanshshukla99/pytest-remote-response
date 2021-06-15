@@ -58,7 +58,6 @@ class ResponseSocketIO(SocketIO):
         if response.capture and response.remote:
             global CONFIG
             url = CONFIG.get("url")
-            log.debug(f"dumped {url}")
             response.insert(url=url, response=self.output.getvalue(), headers={})
 
 
@@ -88,7 +87,6 @@ class ResponseSocket(_socket.socket):
             raise RemoteBlockedError
 
         if not response.response:
-            log.debug(f"Connecting...to {self.host}:{self.port} response:{response.response}")
             super().connect((self.host, self.port), *args, **kwargs)
 
     def close(self):
@@ -175,7 +173,6 @@ class Response_SSLSocket(SSLSocket):
         if response.capture and response.remote:
             global CONFIG
             url = CONFIG.get("url")
-            log.debug(f"dumped {url}")
             response.insert(url=url, response=self.output.getvalue(), headers={})
 
     pass
@@ -195,8 +192,6 @@ class ResponseHTTPResponse(http.client.HTTPResponse):
         if not response.remote:
             log.error(f"remote:{response.remote}")
             raise RemoteBlockedError
-
-        log.debug(f"begin response fetching/framing capture:{response.capture} response:{response.response}")
 
         if response.response:
             global CONFIG
@@ -274,7 +269,7 @@ class ResponseHTTPSConnection(http.client.HTTPSConnection, ResponseHTTPConnectio
             log.error(f"Attempting to connect. remote:{response.remote}")
             raise RemoteBlockedError
 
-        log.info("Intercepting call to %s:%s\n" % (self.host, self.port))
+        log.debug("Intercepting call to %s:%s\n" % (self.host, self.port))
         self.sock = ResponseSocket(
             host=self.host,
             port=self.port,
@@ -308,59 +303,6 @@ class ResponseHTTPSHandler(urllib.request.HTTPSHandler):
 
     def https_open(self, req):
         return self.do_open(ResponseHTTPSConnection, req)
-
-
-class MockResponse:
-    def __init__(self, data):
-        self.status = self.code = 200
-        self.msg = self.reason = "OK"
-        self.headers = MockHeaders()
-        self.fp = data
-        self.will_close = True
-
-    def flush(self):
-        self.fp.flush()
-
-    def info(self):
-        return {}
-
-    def read(self, *args, **kwargs):
-        """
-        Wrapper for _io.BytesIO.read
-        """
-        return self.fp.read(*args, **kwargs)
-
-    def readline(self, *args, **kwargs):
-        """
-        Wrapper for _io.BytesIO.readline
-        """
-        return self.fp.readline(*args, **kwargs)
-
-    def readinto(self, *args, **kwargs):
-        """
-        Wrapper for _io.BytesIO.readinto
-        """
-        return self.fp.readinto(*args, **kwargs)
-
-    def __exit__(self):
-        """
-        Method for properly closing resources.
-        """
-        if hasattr(self, "fp"):
-            self.fp.close()
-
-    def close(self):
-        if hasattr(self, "fp"):
-            self.fp.close()
-
-    def __del__(self):
-        """
-        Method for properly closing resources.
-        """
-        if hasattr(self, "fp"):
-            self.fp.close()
-
-    pass
 
 
 def install_opener():
