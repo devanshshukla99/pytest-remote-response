@@ -5,8 +5,8 @@ from typing import List
 from pytest import MonkeyPatch
 
 from pytest_response.database import ResponseDB
-from pytest_response.logger import log
 from pytest_response.exceptions import InterceptorNotFound
+from pytest_response.logger import log
 
 
 class Response:

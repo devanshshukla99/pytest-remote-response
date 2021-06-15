@@ -9,9 +9,8 @@ from urllib.parse import urljoin
 import _socket
 
 from pytest_response import response
-from pytest_response.logger import log
 from pytest_response.exceptions import RemoteBlockedError, ResponseNotFound
-
+from pytest_response.logger import log
 
 EBADF = getattr(errno, "EBADF", 9)
 EAGAIN = getattr(errno, "EAGAIN", 11)

@@ -36,7 +36,9 @@ def pytest_configure(config):
         print(f"Remote: {config.option.remote}")
 
     if config.option.remote_capture and config.option.remote_response:
-        assert not config.option.remote_capture and config.option.remote_response  # either capture or mock_remote
+        assert (
+            not config.option.remote_capture and config.option.remote_response
+        )  # either capture or mock_remote
 
     response.setup_database("basedata.json")
     response.register("urllib_quick")

@@ -5,8 +5,8 @@ from urllib.parse import urljoin
 import urllib3
 
 from pytest_response import response
-from pytest_response.logger import log
 from pytest_response.exceptions import RemoteBlockedError, ResponseNotFound
+from pytest_response.logger import log
 
 
 def _build_url(scheme, host, url):
