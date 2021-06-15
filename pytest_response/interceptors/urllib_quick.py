@@ -4,16 +4,7 @@ from functools import wraps
 
 from pytest_response import response
 from pytest_response.logger import log
-
-
-class RemoteBlockedError(RuntimeError):
-    def __init__(self, *args, **kwargs):
-        super(RemoteBlockedError, self).__init__("A test tried to connect to internet.")
-
-
-class ResponseNotFound(RuntimeError):
-    def __init__(self, *args, **kwargs):
-        super(ResponseNotFound, self).__init__("Response is not available; try capturing first.")
+from pytest_response.exceptions import RemoteBlockedError, ResponseNotFound
 
 
 def urlopen_wrapper(func):
@@ -75,13 +66,6 @@ class MockResponse:
         Wrapper for _io.BytesIO.readinto
         """
         return self.fp.readinto(*args, **kwargs)
-
-    def __exit__(self):
-        """
-        Method for properly closing resources.
-        """
-        if hasattr(self, "fp"):
-            self.fp.close()
 
     def close(self):
         if hasattr(self, "fp"):

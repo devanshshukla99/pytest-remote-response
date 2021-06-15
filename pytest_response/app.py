@@ -6,6 +6,7 @@ from pytest import MonkeyPatch
 
 from pytest_response.database import ResponseDB
 from pytest_response.logger import log
+from pytest_response.exceptions import InterceptorNotFound
 
 
 class Response:
@@ -178,29 +179,5 @@ class Response:
             # If interceptor is not available raise/
             raise InterceptorNotFound(f"Requested interceptor `{mock}` is not available; check `available()`")
         return mock
-
-    pass
-
-
-class MalformedUrl(Exception):
-    """
-    Exception raised when a malformed URL is encountered.
-    """
-
-    def __init__(self, reason):
-        self.reason = reason
-        super().__init__(reason)
-
-    pass
-
-
-class InterceptorNotFound(ModuleNotFoundError):
-    """
-    Exception raised when the requested interceptor is not available.
-    """
-
-    def __init__(self, reason):
-        self.reason = reason
-        super().__init__(reason)
 
     pass

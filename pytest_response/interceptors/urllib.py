@@ -5,12 +5,13 @@ import urllib.request
 from ssl import SSLSocket, SSLContext
 from socket import SocketIO
 from urllib.parse import urljoin
-from collections.abc import MutableMapping
 
 import _socket
 
 from pytest_response import response
 from pytest_response.logger import log
+from pytest_response.exceptions import RemoteBlockedError, ResponseNotFound
+
 
 EBADF = getattr(errno, "EBADF", 9)
 EAGAIN = getattr(errno, "EAGAIN", 11)
@@ -314,16 +315,6 @@ def install_opener():
 
 def uninstall_opener():
     urllib.request.install_opener(None)
-
-
-class RemoteBlockedError(RuntimeError):
-    def __init__(self, *args, **kwargs):
-        super(RemoteBlockedError, self).__init__("A test tried to connect to internet.")
-
-
-class ResponseNotFound(RuntimeError):
-    def __init__(self, *args, **kwargs):
-        super(ResponseNotFound, self).__init__("Response is not available; try capturing first.")
 
 
 install = install_opener

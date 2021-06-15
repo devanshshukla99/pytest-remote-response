@@ -6,16 +6,7 @@ import urllib3
 
 from pytest_response import response
 from pytest_response.logger import log
-
-
-class RemoteBlockedError(RuntimeError):
-    def __init__(self, *args, **kwargs):
-        super(RemoteBlockedError, self).__init__("A test tried to connect to internet.")
-
-
-class ResponseNotFound(RuntimeError):
-    def __init__(self, *args, **kwargs):
-        super(ResponseNotFound, self).__init__("Response is not available; try capturing first.")
+from pytest_response.exceptions import RemoteBlockedError, ResponseNotFound
 
 
 def _build_url(scheme, host, url):

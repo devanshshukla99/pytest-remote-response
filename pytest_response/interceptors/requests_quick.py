@@ -1,26 +1,11 @@
 from functools import wraps
-from urllib.parse import urljoin
 
 import requests
 import urllib3
 
 from pytest_response import response
 from pytest_response.logger import log
-
-
-class RemoteBlockedError(RuntimeError):
-    def __init__(self, *args, **kwargs):
-        super(RemoteBlockedError, self).__init__("A test tried to connect to internet.")
-
-
-class ResponseNotFound(RuntimeError):
-    def __init__(self, *args, **kwargs):
-        super(ResponseNotFound, self).__init__("Response is not available; try capturing first.")
-
-
-def _build_url(scheme, host, url):
-    _scheme_host = "://".join([scheme, host])
-    return urljoin(_scheme_host, url)
+from pytest_response.exceptions import RemoteBlockedError, ResponseNotFound
 
 
 def requests_wrapper(func):

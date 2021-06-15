@@ -1,7 +1,7 @@
 import logging
 
 
-class CustomFormatter(logging.Formatter):
+class Formatter(logging.Formatter):
     """Logging Formatter to add colors and count warning / errors"""
 
     grey = "\033[38;1m"
@@ -36,8 +36,8 @@ def _init_log(level="info"):
     ch = logging.StreamHandler()
     ch.setLevel(logging.ERROR)
     # formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    fh.setFormatter(CustomFormatter())
-    ch.setFormatter(CustomFormatter())
+    fh.setFormatter(Formatter())
+    ch.setFormatter(Formatter())
     log.addHandler(fh)
     log.addHandler(ch)
     return log
