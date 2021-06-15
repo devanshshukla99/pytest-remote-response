@@ -62,6 +62,12 @@ class ResponseDB:
         """
         return self._database.all()
 
+    def truncate(self):
+        """
+        Method to purge all records in the database.
+        """
+        return self._database.truncate()
+
     def close(self):
         if hasattr(self, "_database"):
             self._database.close()

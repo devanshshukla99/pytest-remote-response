@@ -203,7 +203,7 @@ class ResponseHTTPResponse(http.client.HTTPResponse):
                 self.will_close = True
                 log.error(f"Response not found {CONFIG.get('url', '')}")
                 raise ResponseNotFound
-            # self.output.write(b"HTTP/1.0 " + status.encode("ISO-8859-1") + b"\n")
+            self.output.write(b"HTTP/1.0 " + "200".encode("ISO-8859-1") + b"\n")
             self.output.write(data)
             self.will_close = False
             self.fp = self.output

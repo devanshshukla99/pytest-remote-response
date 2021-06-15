@@ -163,6 +163,15 @@ class Response:
         log.info(f"{mock.name} registered")
         return
 
+    def registermany(self, mocks: List[str]) -> None:
+        """
+        Wrapper for `pytest_response.app.register`
+        Registers interceptor modules; applies using `pytest_response.app.applies`
+        """
+        for mock in mocks:
+            self.register(mock)
+        return
+
     def post(self, mock: str) -> None:
         """
         Registers and applies the mock under the same hood.

@@ -1,4 +1,6 @@
+import re
 from pytest_response import response
+from pytest_response.logger import log
 
 
 def pytest_addoption(parser):
@@ -8,9 +10,10 @@ def pytest_addoption(parser):
     parser.addoption(
         "--remote",
         dest="remote",
-        action="store_true",
-        default=False,
-        help="Allow outgoing connections requests.",
+        action="store",
+        type=str,
+        default=None,
+        help="Patches interceptors. (urllib|requests|urllib3)",
     )
     parser.addoption(
         "--remote-capture",
@@ -26,6 +29,14 @@ def pytest_addoption(parser):
         default=False,
         help="Mock connections requests.",
     )
+    parser.addoption(
+        "--remote-db",
+        dest="remote_db",
+        action="store",
+        type=str,
+        default="basedata.json",
+        help="Mock connections requests.",
+    )
 
 
 def pytest_configure(config):
@@ -35,21 +46,23 @@ def pytest_configure(config):
     if not config.option.remote and config.option.verbose:
         print(f"Remote: {config.option.remote}")
 
-    if config.option.remote_capture and config.option.remote_response:
-        assert (
-            not config.option.remote_capture and config.option.remote_response
-        )  # either capture or mock_remote
+    patch = config.option.remote
+    log.debug(patch)
+    if patch:
+        if config.option.remote_capture and config.option.remote_response:
+            # either remote_capture or remote_response
+            assert not config.option.remote_capture and config.option.remote_response
+        mocks = re.split("[,]|[|]", patch)
+        response.registermany(mocks)
+    else:
+        response.registermany(["urllib_quick", "requests_quick"])
 
-    response.setup_database("basedata.json")
-    response.register("urllib_quick")
-    response.register("requests_quick")
-
+    response.setup_database(config.option.remote_db)
     response.configure(
-        remote=config.option.remote,
-        capture=config.option.remote_capture,
+        remote=bool(config.option.remote),
+        capture=bool(config.option.remote_capture),
         response=config.option.remote_response,
     )
-
     response.applyall()
 
 
