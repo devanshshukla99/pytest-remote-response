@@ -20,7 +20,7 @@ def test_remote_blocked(testdir):
                                            "https://www.python.org"]
         """
     )
-    result = testdir.runpytest("-q", "-p", "no:warnings")
+    result = testdir.runpytest("-q", "--remote-blocked", "-p", "no:warnings")
     result.assert_outcomes(failed=3)
 
 

@@ -1,4 +1,5 @@
 import re
+
 from pytest_response import response
 from pytest_response.logger import log
 
@@ -37,6 +38,13 @@ def pytest_addoption(parser):
         default="basedata.json",
         help="Mock connections requests.",
     )
+    parser.addoption(
+        "--remote-blocked",
+        dest="remote_blocked",
+        action="store_false",
+        default=True,
+        help="Mock connections requests.",
+    )
 
 
 def pytest_configure(config):
@@ -44,10 +52,10 @@ def pytest_configure(config):
     Pytest hook for setting up monkeypatch, if ``--intercept-remote`` is ``True``
     """
     if not config.option.remote and config.option.verbose:
-        print(f"Remote: {config.option.remote}")
+        print(f"Remote:{config.option.remote}")
 
     patch = config.option.remote
-    log.debug(patch)
+    print(f"Patch:{patch}")
     if patch:
         if config.option.remote_capture and config.option.remote_response:
             # either remote_capture or remote_response
@@ -59,7 +67,7 @@ def pytest_configure(config):
 
     response.setup_database(config.option.remote_db)
     response.configure(
-        remote=bool(config.option.remote),
+        remote=bool(config.option.remote_blocked),
         capture=bool(config.option.remote_capture),
         response=config.option.remote_response,
     )
