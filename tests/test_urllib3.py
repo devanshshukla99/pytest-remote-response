@@ -17,7 +17,7 @@ def test_remote(testdir):
 
         def test_database():
             assert response.db.index() == ["http://www.testingmcafeesites.com/testcat_ac.html",
-                                           "https://www.python.org/"]
+                                           "https://www.python.org"]
         """
     )
     result = testdir.runpytest("-q", "-p", "no:warnings")

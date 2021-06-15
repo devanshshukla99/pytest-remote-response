@@ -39,7 +39,7 @@ def pytest_configure(config):
         assert not config.option.remote_capture and config.option.response  # either capture or mock_remote
     response.setup_database("basedata.json")
     response.register("urllib_quick")
-    response.register("urllib3")
+    response.register("requests_quick")
 
     # if config.option.remote_capture:
     response.capture = config.option.remote_capture

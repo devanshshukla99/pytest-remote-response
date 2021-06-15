@@ -1,6 +1,4 @@
 import io
-import http
-import errno
 import urllib.request
 from functools import wraps
 
@@ -32,7 +30,8 @@ def urlopen_wrapper(func):
             return _
         data = _.fp.read()
         _.fp = io.BytesIO(data)
-        response.insert(url=url, response=data)
+        headers = _.headers
+        response.insert(url=url, response=data, headers=dict(headers))
         return _
 
     return inner_func
@@ -85,32 +84,6 @@ class MockResponse:
             self.fp.close()
 
     pass
-
-
-# class MockHeaders(MutableMapping):
-#     def __init__(self, default_headers={""}, *args, **kwargs):
-#         self.store = dict()
-#         self.update(dict(*args, **kwargs))
-
-#     def __repr__(self):
-#         return str(self.store)
-
-#     def __getitem__(self, key):
-#         return self.store[key]
-
-#     def __setitem__(self, key, value):
-#         self.store[key] = value
-
-#     def __delitem__(self, key):
-#         del self.store[key]
-
-#     def __iter__(self):
-#         return iter(self.store)
-
-#     def __len__(self):
-#         return len(self.store)
-
-#     pass
 
 
 def install_opener():

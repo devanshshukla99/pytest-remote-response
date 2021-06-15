@@ -1,7 +1,7 @@
-import io
 import urllib3
 from urllib.parse import urljoin
 from functools import wraps
+import requests
 
 from pytest_response import response
 from pytest_response.logger import log
@@ -22,27 +22,22 @@ def _build_url(scheme, host, url):
     return urljoin(_scheme_host, url)
 
 
-def urlopen_wrapper(func):
+def requests_wrapper(func):
     @wraps(func)
-    def inner_func(self, method, url, *args, **kwargs):
-        _url = _build_url(self.scheme, self.host, url)
+    def inner_func(url, params=None, **kwargs):
         if not response.remote:
             raise RemoteBlockedError
         if response.response:
-            data, headers = response.get(url=_url)
+            data, headers = response.get(url=url)
             if not data:
-                log.error(f"Response not found url:{_url}")
+                log.error(f"Response not found url:{url}")
                 raise ResponseNotFound
-            print(type(headers))
-            log.error(headers)
             return MockResponse(data, headers)
-        _ = func(self, method, url, *args, **kwargs)
+        _ = func(url, params, **kwargs)
         if not response.capture:
             return _
-        print(_.headers)
-        data = _._fp.read()
-        _._fp = io.BytesIO(data)
-        response.insert(url=_url, response=data, headers=dict(_.headers))
+        data = _.content
+        response.insert(url=url, response=data, headers=dict(_.headers))
         return _
 
     return inner_func
@@ -50,20 +45,12 @@ def urlopen_wrapper(func):
 
 class MockResponse:
     def __init__(self, data, headers={}):
-        self.status = self.code = 200
+        self.status = self.code = self.status_code = 200
         self.msg = self.reason = "OK"
         self.headers = urllib3.response.HTTPHeaderDict(headers)
         self.will_close = True
-        if not isinstance(data, io.BytesIO):
-            data = io.BytesIO(data)
-        self._fp = data
-        self.will_close = True
-
-    def flush(self):
-        self._fp.flush()
-
-    def info(self):
-        return {}
+        self.content = data
+        self._fp = None
 
     def read(self, *args, **kwargs):
         """
@@ -90,37 +77,10 @@ class MockResponse:
     pass
 
 
-# class MockHeaders(MutableMapping):
-#     def __init__(self, default_headers={""}, *args, **kwargs):
-#         self.store = dict()
-#         self.update(dict(*args, **kwargs))
-
-#     def __repr__(self):
-#         return str(self.store)
-
-#     def __getitem__(self, key):
-#         return self.store[key]
-
-#     def __setitem__(self, key, value):
-#         self.store[key] = value
-
-#     def __delitem__(self, key):
-#         del self.store[key]
-
-#     def __iter__(self):
-#         return iter(self.store)
-
-#     def __len__(self):
-#         return len(self.store)
-
-#     pass
-
-
 def install_opener():
-    u3open = urllib3.connectionpool.HTTPConnectionPool.urlopen
-    nurlopen = urlopen_wrapper(u3open)
-    response.mpatch.setattr("urllib3.connectionpool.HTTPConnectionPool.urlopen", nurlopen)
-    log.error("MPATCHED")
+    u3open = requests.get
+    nurlopen = requests_wrapper(u3open)
+    response.mpatch.setattr("requests.get", nurlopen)
     return
 
 

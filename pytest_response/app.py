@@ -8,69 +8,6 @@ from pytest import MonkeyPatch
 from pytest_response.database import ResponseDB
 from pytest_response.logger import log
 
-# class Controller:
-#     """
-#     Internal controller for interceptors.
-#     """
-
-#     def __init__(
-#         self,
-#         capture: Optional[Type[bool]] = False,
-#         response: Optional[Type[bool]] = False,
-#         remote: Optional[Type[bool]] = False,
-#     ):
-#         self.capture = capture
-#         self.response = response
-#         self.remote = remote
-#         self.url = None
-#         self.host = None
-#         self.https = False
-#         self.headers = {}
-#         self.db = None
-
-#     def _setup_database(self, path: Type[str]):
-#         """
-#         Internal method for setting up the database.
-#         """
-#         self.db = database(path)
-
-#     def build_url(
-#         self, host: Type[str], url: Type[str], https: Optional[Type[bool]] = False
-#     ):
-#         """
-#         Internal controller method for building urls.
-#         """
-#         self.url = url
-#         self.host = host
-#         self.https = https
-#         _scheme = "https://" if https else "http://"
-#         _url = "".join([_scheme, host])
-#         self.url = urljoin(_url, url)
-#         if self._validate_url(_url):
-#             return self.url
-#         raise MalformedUrl(f"URL '{_url}' is invalid")
-
-#     def _validate_url(self, value: Type[str]):
-#         """
-#         Internal method for validating a URL.
-#         """
-#         result = urlparse(value)
-#         return all([result.scheme, result.netloc])
-
-#     def insert(self, *args, **kwargs):
-#         """
-#         Wrapper function for `pytest_response.database.db.insert`
-#         """
-#         return self.db.insert(*args, **kwargs)
-
-#     def get(self, *args, **kwargs):
-#         """
-#         Wrapper function for `pytest_response.database.db.get`
-#         """
-#         return self.db.get(*args, **kwargs)
-
-#     pass
-
 
 class Response:
     """
@@ -221,11 +158,11 @@ class Response:
             mock_lib.uninstall()
         log.debug("interceptors unapplied")
 
-    def insert(self, url, response, *args, **kwargs):
+    def insert(self, url, response, headers, *args, **kwargs):
         """
         Wrapper function for `pytest_response.database.db.insert`
         """
-        return self.db.insert(url, response, *args, **kwargs)
+        return self.db.insert(url, response, headers, *args, **kwargs)
 
     def get(self, url, *args, **kwargs):
         """
