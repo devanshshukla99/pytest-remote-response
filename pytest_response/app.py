@@ -12,7 +12,7 @@ from pytest_response.logger import log
 
 class BaseMockResponse:
     def __init__(self, data: bytes, headers: dict = {}) -> None:
-        self.status = self.code = 200
+        self.status = self.status_code = self.code = 200
         self.msg = self.reason = "OK"
         self.headers = headers
         self.will_close = True
@@ -123,7 +123,7 @@ class Response:
 
     @property
     def available(self) -> List[str]:
-        return self.available_mocks
+        return self._available_mocks
 
     def configure(self, remote: bool, capture: bool, response: bool) -> None:
         self.remote = remote
@@ -177,13 +177,10 @@ class Response:
         """
         Deactivates interceptor modules.
         """
-        try:
-            for lib in self._registered_mocks.values():
-                lib.uninstall()
-                log.debug(f"{lib.__name__} unregistered")
-            self._registered_mocks = {}
-        except Exception:
-            raise
+        for lib in self._registered_mocks.values():
+            lib.uninstall()
+            log.debug(f"{lib.__name__} unregistered")
+        self._registered_mocks = {}
 
     def apply(self, mock) -> None:
         """

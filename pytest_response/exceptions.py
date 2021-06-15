@@ -21,7 +21,7 @@ class MalformedUrl(Exception):
     Exception raised when a malformed URL is encountered.
     """
 
-    def __init__(self, reason):
+    def __init__(self, reason="Malformed URL encountered"):
         super().__init__(reason)
 
     pass
@@ -32,7 +32,7 @@ class InterceptorNotFound(ModuleNotFoundError):
     Exception raised when the requested interceptor is not available.
     """
 
-    def __init__(self, reason):
+    def __init__(self, reason="Interceptor not available; check `Response.available`"):
         super().__init__(reason)
 
     pass
