@@ -1,3 +1,4 @@
+import io
 import pathlib
 import importlib.util
 from typing import List
@@ -7,6 +8,50 @@ from pytest import MonkeyPatch
 from pytest_response.database import ResponseDB
 from pytest_response.exceptions import InterceptorNotFound
 from pytest_response.logger import log
+
+
+class BaseMockResponse:
+    def __init__(self, data: bytes, headers: dict = {}) -> None:
+        self.status = self.code = 200
+        self.msg = self.reason = "OK"
+        self.headers = headers
+        self.will_close = True
+        if not isinstance(data, io.BytesIO):
+            data = io.BytesIO(data)
+        self.fp = data
+
+    def getcode(self) -> int:
+        return self.code
+
+    def flush(self):
+        self.fp.flush()
+
+    def info(self) -> dict:
+        return self.headers
+
+    def read(self, *args, **kwargs) -> bytes:
+        """
+        Wrapper for _io.BytesIO.read
+        """
+        return self.fp.read(*args, **kwargs)
+
+    def readline(self, *args, **kwargs) -> bytes:
+        """
+        Wrapper for _io.BytesIO.readline
+        """
+        return self.fp.readline(*args, **kwargs)
+
+    def readinto(self, *args, **kwargs) -> bytes:
+        """
+        Wrapper for _io.BytesIO.readinto
+        """
+        return self.fp.readinto(*args, **kwargs)
+
+    def close(self) -> None:
+        if hasattr(self, "fp"):
+            self.fp.close()
+
+    pass
 
 
 class Response:

@@ -5,6 +5,7 @@ from urllib.parse import urljoin
 import urllib3
 
 from pytest_response import response
+from pytest_response.app import BaseMockResponse
 from pytest_response.exceptions import RemoteBlockedError, ResponseNotFound
 from pytest_response.logger import log
 
@@ -40,72 +41,10 @@ def urlopen_wrapper(func):
     return inner_func
 
 
-class MockResponse:
+class MockResponse(BaseMockResponse):
     def __init__(self, data, headers={}):
-        self.status = self.code = 200
-        self.msg = self.reason = "OK"
-        self.headers = urllib3.response.HTTPHeaderDict(headers)
-        self.will_close = True
-        if not isinstance(data, io.BytesIO):
-            data = io.BytesIO(data)
-        self._fp = data
-        self.will_close = True
-
-    def flush(self):
-        self._fp.flush()
-
-    def info(self):
-        return {}
-
-    def read(self, *args, **kwargs):
-        """
-        Wrapper for _io.BytesIO.read
-        """
-        return self._fp.read(*args, **kwargs)
-
-    def readline(self, *args, **kwargs):
-        """
-        Wrapper for _io.BytesIO.readline
-        """
-        return self._fp.readline(*args, **kwargs)
-
-    def readinto(self, *args, **kwargs):
-        """
-        Wrapper for _io.BytesIO.readinto
-        """
-        return self._fp.readinto(*args, **kwargs)
-
-    def close(self):
-        if hasattr(self, "_fp"):
-            self._fp.close()
-
-    pass
-
-
-# class MockHeaders(MutableMapping):
-#     def __init__(self, default_headers={""}, *args, **kwargs):
-#         self.store = dict()
-#         self.update(dict(*args, **kwargs))
-
-#     def __repr__(self):
-#         return str(self.store)
-
-#     def __getitem__(self, key):
-#         return self.store[key]
-
-#     def __setitem__(self, key, value):
-#         self.store[key] = value
-
-#     def __delitem__(self, key):
-#         del self.store[key]
-
-#     def __iter__(self):
-#         return iter(self.store)
-
-#     def __len__(self):
-#         return len(self.store)
-
-#     pass
+        headers = urllib3.response.HTTPHeaderDict(headers)
+        super().__init__(data, headers)
 
 
 def install_opener():
@@ -118,7 +57,7 @@ def install_opener():
 
 def uninstall_opener():
     response.mpatch.undo()
-    # response.mpatch.setattr("urllib.request.urlopen", )
+    return
 
 
 install = install_opener
