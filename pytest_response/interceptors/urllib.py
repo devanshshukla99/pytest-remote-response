@@ -9,6 +9,7 @@ from urllib.parse import urljoin
 import _socket
 
 from pytest_response import response
+from pytest_response.exceptions import RemoteBlockedError, ResponseNotFound
 from pytest_response.logger import log
 
 EBADF = getattr(errno, "EBADF", 9)
@@ -57,8 +58,7 @@ class ResponseSocketIO(SocketIO):
         if response.capture and response.remote:
             global CONFIG
             url = CONFIG.get("url")
-            log.debug(f"dumped {url}")
-            response.insert(url=url, response=self.output.getvalue())
+            response.insert(url=url, response=self.output.getvalue(), headers={})
 
 
 class ResponseSocket(_socket.socket):
@@ -87,7 +87,6 @@ class ResponseSocket(_socket.socket):
             raise RemoteBlockedError
 
         if not response.response:
-            log.debug(f"Connecting...to {self.host}:{self.port} response:{response.response}")
             super().connect((self.host, self.port), *args, **kwargs)
 
     def close(self):
@@ -174,8 +173,7 @@ class Response_SSLSocket(SSLSocket):
         if response.capture and response.remote:
             global CONFIG
             url = CONFIG.get("url")
-            log.debug(f"dumped {url}")
-            response.insert(url=url, response=self.output.getvalue())
+            response.insert(url=url, response=self.output.getvalue(), headers={})
 
     pass
 
@@ -195,8 +193,6 @@ class ResponseHTTPResponse(http.client.HTTPResponse):
             log.error(f"remote:{response.remote}")
             raise RemoteBlockedError
 
-        log.debug(f"begin response fetching/framing capture:{response.capture} response:{response.response}")
-
         if response.response:
             global CONFIG
             self.fp = io.BytesIO()
@@ -207,7 +203,7 @@ class ResponseHTTPResponse(http.client.HTTPResponse):
                 self.will_close = True
                 log.error(f"Response not found {CONFIG.get('url', '')}")
                 raise ResponseNotFound
-            # self.output.write(b"HTTP/1.0 " + status.encode("ISO-8859-1") + b"\n")
+            self.output.write(b"HTTP/1.0 " + "200".encode("ISO-8859-1") + b"\n")
             self.output.write(data)
             self.will_close = False
             self.fp = self.output
@@ -273,7 +269,7 @@ class ResponseHTTPSConnection(http.client.HTTPSConnection, ResponseHTTPConnectio
             log.error(f"Attempting to connect. remote:{response.remote}")
             raise RemoteBlockedError
 
-        log.info("Intercepting call to %s:%s\n" % (self.host, self.port))
+        log.debug("Intercepting call to %s:%s\n" % (self.host, self.port))
         self.sock = ResponseSocket(
             host=self.host,
             port=self.port,
@@ -309,61 +305,6 @@ class ResponseHTTPSHandler(urllib.request.HTTPSHandler):
         return self.do_open(ResponseHTTPSConnection, req)
 
 
-class MockResponse:
-    def __init__(self, data, headers):
-        self.code = 200
-        self.status = 200
-        self.msg = "OK"
-        self.reason = "OK"
-        self.headers = headers
-        self.fp = io.BytesIO(data)
-        self.will_close = True
-
-    def flush(self):
-        self.fp.flush()
-
-    def info(self):
-        return {}
-
-    def read(self, *args, **kwargs):
-        """
-        Wrapper for _io.BytesIO.read
-        """
-        return self.fp.read(*args, **kwargs)
-
-    def readline(self, *args, **kwargs):
-        """
-        Wrapper for _io.BytesIO.readline
-        """
-        return self.fp.readline(*args, **kwargs)
-
-    def readinto(self, *args, **kwargs):
-        """
-        Wrapper for _io.BytesIO.readinto
-        """
-        return self.fp.readinto(*args, **kwargs)
-
-    def __exit__(self):
-        """
-        Method for properly closing resources.
-        """
-        if hasattr(self, "fp"):
-            self.fp.close()
-
-    def close(self):
-        if hasattr(self, "fp"):
-            self.fp.close()
-
-    def __del__(self):
-        """
-        Method for properly closing resources.
-        """
-        if hasattr(self, "fp"):
-            self.fp.close()
-
-    pass
-
-
 def install_opener():
     handlers = [ResponseHTTPHandler(), ResponseHTTPSHandler()]
     opener = urllib.request.build_opener(*handlers)
@@ -373,16 +314,6 @@ def install_opener():
 
 def uninstall_opener():
     urllib.request.install_opener(None)
-
-
-class RemoteBlockedError(RuntimeError):
-    def __init__(self, *args, **kwargs):
-        super(RemoteBlockedError, self).__init__("A test tried to connect to internet.")
-
-
-class ResponseNotFound(RuntimeError):
-    def __init__(self, *args, **kwargs):
-        super(ResponseNotFound, self).__init__("Response is not available; try capturing first.")
 
 
 install = install_opener

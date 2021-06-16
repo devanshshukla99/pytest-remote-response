@@ -2,9 +2,10 @@ import ast
 import zlib
 from base64 import b64decode, b64encode
 from datetime import date
-from collections.abc import MutableMapping
 
 from tinydb import TinyDB, where
+
+# from collections.abc import MutableMapping
 
 
 class ResponseDB:
@@ -29,7 +30,7 @@ class ResponseDB:
             _occurances.append(element.get(index))
         return _occurances
 
-    def insert(self, url: str, response: bytes, **kwargs):
+    def insert(self, url: str, response: bytes, headers: dict, **kwargs):
         """
         Method for dumping url, headers and responses to the database.
         All additonal kwargs are dumped as well.
@@ -37,6 +38,7 @@ class ResponseDB:
         kwargs.update({"url": url})
         kwargs.update({"cache_date": self.today})
         kwargs.update({"response": b64encode(zlib.compress(response)).decode("utf-8")})
+        kwargs.update({"headers": b64encode(zlib.compress(str(headers).encode("utf-8"))).decode("utf-8")})
         self._database.upsert(kwargs, where("url") == url)
         return
 
@@ -49,7 +51,9 @@ class ResponseDB:
         if element := self._database.search(query):
             res = element[0].get("response")
             headers = element[0].get("headers", "[]")
-            return zlib.decompress(b64decode(res.encode("utf-8"))), dict.fromkeys(ast.literal_eval(headers))
+            return zlib.decompress(b64decode(res.encode("utf-8"))), ast.literal_eval(
+                zlib.decompress(b64decode(headers)).decode("utf-8")
+            )
         return b"", {}
 
     def all(self):
@@ -57,6 +61,12 @@ class ResponseDB:
         Method to return all records in the database.
         """
         return self._database.all()
+
+    def truncate(self):
+        """
+        Method to purge all records in the database.
+        """
+        return self._database.truncate()
 
     def close(self):
         if hasattr(self, "_database"):
@@ -70,27 +80,27 @@ class ResponseDB:
     pass
 
 
-class MockHeaders(MutableMapping):
-    def __init__(self, default_headers={""}, *args, **kwargs):
-        self.store = dict()
-        self.update(dict(*args, **kwargs))
+# class MockHeaders(MutableMapping):
+#     def __init__(self, default_headers={""}, *args, **kwargs):
+#         self.store = dict()
+#         self.update(dict(*args, **kwargs))
 
-    def __repr__(self):
-        return str(self.store)
+#     def __repr__(self):
+#         return str(self.store)
 
-    def __getitem__(self, key):
-        return self.store[key]
+#     def __getitem__(self, key):
+#         return self.store[key]
 
-    def __setitem__(self, key, value):
-        self.store[key] = value
+#     def __setitem__(self, key, value):
+#         self.store[key] = value
 
-    def __delitem__(self, key):
-        del self.store[key]
+#     def __delitem__(self, key):
+#         del self.store[key]
 
-    def __iter__(self):
-        return iter(self.store)
+#     def __iter__(self):
+#         return iter(self.store)
 
-    def __len__(self):
-        return len(self.store)
+#     def __len__(self):
+#         return len(self.store)
 
-    pass
+#     pass

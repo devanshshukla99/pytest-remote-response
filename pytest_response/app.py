@@ -1,72 +1,57 @@
+import io
 import pathlib
 import importlib.util
 from typing import List
 
+from pytest import MonkeyPatch
+
 from pytest_response.database import ResponseDB
+from pytest_response.exceptions import InterceptorNotFound
 from pytest_response.logger import log
 
-# class Controller:
-#     """
-#     Internal controller for interceptors.
-#     """
 
-#     def __init__(
-#         self,
-#         capture: Optional[Type[bool]] = False,
-#         response: Optional[Type[bool]] = False,
-#         remote: Optional[Type[bool]] = False,
-#     ):
-#         self.capture = capture
-#         self.response = response
-#         self.remote = remote
-#         self.url = None
-#         self.host = None
-#         self.https = False
-#         self.headers = {}
-#         self.db = None
+class BaseMockResponse:
+    def __init__(self, data: bytes, headers: dict = {}) -> None:
+        self.status = self.status_code = self.code = 200
+        self.msg = self.reason = "OK"
+        self.headers = headers
+        self.will_close = True
+        if not isinstance(data, io.BytesIO):
+            data = io.BytesIO(data)
+        self.fp = data
 
-#     def _setup_database(self, path: Type[str]):
-#         """
-#         Internal method for setting up the database.
-#         """
-#         self.db = database(path)
+    def getcode(self) -> int:
+        return self.code
 
-#     def build_url(
-#         self, host: Type[str], url: Type[str], https: Optional[Type[bool]] = False
-#     ):
-#         """
-#         Internal controller method for building urls.
-#         """
-#         self.url = url
-#         self.host = host
-#         self.https = https
-#         _scheme = "https://" if https else "http://"
-#         _url = "".join([_scheme, host])
-#         self.url = urljoin(_url, url)
-#         if self._validate_url(_url):
-#             return self.url
-#         raise MalformedUrl(f"URL '{_url}' is invalid")
+    def flush(self):
+        self.fp.flush()
 
-#     def _validate_url(self, value: Type[str]):
-#         """
-#         Internal method for validating a URL.
-#         """
-#         result = urlparse(value)
-#         return all([result.scheme, result.netloc])
+    def info(self) -> dict:
+        return self.headers
 
-#     def insert(self, *args, **kwargs):
-#         """
-#         Wrapper function for `pytest_response.database.db.insert`
-#         """
-#         return self.db.insert(*args, **kwargs)
+    def read(self, *args, **kwargs) -> bytes:
+        """
+        Wrapper for _io.BytesIO.read
+        """
+        return self.fp.read(*args, **kwargs)
 
-#     def get(self, *args, **kwargs):
-#         """
-#         Wrapper function for `pytest_response.database.db.get`
-#         """
-#         return self.db.get(*args, **kwargs)
+    def readline(self, *args, **kwargs) -> bytes:
+        """
+        Wrapper for _io.BytesIO.readline
+        """
+        return self.fp.readline(*args, **kwargs)
 
-#     pass
+    def readinto(self, *args, **kwargs) -> bytes:
+        """
+        Wrapper for _io.BytesIO.readinto
+        """
+        return self.fp.readinto(*args, **kwargs)
+
+    def close(self) -> None:
+        if hasattr(self, "fp"):
+            self.fp.close()
+
+    pass
 
 
 class Response:
@@ -88,15 +73,29 @@ class Response:
         log.info("<------------------------------------------------------------------->")
         self._basepath = pathlib.Path(__file__).parent
         self._db_path = self._basepath.joinpath(database)
+        self.db = None
         self._path_to_mocks = self._basepath.joinpath(path)
         self._available_mocks = list(self._get_available_mocks())
-        self._registered_mocks = []
+        self._registered_mocks = {}
+        self.mpatch = MonkeyPatch()
 
         self.config = {"url": None, "host": None, "https": None, "headers": None}
 
+        self.remote = remote
         self.capture = capture
         self.response = response
-        self.remote = remote
+
+    @property
+    def remote(self) -> bool:
+        return self._remote
+
+    @remote.setter
+    def remote(self, value: bool) -> None:
+        if type(value) is not bool:
+            raise TypeError(f"Encountered `{type(value)}` instead of bool.")
+        log.info(f"remote:{value}")
+        self._remote = value
+        return
 
     @property
     def capture(self) -> bool:
@@ -123,20 +122,14 @@ class Response:
         return
 
     @property
-    def remote(self) -> bool:
-        return self._remote
-
-    @remote.setter
-    def remote(self, value: bool) -> None:
-        if type(value) is not bool:
-            raise TypeError(f"Encountered `{type(value)}` instead of bool.")
-        log.info(f"remote:{value}")
-        self._remote = value
-        return
-
-    @property
     def available(self) -> List[str]:
-        return self.available_mocks
+        return self._available_mocks
+
+    def configure(self, remote: bool, capture: bool, response: bool) -> None:
+        self.remote = remote
+        self.capture = capture
+        self.response = response
+        return
 
     def setup_database(self, path: str) -> None:
         self._db_path = path
@@ -159,81 +152,89 @@ class Response:
         """
         Registers interceptor modules; applies using `pytest_response.app.applies`
         """
-        mock = self._path_to_mocks.joinpath(mock)
-        if not mock.suffix:
-            mock = mock.with_suffix(".py")
-        if mock not in self._get_available_mocks():
-            raise InterceptorNotFound(f"Requested interceptor `{mock}` is not available; check `available()`")
+        mock = self._sanatize_interceptor(mock)
+        # Load interceptor
         spec = importlib.util.spec_from_file_location(mock.name, str(mock))
         mock_lib = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mock_lib)
-        self._registered_mocks.append(mock_lib)
+
+        # Register for future use.
+        self._registered_mocks[mock.stem] = mock_lib
         log.info(f"{mock.name} registered")
+        return
+
+    def registermany(self, mocks: List[str]) -> None:
+        """
+        Wrapper for `pytest_response.app.register`
+        Registers interceptor modules; applies using `pytest_response.app.applies`
+        """
+        for mock in mocks:
+            self.register(mock)
+        return
+
+    def post(self, mock: str) -> None:
+        """
+        Registers and applies the mock under the same hood.
+
+        Internally uses ``Response.register`` followed by ``Response.apply``
+        """
+        self.register(mock)
+        self.apply(mock)
         return
 
     def unregister(self) -> None:
         """
         Deactivates interceptor modules.
         """
-        try:
-            for lib in self._registered_mocks:
-                lib.uninstall()
-                log.debug(f"{lib.__name__} unregistered")
-            self._registered_mocks = []
-        except Exception:
-            raise
+        for lib in self._registered_mocks.values():
+            lib.uninstall()
+            log.debug(f"{lib.__name__} unregistered")
+        self._registered_mocks = {}
 
-    def apply(self) -> bool:
+    def apply(self, mock) -> None:
         """
         Activates intercepter modules.
         """
-        for mock_lib in self._registered_mocks:
+        if mock_lib := self._registered_mocks.get(mock):
             mock_lib.install()
-        log.debug("interceptors applied")
         return
 
-    def unapply(self) -> None:
+    def unapply(self, *args, **kwargs) -> None:
+        return self.unapplyall(*args, **kwargs)
+
+    def applyall(self) -> None:
+        for mock_lib in self._registered_mocks.values():
+            mock_lib.install()
+        return
+
+    def unapplyall(self) -> None:
         """
         Un-applies interceptor modules.
         """
-        for mock_lib in self._registered_mocks:
+        for mock_lib in self._registered_mocks.values():
             mock_lib.uninstall()
         log.debug("interceptors unapplied")
 
-    def insert(self, *args, **kwargs):
+    def insert(self, url, response, headers, *args, **kwargs):
         """
         Wrapper function for `pytest_response.database.db.insert`
         """
-        return self.db.insert(*args, **kwargs)
+        return self.db.insert(url, response, headers, *args, **kwargs)
 
-    def get(self, *args, **kwargs):
+    def get(self, url, *args, **kwargs):
         """
         Wrapper function for `pytest_response.database.db.get`
         """
-        return self.db.get(*args, **kwargs)
+        return self.db.get(url, *args, **kwargs)
 
-    pass
-
-
-class MalformedUrl(Exception):
-    """
-    Exception raised when a malformed URL is encountered.
-    """
-
-    def __init__(self, reason):
-        self.reason = reason
-        super().__init__(reason)
-
-    pass
-
-
-class InterceptorNotFound(ModuleNotFoundError):
-    """
-    Exception raised when the requested interceptor is not available.
-    """
-
-    def __init__(self, reason):
-        self.reason = reason
-        super().__init__(reason)
+    def _sanatize_interceptor(self, mock: str) -> pathlib.Path:
+        mock = self._path_to_mocks.joinpath(mock)
+        if not mock.suffix:
+            # If supplied mock-name is missing .py, add it.
+            mock = mock.with_suffix(".py")
+        if mock not in self._get_available_mocks():
+            # If interceptor is not available raise/
+            raise InterceptorNotFound(f"Requested interceptor `{mock}` is not available; check `available()`")
+        return mock
 
     pass
