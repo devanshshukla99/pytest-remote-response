@@ -14,7 +14,7 @@ def pytest_addoption(parser):
         action="store",
         type=str,
         default=None,
-        help="Patches interceptors. (urllib|requests|urllib3)",
+        help="Patches interceptors. --remote=[urllib|urllib3|urllib_quick|urllib3_quick|requests_quick]",
     )
     parser.addoption(
         "--remote-capture",
@@ -28,7 +28,7 @@ def pytest_addoption(parser):
         dest="remote_response",
         action="store_true",
         default=False,
-        help="Mock connections requests.",
+        help="Mocks connection requests.",
     )
     parser.addoption(
         "--remote-db",
@@ -36,14 +36,14 @@ def pytest_addoption(parser):
         action="store",
         type=str,
         default="basedata.json",
-        help="Mock connections requests.",
+        help="Dumps the captured data to this file. --remote-db=[DUMPFILE]",
     )
     parser.addoption(
         "--remote-blocked",
         dest="remote_blocked",
         action="store_false",
         default=True,
-        help="Mock connections requests.",
+        help="Blocks remote connection requests for all interceptors.",
     )
 
 
