@@ -16,6 +16,18 @@ def test_response_obj():
     assert res.registermany(["urllib_quick", "requests_quick"]) is None
     assert list(res.registered().keys()) == ["urllib", "urllib_quick", "requests_quick"]
 
+    res.remote = True
+    assert res.remote is True
+
+    res.capture = True
+    assert res.capture is True
+
+    res.response = True
+    assert res.response is True
+
+    res.configure(remote=False, capture=False, response=False)
+    assert not all([res.capture, res.remote, res.response])
+
     with pytest.raises(InterceptorNotFound):
         res.register("invalid_interceptor")
 

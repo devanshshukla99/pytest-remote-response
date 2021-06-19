@@ -81,9 +81,7 @@ class Response:
 
         self.config = {"url": None, "host": None, "https": None, "headers": None}
 
-        self.remote = remote
-        self.capture = capture
-        self.response = response
+        self.configure(remote=remote, capture=capture, response=response)
 
     @property
     def remote(self) -> bool:
@@ -126,9 +124,10 @@ class Response:
         return self._available_mocks
 
     def configure(self, remote: bool, capture: bool, response: bool) -> None:
-        self.remote = remote
-        self.capture = capture
-        self.response = response
+        self._remote = remote
+        self._capture = capture
+        self._response = response
+        log.info(f"Remote:{remote}, Capture:{capture}, Response:{response}")
         return
 
     def setup_database(self, path: str) -> None:
