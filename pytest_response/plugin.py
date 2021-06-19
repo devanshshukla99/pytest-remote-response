@@ -1,7 +1,6 @@
 import re
 
 from pytest_response import response
-from pytest_response.logger import log
 
 
 def pytest_addoption(parser):
