@@ -123,7 +123,7 @@ class Response:
     def available(self) -> List[str]:
         return self._available_mocks
 
-    def configure(self, remote: bool, capture: bool, response: bool) -> None:
+    def configure(self, remote: bool = False, capture: bool = False, response: bool = False) -> None:
         self._remote = remote
         self._capture = capture
         self._response = response
