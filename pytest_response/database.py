@@ -2,9 +2,11 @@ import ast
 import zlib
 from base64 import b64decode, b64encode
 from datetime import date
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urljoin, urlparse
 
 from tinydb import TinyDB, where
+
+from pytest_response.exceptions import MalformedUrl
 
 # from collections.abc import MutableMapping
 
@@ -37,9 +39,12 @@ class ResponseDB:
         Expecting:
             from `http://www.python.org:80` -> `http://www.python.org`
         """
-        _urlparsed = urlparse(url)
-        _url = "://".join([_urlparsed.scheme, _urlparsed.hostname])
-        return urljoin(_url, _urlparsed.path)
+        try:
+            _urlparsed = urlparse(url)
+            _url = "://".join([_urlparsed.scheme, _urlparsed.hostname])
+            return urljoin(_url, _urlparsed.path)
+        except Exception:
+            raise MalformedUrl
 
     def insert(self, url: str, response: bytes, headers: dict, status: str = "200", **kwargs):
         """
@@ -64,10 +69,12 @@ class ResponseDB:
             res = element[0].get("response")
             headers = element[0].get("headers", "[]")
             status = element[0].get("status", "200")
-            return zlib.decompress(b64decode(res.encode("utf-8"))), ast.literal_eval(
-                zlib.decompress(b64decode(headers)).decode("utf-8")
-            ), str(status)
-        return b"", {}
+            return (
+                str(status),
+                zlib.decompress(b64decode(res.encode("utf-8"))),
+                ast.literal_eval(zlib.decompress(b64decode(headers)).decode("utf-8")),
+            )
+        return "404", b"", {}
 
     def all(self):
         """

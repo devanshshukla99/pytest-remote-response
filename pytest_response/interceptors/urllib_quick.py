@@ -15,7 +15,7 @@ def urlopen_wrapper(func):
             log.error(f"RemoteBlockedError remote:{response.remote}")
             raise RemoteBlockedError
         if response.response:
-            data, headers = response.get(url=url)
+            status, data, headers = response.get(url=url)
             if not data:
                 log.error(f"Response not found url:{url}")
                 raise ResponseNotFound
