@@ -2,6 +2,7 @@ import ast
 import zlib
 from base64 import b64decode, b64encode
 from datetime import date
+from urllib.parse import urlparse, urljoin
 
 from tinydb import TinyDB, where
 
@@ -30,12 +31,22 @@ class ResponseDB:
             _occurances.append(element.get(index))
         return _occurances
 
+    def _sanatize_url(self, url: str):
+        """
+        Method intended to sanatize urls to a common form:
+        Expecting:
+            from 'http://www.python.org:80' -> 'http://www.python.org'
+        """
+        _urlparsed = urlparse(url)
+        _url = '://'.join([_urlparsed.scheme, _urlparsed.hostname])
+        return urljoin(_url, _urlparsed.path)
+
     def insert(self, url: str, response: bytes, headers: dict, **kwargs):
         """
         Method for dumping url, headers and responses to the database.
         All additonal kwargs are dumped as well.
         """
-        kwargs.update({"url": url})
+        kwargs.update({"url": self._sanatize_url(url)})
         kwargs.update({"cache_date": self.today})
         kwargs.update({"response": b64encode(zlib.compress(response)).decode("utf-8")})
         kwargs.update({"headers": b64encode(zlib.compress(str(headers).encode("utf-8"))).decode("utf-8")})
@@ -47,7 +58,7 @@ class ResponseDB:
         Method for getting response and header for a perticular query `url`.
         Currently working by locating `url` only; multi-query to be implemented later.
         """
-        query = where("url") == url  # and where("request") == "req"
+        query = where("url") == self._sanatize_url(url)  # and where("request") == "req"
         if element := self._database.search(query):
             res = element[0].get("response")
             headers = element[0].get("headers", "[]")
