@@ -41,7 +41,7 @@ class ResponseDB:
         _url = "://".join([_urlparsed.scheme, _urlparsed.hostname])
         return urljoin(_url, _urlparsed.path)
 
-    def insert(self, url: str, response: bytes, headers: dict, **kwargs):
+    def insert(self, url: str, response: bytes, headers: dict, status: str = "200", **kwargs):
         """
         Method for dumping url, headers and responses to the database.
         All additonal kwargs are dumped as well.
@@ -50,6 +50,7 @@ class ResponseDB:
         kwargs.update({"cache_date": self.today})
         kwargs.update({"response": b64encode(zlib.compress(response)).decode("utf-8")})
         kwargs.update({"headers": b64encode(zlib.compress(str(headers).encode("utf-8"))).decode("utf-8")})
+        kwargs.update({"status": str(status)})
         self._database.upsert(kwargs, where("url") == url)
         return
 
@@ -62,9 +63,10 @@ class ResponseDB:
         if element := self._database.search(query):
             res = element[0].get("response")
             headers = element[0].get("headers", "[]")
+            status = element[0].get("status", "200")
             return zlib.decompress(b64decode(res.encode("utf-8"))), ast.literal_eval(
                 zlib.decompress(b64decode(headers)).decode("utf-8")
-            )
+            ), str(status)
         return b"", {}
 
     def all(self):
