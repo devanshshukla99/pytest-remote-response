@@ -35,10 +35,10 @@ class ResponseDB:
         """
         Method intended to sanatize urls to a common form:
         Expecting:
-            from 'http://www.python.org:80' -> 'http://www.python.org'
+            from `http://www.python.org:80` -> `http://www.python.org`
         """
         _urlparsed = urlparse(url)
-        _url = '://'.join([_urlparsed.scheme, _urlparsed.hostname])
+        _url = "://".join([_urlparsed.scheme, _urlparsed.hostname])
         return urljoin(_url, _urlparsed.path)
 
     def insert(self, url: str, response: bytes, headers: dict, **kwargs):
