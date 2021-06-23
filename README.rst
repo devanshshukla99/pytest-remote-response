@@ -21,26 +21,51 @@ The plugin will register automatically with ``pytest`` framework and will be rea
 Usage
 -----
 
-The plugin can be used in three different ways: 
+Pytest plugin
+*************
 
-- for preventing all remote requests:
-    by default all requests are blocked; one can enable them using ``--remote`` flag.
+The plugin works by using interceptors of different libraries which can be checked by `response.available()` method; these interceptors have to be applied for each pytest run using ``--remote={INTERCEPTOR}``.
+
+.. code-block:: console
+    $ pytest --remote="urllib_quick|requests_quick|aiohttp_quick"
+
+Handling requests:
+
+- Prevent remote requests:
+    all requests are allowed by default; one can disable them using `--remote-blocked` flag.
+
 .. code-block:: console
 
-    $ pytest --remote
+    $ pytest --remote-blocked
 
-- for capturing all remote requests:
-    the requests can be captured in a ``json`` database using ``--remote-capture`` flag.
+- Capture remote requests:
+    the requests can be captured in a ``json`` file using ``--remote-capture`` arg.
+
 .. code-block:: console
+    $ pytest --remote={INTERCEPTORS} --remote-capture
 
-    $ pytest --remote --remote-capture
+- Mock remote requests:
+    the requests can be mocked using ``--remote-response`` flag.
+    NOTE: Due to certain limitations, it is advised to not use this plugin in an offline environment,
 
-- for mocking the captured connetion requests:
-    the requests can be mocked using ``--response`` flag.
 .. code-block:: console
+    $ pytest --remote={INTERCEPTORS} --remote-response
 
-    $ pytest --response
 
+Standlone package
+*****************
+
+The tools implemented in this package can be easily ported to any other application, with mimial config required.
+
+Configuration:
+
+.. code-block:: python
+    from pytest_response import response
+
+    response.setup_database({DUMP FILE})
+    response.post({INTERCEPTOR})
+    ...
+    response.unpost()
 
 
 Testing
