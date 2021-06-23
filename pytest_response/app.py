@@ -185,7 +185,7 @@ class Response:
         """
         Unapplied and unregisters mocks under the same hood.
 
-        Internally uses ``Response.unapplyall() followed by ``Response.unregister``
+        Internally uses ``Response.unapplyall()`` followed by ``Response.unregister``
         """
         self.unapplyall()
         self.unregister()
