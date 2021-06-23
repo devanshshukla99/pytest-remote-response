@@ -24,9 +24,9 @@ Usage
 Pytest plugin
 *************
 
-The plugin works by using interceptors of different libraries which can be checked by `response.available()` method; these interceptors have to be applied for each pytest run using ``--remote={INTERCEPTOR}``.
+The plugin works by using interceptors of different libraries which can be checked by ``response.available()`` method; these interceptors have to be applied for each pytest run using ``--remote={INTERCEPTOR}``.
 
-.. code-block:: console
+.. code-block:: bash
     $ pytest --remote="urllib_quick|requests_quick|aiohttp_quick"
 
 Handling requests:
@@ -34,21 +34,24 @@ Handling requests:
 - Prevent remote requests:
     all requests are allowed by default; one can disable them using `--remote-blocked` flag.
 
-.. code-block:: console
+.. code-block:: bash
 
-    $ pytest --remote-blocked
+    $ pytest --remote={INTERCEPTORS} --remote-blocked
 
 - Capture remote requests:
     the requests can be captured in a ``json`` file using ``--remote-capture`` arg.
 
-.. code-block:: console
+.. code-block:: bash
+
     $ pytest --remote={INTERCEPTORS} --remote-capture
 
 - Mock remote requests:
     the requests can be mocked using ``--remote-response`` flag.
-    NOTE: Due to certain limitations, it is advised to not use this plugin in an offline environment,
+    
+    NOTE: Due to certain limitations, it is advised to not use this plugin in an offline environment.
 
-.. code-block:: console
+.. code-block:: bash
+
     $ pytest --remote={INTERCEPTORS} --remote-response
 
 
@@ -60,6 +63,7 @@ The tools implemented in this package can be easily ported to any other applicat
 Configuration:
 
 .. code-block:: python
+
     from pytest_response import response
 
     response.setup_database({DUMP FILE})
