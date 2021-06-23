@@ -42,7 +42,7 @@ class ResponseDB:
         try:
             _urlparsed = urlparse(url)
             _url = "://".join([_urlparsed.scheme, _urlparsed.hostname])
-            return urljoin(_url, _urlparsed.path)
+            return urljoin(_url, _urlparsed.path).rstrip("/")
         except Exception:
             raise MalformedUrl
 
