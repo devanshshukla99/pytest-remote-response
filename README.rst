@@ -14,8 +14,14 @@ Installation
 
 .. code-block:: bash
 
-    $ git clone https://github.com/devanshshukla99/pytest-response
-    $ cd pytest-response
+    $ pip install pytest-remote-response
+    
+or
+
+.. code-block:: bash
+
+    $ git clone https://github.com/devanshshukla99/pytest-remote-response
+    $ cd pytest-remote-response
     $ pip install .
 
 The plugin will register automatically with ``pytest`` framework and will be ready to use.
@@ -82,8 +88,8 @@ Use ``tox`` to make sure the plugin is working:
 
 .. code-block:: bash
 
-    $ git clone https://github.com/devanshshukla99/pytest-response
-    $ cd pytest-response
+    $ git clone https://github.com/devanshshukla99/pytest-remote-response
+    $ cd pytest-remote-response
     $ tox -e py38
 
 See `tox <https://github.com/tox-dev/tox>`_ for more info.
