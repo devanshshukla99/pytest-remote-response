@@ -64,7 +64,7 @@ Handling requests:
     $ pytest --remote={INTERCEPTORS} --remote-response
 
 
-Standlone package
+Standalone package
 *****************
 
 The tools implemented in this package can be easily ported to any other application, with mimial config required.
@@ -110,7 +110,7 @@ This plugin is licenced under a 3-clause BSD style licence - see the ``LICENCE``
     :alt: Package stability
 
 .. |versions| image:: https://img.shields.io/pypi/pyversions/pytest-remote-response.svg?logo=python&logoColor=FBE072
-    :target: https://pypi.org/project/coverage/
+    :target: https://pypi.org/project/pytest-remote-response/
     :alt: Python versions supported
 
 .. |license| image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg 
