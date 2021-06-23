@@ -15,11 +15,11 @@ def urlopen_wrapper(func):
             log.error(f"RemoteBlockedError remote:{response.remote}")
             raise RemoteBlockedError
         if response.response:
-            data, headers = response.get(url=url)
+            status, data, headers = response.get(url=url)
             if not data:
                 log.error(f"Response not found url:{url}")
                 raise ResponseNotFound
-            return MockResponse(data, headers)
+            return MockResponse(status, data, headers)
 
         _ = func(url, *args, **kwargs)
         if not response.capture:
@@ -27,15 +27,15 @@ def urlopen_wrapper(func):
         data = _.fp.read()
         _.fp = io.BytesIO(data)
         headers = _.headers
-        response.insert(url=url, response=data, headers=dict(headers))
+        response.insert(url=url, response=data, headers=dict(headers), status=_.status)
         return _
 
     return inner_func
 
 
 class MockResponse(BaseMockResponse):
-    def __init__(self, data, headers={}):
-        super().__init__(data, headers)
+    def __init__(self, status, data, headers={}):
+        super().__init__(status, data, headers)
 
     pass
 

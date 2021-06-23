@@ -2,9 +2,11 @@ import ast
 import zlib
 from base64 import b64decode, b64encode
 from datetime import date
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urljoin, urlparse
 
 from tinydb import TinyDB, where
+
+from pytest_response.exceptions import MalformedUrl
 
 # from collections.abc import MutableMapping
 
@@ -37,19 +39,23 @@ class ResponseDB:
         Expecting:
             from `http://www.python.org:80` -> `http://www.python.org`
         """
-        _urlparsed = urlparse(url)
-        _url = "://".join([_urlparsed.scheme, _urlparsed.hostname])
-        return urljoin(_url, _urlparsed.path)
+        try:
+            _urlparsed = urlparse(url)
+            _url = "://".join([_urlparsed.scheme, _urlparsed.hostname])
+            return urljoin(_url, _urlparsed.path)
+        except Exception:
+            raise MalformedUrl
 
-    def insert(self, url: str, response: bytes, headers: dict, **kwargs):
+    def insert(self, url: str, response: bytes, headers: dict, status: int = 200, **kwargs):
         """
         Method for dumping url, headers and responses to the database.
         All additonal kwargs are dumped as well.
         """
         kwargs.update({"url": self._sanatize_url(url)})
         kwargs.update({"cache_date": self.today})
-        kwargs.update({"response": b64encode(zlib.compress(response)).decode("utf-8")})
+        kwargs.update({"status": str(status)})
         kwargs.update({"headers": b64encode(zlib.compress(str(headers).encode("utf-8"))).decode("utf-8")})
+        kwargs.update({"response": b64encode(zlib.compress(response)).decode("utf-8")})
         self._database.upsert(kwargs, where("url") == url)
         return
 
@@ -60,12 +66,15 @@ class ResponseDB:
         """
         query = where("url") == self._sanatize_url(url)  # and where("request") == "req"
         if element := self._database.search(query):
-            res = element[0].get("response")
+            status = element[0].get("status", 200)
             headers = element[0].get("headers", "[]")
-            return zlib.decompress(b64decode(res.encode("utf-8"))), ast.literal_eval(
-                zlib.decompress(b64decode(headers)).decode("utf-8")
+            res = element[0].get("response")
+            return (
+                int(status),
+                zlib.decompress(b64decode(res.encode("utf-8"))),
+                ast.literal_eval(zlib.decompress(b64decode(headers)).decode("utf-8")),
             )
-        return b"", {}
+        return 404, b"", {}
 
     def all(self):
         """

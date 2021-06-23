@@ -196,7 +196,7 @@ class ResponseHTTPResponse(http.client.HTTPResponse):
         if response.response:
             global CONFIG
             self.fp = io.BytesIO()
-            data, headers = response.get(url=CONFIG.get("url", ""))
+            status, data, headers = response.get(url=CONFIG.get("url", ""))
             if not data:
                 self.code = self.status = 404
                 self.reason = "Response Not Found (pytest-response)"

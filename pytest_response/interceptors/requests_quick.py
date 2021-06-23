@@ -16,26 +16,26 @@ def requests_wrapper(func):
             log.error(f"RemoteBlockedError remote:{response.remote}")
             raise RemoteBlockedError
         if response.response:
-            data, headers = response.get(url=url)
+            status, data, headers = response.get(url=url)
             if not data:
                 log.error(f"Response not found url:{url}")
                 raise ResponseNotFound
-            return MockResponse(data, headers)
+            return MockResponse(status, data, headers)
         _ = func(url, params, **kwargs)
         if not response.capture:
             return _
         data = _.content
-        response.insert(url=url, response=data, headers=dict(_.headers))
+        response.insert(url=url, response=data, headers=dict(_.headers), status=_.status_code)
         return _
 
     return inner_func
 
 
 class MockResponse(BaseMockResponse):
-    def __init__(self, data, headers={}):
+    def __init__(self, status, data, headers={}):
         headers = urllib3.response.HTTPHeaderDict(headers)
         self.content = data
-        super().__init__(data, headers)
+        super().__init__(status, data, headers)
 
     pass
 

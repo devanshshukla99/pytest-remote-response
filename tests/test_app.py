@@ -45,7 +45,7 @@ def test_response_obj():
 
 
 def test_basemockresponse():
-    res = BaseMockResponse(b"Hello", headers={"Mock": True})
+    res = BaseMockResponse(200, b"Hello", headers={"Mock": True})
     assert res.code == res.status_code == res.status == res.getcode() == 200
     assert res.headers
     assert res.info()
