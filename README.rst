@@ -65,7 +65,7 @@ Handling requests:
 
 
 Standalone package
-*****************
+******************
 
 The tools implemented in this package can be easily ported to any other application, with mimial config required.
 
