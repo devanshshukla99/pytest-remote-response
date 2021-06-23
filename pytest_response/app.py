@@ -181,6 +181,15 @@ class Response:
         self.apply(mock)
         return
 
+    def unpost(self) -> None:
+        """
+        Unapplied and unregisters mocks under the same hood.
+
+        Internally uses ``Response.unapplyall() followed by ``Response.unregister``
+        """
+        self.unapplyall()
+        self.unregister()
+
     def unregister(self) -> None:
         """
         Deactivates interceptor modules.
