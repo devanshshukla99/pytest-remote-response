@@ -40,8 +40,11 @@ def test_response_obj():
     with pytest.raises(TypeError):
         res.response = "Invalid"
 
-    res.post("urllib3")
     res.unapply()
+    res.post("urllib3")
+    assert list(res.registered().keys()) == ["urllib", "urllib_quick", "requests_quick", "urllib3"]
+    res.unpost()
+    assert list(res.registered().keys()) == []
 
 
 def test_basemockresponse():
