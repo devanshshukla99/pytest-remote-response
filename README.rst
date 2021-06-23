@@ -27,6 +27,7 @@ Pytest plugin
 The plugin works by using interceptors of different libraries which can be checked by ``response.available()`` method; these interceptors have to be applied for each pytest run using ``--remote={INTERCEPTOR}``.
 
 .. code-block:: bash
+
     $ pytest --remote="urllib_quick|requests_quick|aiohttp_quick"
 
 Handling requests:
