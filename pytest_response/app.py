@@ -194,7 +194,8 @@ class Response:
         """
         Activates intercepter modules.
         """
-        if mock_lib := self._registered_mocks.get(mock):
+        mock_lib = self._registered_mocks.get(mock, None)
+        if mock_lib:
             mock_lib.install()
         return
 
