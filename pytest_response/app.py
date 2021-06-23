@@ -11,8 +11,8 @@ from pytest_response.logger import log
 
 
 class BaseMockResponse:
-    def __init__(self, data: bytes, headers: dict = {}) -> None:
-        self.status = self.status_code = self.code = 200
+    def __init__(self, status: int, data: bytes, headers: dict = {}) -> None:
+        self.status = self.status_code = self.code = status
         self.msg = self.reason = "OK"
         self.headers = headers
         self.will_close = True
@@ -159,7 +159,7 @@ class Response:
 
         # Register for future use.
         self._registered_mocks[mock.stem] = mock_lib
-        log.info(f"{mock.name} registered")
+        log.debug(f"{mock.name} registered")
         return
 
     def registermany(self, mocks: List[str]) -> None:

@@ -46,16 +46,16 @@ class ResponseDB:
         except Exception:
             raise MalformedUrl
 
-    def insert(self, url: str, response: bytes, headers: dict, status: str = "200", **kwargs):
+    def insert(self, url: str, response: bytes, headers: dict, status: int = 200, **kwargs):
         """
         Method for dumping url, headers and responses to the database.
         All additonal kwargs are dumped as well.
         """
         kwargs.update({"url": self._sanatize_url(url)})
         kwargs.update({"cache_date": self.today})
-        kwargs.update({"response": b64encode(zlib.compress(response)).decode("utf-8")})
-        kwargs.update({"headers": b64encode(zlib.compress(str(headers).encode("utf-8"))).decode("utf-8")})
         kwargs.update({"status": str(status)})
+        kwargs.update({"headers": b64encode(zlib.compress(str(headers).encode("utf-8"))).decode("utf-8")})
+        kwargs.update({"response": b64encode(zlib.compress(response)).decode("utf-8")})
         self._database.upsert(kwargs, where("url") == url)
         return
 
@@ -66,15 +66,15 @@ class ResponseDB:
         """
         query = where("url") == self._sanatize_url(url)  # and where("request") == "req"
         if element := self._database.search(query):
-            res = element[0].get("response")
+            status = element[0].get("status", 200)
             headers = element[0].get("headers", "[]")
-            status = element[0].get("status", "200")
+            res = element[0].get("response")
             return (
-                str(status),
+                int(status),
                 zlib.decompress(b64decode(res.encode("utf-8"))),
                 ast.literal_eval(zlib.decompress(b64decode(headers)).decode("utf-8")),
             )
-        return "404", b"", {}
+        return 404, b"", {}
 
     def all(self):
         """

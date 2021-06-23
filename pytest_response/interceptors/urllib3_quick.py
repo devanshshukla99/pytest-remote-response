@@ -26,22 +26,22 @@ def urlopen_wrapper(func):
             if not data:
                 log.error(f"Response not found url:{_url}")
                 raise ResponseNotFound
-            return MockResponse(data, headers)
+            return MockResponse(status, data, headers)
         _ = func(self, method, url, *args, **kwargs)
         if not response.capture:
             return _
         data = _._fp.read()
         _._fp = io.BytesIO(data)
-        response.insert(url=_url, response=data, headers=dict(_.headers))
+        response.insert(url=_url, response=data, headers=dict(_.headers), status=_.status)
         return _
 
     return inner_func
 
 
 class MockResponse(BaseMockResponse):
-    def __init__(self, data, headers={}):
+    def __init__(self, status, data, headers={}):
         headers = urllib3.response.HTTPHeaderDict(headers)
-        super().__init__(data, headers)
+        super().__init__(status, data, headers)
 
 
 def install_opener():
