@@ -1,8 +1,10 @@
-===============
-pytest-response
-===============
+======================
+pytest-remote-response
+======================
 
-|license| |build| |coverage| |codestyle|
+|versions|
+
+|license| |build| |coverage| |status| |codestyle|
 
 
 This package provides a plugin for ``pytest`` framework for capturing and mocking connection requests during the test run.
@@ -91,22 +93,22 @@ Licence
 -------
 This plugin is licenced under a 3-clause BSD style licence - see the ``LICENCE`` file.
 
-.. |build| image:: https://github.com/devanshshukla99/pytest-response/actions/workflows/main.yml/badge.svg
+.. |build| image:: https://github.com/devanshshukla99/pytest-remote-response/actions/workflows/main.yml/badge.svg
 
-.. |coverage| image:: https://codecov.io/gh/devanshshukla99/pytest-response/branch/main/graph/badge.svg?token=NQMZKNZOB2
-    :target: https://codecov.io/gh/devanshshukla99/pytest-response
+.. |coverage| image:: https://codecov.io/gh/devanshshukla99/pytest-remote-response/branch/main/graph/badge.svg?token=NQMZKNZOB2
+    :target: https://codecov.io/gh/devanshshukla99/pytest-remote-response
     :alt: Code coverage
 
-.. |status| image:: https://img.shields.io/pypi/status/pytest-response.svg
-    :target: https://pypi.org/project/pytest-response/
+.. |status| image:: https://img.shields.io/pypi/status/pytest-remote-response.svg
+    :target: https://pypi.org/project/pytest-remote-response/
     :alt: Package stability
 
-.. |versions| image:: https://img.shields.io/pypi/pyversions/pytest-response.svg?logo=python&logoColor=FBE072
+.. |versions| image:: https://img.shields.io/pypi/pyversions/pytest-remote-response.svg?logo=python&logoColor=FBE072
     :target: https://pypi.org/project/coverage/
     :alt: Python versions supported
 
 .. |license| image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg 
-    :target: https://pypi.org/project/pytest-response/
+    :target: https://pypi.org/project/pytest-remote-response/
     :alt: License
 
 .. |codestyle| image:: https://img.shields.io/badge/code%20style-black-000000.svg
