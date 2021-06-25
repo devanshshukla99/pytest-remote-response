@@ -1,7 +1,8 @@
 import io
 import pathlib
 import importlib.util
-from typing import List
+from types import ModuleType
+from typing import Dict, List
 
 from pytest import MonkeyPatch
 
@@ -201,7 +202,7 @@ class Response:
         """
         return self._path_to_mocks.rglob("*.py")
 
-    def registered(self) -> List[pathlib.Path]:
+    def registered(self) -> Dict[str, ModuleType]:
         """
         Returns registered modules.
 
