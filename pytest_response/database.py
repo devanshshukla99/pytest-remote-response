@@ -42,7 +42,7 @@ class ResponseDB:
         Parameters
         ----------
         index : `str`
-            Defaults to "urls".
+            Defaults to `url`.
 
         Returns
         -------
