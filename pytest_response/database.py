@@ -12,6 +12,19 @@ from pytest_response.exceptions import MalformedUrl
 
 
 class ResponseDB:
+    """
+    Basic database class for `pytest_response`
+
+    Parameters
+    ----------
+    path : `str`
+        Path for the database
+
+    Examples
+    --------
+    >>> db = ResponseDB("db.json")
+    """
+
     today = date.today().strftime("%Y-%m-%d")
     _path = None
 
@@ -25,7 +38,17 @@ class ResponseDB:
 
     def index(self, index: str = "url"):
         """
-        Returns all occurances of the column `index`. Defaults to "urls".
+        Returns all occurances of the column `index`.
+
+        Parameters
+        ----------
+        index : `str`
+            Defaults to "urls".
+
+        Returns
+        -------
+        _occurances : `list`
+            All occurances of the selected column `index`.
         """
         elements = self._database.all()
         _occurances = []
@@ -35,9 +58,14 @@ class ResponseDB:
 
     def _sanatize_url(self, url: str):
         """
-        Method intended to sanatize urls to a common form:
+        Internal method intended to sanatize urls to a common form:
         Expecting:
             from `http://www.python.org:80` -> `http://www.python.org`
+
+        Parameters
+        ----------
+        url : `str`
+            URL to be sanatized.
         """
         try:
             _urlparsed = urlparse(url)
@@ -50,6 +78,20 @@ class ResponseDB:
         """
         Method for dumping url, headers and responses to the database.
         All additonal kwargs are dumped as well.
+
+        Parameters
+        ----------
+        url : `str`
+            URL of the dump.
+        response : `bytes`
+            Data captured.
+        headers : `str`
+            Headers captured.
+        status : `int`
+            Status code of the response.
+        **kwargs : `dict`
+            Any additional parameter to be dumped.
+
         """
         kwargs.update({"url": self._sanatize_url(url)})
         kwargs.update({"cache_date": self.today})
@@ -63,6 +105,20 @@ class ResponseDB:
         """
         Method for getting response and header for a perticular query `url`.
         Currently working by locating `url` only; multi-query to be implemented later.
+
+        Parameters
+        ----------
+        url : `str`
+            URL to be queried.
+
+        Returns
+        -------
+        status : `int`
+            Status code
+        data : `bytes`
+            Response data.
+        headers : `dict`
+            Response header.
         """
         query = where("url") == self._sanatize_url(url)  # and where("request") == "req"
         element = self._database.search(query)
@@ -80,6 +136,10 @@ class ResponseDB:
     def all(self):
         """
         Method to return all records in the database.
+
+        Returns
+        -------
+        Return list of all elements.
         """
         return self._database.all()
 
@@ -99,29 +159,3 @@ class ResponseDB:
         return
 
     pass
-
-
-# class MockHeaders(MutableMapping):
-#     def __init__(self, default_headers={""}, *args, **kwargs):
-#         self.store = dict()
-#         self.update(dict(*args, **kwargs))
-
-#     def __repr__(self):
-#         return str(self.store)
-
-#     def __getitem__(self, key):
-#         return self.store[key]
-
-#     def __setitem__(self, key, value):
-#         self.store[key] = value
-
-#     def __delitem__(self, key):
-#         del self.store[key]
-
-#     def __iter__(self):
-#         return iter(self.store)
-
-#     def __len__(self):
-#         return len(self.store)
-
-#     pass
