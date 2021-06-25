@@ -18,7 +18,7 @@ EWOULDBLOCK = getattr(errno, "EWOULDBLOCK", 11)
 _blocking_errnos = {EAGAIN, EWOULDBLOCK}
 
 
-CONFIG = {"url": None, "host": None, "https": None, "headers": None}
+CONFIG = {"url": None, "host": None, "https": None, "headers": None, "status": 200}
 
 
 def _build_url(host, url, headers, https=False):
@@ -58,7 +58,8 @@ class ResponseSocketIO(SocketIO):
         if response.capture and response.remote:
             global CONFIG
             url = CONFIG.get("url")
-            response.insert(url=url, response=self.output.getvalue(), headers={})
+            status = CONFIG.get("status")
+            response.insert(url=url, response=self.output.getvalue(), headers={}, status=status)
 
 
 class ResponseSocket(_socket.socket):
@@ -173,7 +174,8 @@ class Response_SSLSocket(SSLSocket):
         if response.capture and response.remote:
             global CONFIG
             url = CONFIG.get("url")
-            response.insert(url=url, response=self.output.getvalue(), headers={})
+            status = CONFIG.get("status")
+            response.insert(url=url, response=self.output.getvalue(), headers={}, status=status)
 
     pass
 
@@ -203,7 +205,7 @@ class ResponseHTTPResponse(http.client.HTTPResponse):
                 self.will_close = True
                 log.error(f"Response not found {CONFIG.get('url', '')}")
                 raise ResponseNotFound
-            self.output.write(b"HTTP/1.0 " + "200".encode("ISO-8859-1") + b"\n")
+            self.output.write(b"HTTP/1.0 " + str(status).encode("ISO-8859-1") + b"\n")
             self.output.write(data)
             self.will_close = False
             self.fp = self.output
