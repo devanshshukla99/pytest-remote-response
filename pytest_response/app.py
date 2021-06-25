@@ -23,6 +23,7 @@ class BaseMockResponse:
     headers : `dict`, optional
         Default to `{}`.
     """
+
     def __init__(self, status: int, data: bytes, headers: dict = {}) -> None:
         self.status = self.status_code = self.code = status
         self.msg = self.reason = "OK"

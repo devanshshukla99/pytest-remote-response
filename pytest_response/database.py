@@ -24,6 +24,7 @@ class ResponseDB:
     --------
     >>> db = ResponseDB("db.json")
     """
+
     today = date.today().strftime("%Y-%m-%d")
     _path = None
 
