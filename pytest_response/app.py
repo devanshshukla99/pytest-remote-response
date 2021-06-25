@@ -1,7 +1,8 @@
 import io
 import pathlib
 import importlib.util
-from typing import List
+from types import ModuleType
+from typing import Dict, List
 
 from pytest import MonkeyPatch
 
@@ -11,6 +12,19 @@ from pytest_response.logger import log
 
 
 class BaseMockResponse:
+    """
+    Basic response for mocking requests.
+
+    Parameters
+    ----------
+    status : `int`
+        Status code of the response.
+    data : `bytes`
+        Response data.
+    headers : `dict`, optional
+        Default to `{}`.
+    """
+
     def __init__(self, status: int, data: bytes, headers: dict = {}) -> None:
         self.status = self.status_code = self.code = status
         self.msg = self.reason = "OK"
@@ -56,7 +70,33 @@ class BaseMockResponse:
 
 class Response:
     """
-    Controlling and configuration application for `pytest_response`
+    Controlling and configuration application for ``pytest-remote-response``
+
+    Parameters
+    ----------
+    path : `str`, optional
+        Path for the interceptors.
+        Defaults to `pytest_response.interceptors`
+    capture : `bool`, optional
+        if `True` captures data and headers in the database.
+        Defaults to `False`
+    remote : `bool`, optional
+        if `False` blocks connection requests.
+        Defaults to `False`
+    response : `bool`, optional
+        if `True` responds with data and headers from the database.
+        Defaults to `False`
+    log_level : `str`, optional
+        Log level.
+        Defaults to `debug`
+
+    Examples
+    --------
+    >>> from pytest_response import response
+    >>> response.setup_database({{ Path to the database}})
+    >>> response.post({{ Interceptor }})
+    >>> ...
+    >>> response.unpost()
     """
 
     def __init__(
@@ -65,14 +105,12 @@ class Response:
         capture: bool = False,
         remote: bool = False,
         response: bool = False,
-        database: bool = "db.json",
-        log_level: bool = "debug",
+        log_level: str = "debug",
     ) -> None:
 
         log.setLevel(log_level.upper())
         log.info("<------------------------------------------------------------------->")
         self._basepath = pathlib.Path(__file__).parent
-        self._db_path = self._basepath.joinpath(database)
         self.db = None
         self._path_to_mocks = self._basepath.joinpath(path)
         self._available_mocks = list(self._get_available_mocks())
@@ -124,6 +162,21 @@ class Response:
         return self._available_mocks
 
     def configure(self, remote: bool = False, capture: bool = False, response: bool = False) -> None:
+        """
+        Helper method to configure interceptors.
+
+        Parameters
+        ----------
+        remote : `bool`, optional
+            If `False` blocks connection requests.
+            Defaults to `False`.
+        capture : `bool`, optional
+            If `True` captures data and headers in the database.
+            Defaults to `False`.
+        response : `bool`, optional
+            If `True` responds with data and headers from the database.
+            Defaults to `False`.
+        """
         self._remote = remote
         self._capture = capture
         self._response = response
@@ -131,25 +184,43 @@ class Response:
         return
 
     def setup_database(self, path: str) -> None:
+        """
+        Method to setup-up database.
+
+        Parameters
+        ----------
+        path : `str`
+            Path for the database.
+        """
         self._db_path = path
         self.db = ResponseDB(self._db_path)
         return
 
-    def _get_available_mocks(self) -> str:
+    def _get_available_mocks(self) -> List[str]:
         """
         Internal method to get available interceptors.
         """
         return self._path_to_mocks.rglob("*.py")
 
-    def registered(self) -> List[pathlib.Path]:
+    def registered(self) -> Dict[str, ModuleType]:
         """
-        Returns registeres modules.
+        Returns registered modules.
+
+        Returns
+        -------
+        `list` of `pathlib.Path`
+            Returns the list of registered interceptors.
         """
         return self._registered_mocks
 
     def register(self, mock: str) -> None:
         """
-        Registers interceptor modules; applies using `pytest_response.app.applies`
+        Registers interceptor modules; applies using ``pytest_response.app.applies``
+
+        Parameters
+        ----------
+        mock : `str`
+            Interceptor; check ``Response.available`` for more info.
         """
         mock = self._sanatize_interceptor(mock)
         # Load interceptor
@@ -166,6 +237,11 @@ class Response:
         """
         Wrapper for `pytest_response.app.register`
         Registers interceptor modules; applies using `pytest_response.app.applies`
+
+        Parameters
+        ----------
+        mocks : `list`
+            List of interceptors to be registered.
         """
         for mock in mocks:
             self.register(mock)
@@ -176,6 +252,11 @@ class Response:
         Registers and applies the mock under the same hood.
 
         Internally uses ``Response.register`` followed by ``Response.apply``
+
+        Parameters
+        ----------
+        mock : `str`
+            Registers and applies the mock.
         """
         self.register(mock)
         self.apply(mock)
@@ -202,6 +283,11 @@ class Response:
     def apply(self, mock) -> None:
         """
         Activates intercepter modules.
+
+        Parameters
+        ----------
+        mock : `str`
+            Applies the mock.
         """
         mock_lib = self._registered_mocks.get(mock, None)
         if mock_lib:
@@ -209,9 +295,15 @@ class Response:
         return
 
     def unapply(self, *args, **kwargs) -> None:
+        """
+        Wrapper method for ``Response.unapplyall()``
+        """
         return self.unapplyall(*args, **kwargs)
 
     def applyall(self) -> None:
+        """
+        Reiterates over registered mocks to apply them all.
+        """
         for mock_lib in self._registered_mocks.values():
             mock_lib.install()
         return
@@ -224,26 +316,61 @@ class Response:
             mock_lib.uninstall()
         log.debug("interceptors unapplied")
 
-    def insert(self, url, response, headers, *args, **kwargs):
+    def insert(self, url, response, headers, status, *args, **kwargs):
         """
-        Wrapper function for `pytest_response.database.db.insert`
+        Wrapper function for ``pytest_response.database.db.insert``
+
+        Parameters
+        ----------
+        url : `str`
+            URL of the dump.
+        response : `bytes`
+            Data captured.
+        headers : `str`
+            Headers captured.
+        status : `int`
+            Status code of the response.
+        **kwargs : `dict`
+            Any additional parameter to be dumped.
         """
         return self.db.insert(url, response, headers, *args, **kwargs)
 
     def get(self, url, *args, **kwargs):
         """
-        Wrapper function for `pytest_response.database.db.get`
+        Wrapper function for ``pytest_response.database.db.get``
+
+        Parameters
+        ----------
+        url : `str`
+            URL to be queried.
+
+        Returns
+        -------
+        status : `int`
+            Status code
+        data : `bytes`
+            Response data.
+        headers : `dict`
+            Response header.
         """
         return self.db.get(url, *args, **kwargs)
 
     def _sanatize_interceptor(self, mock: str) -> pathlib.Path:
+        """
+        Internal method for sanatizing and validating interceptor
+        """
         mock = self._path_to_mocks.joinpath(mock)
+
         if not mock.suffix:
             # If supplied mock-name is missing .py, add it.
             mock = mock.with_suffix(".py")
+
         if mock not in self._get_available_mocks():
             # If interceptor is not available raise/
-            raise InterceptorNotFound(f"Requested interceptor `{mock}` is not available; check `available()`")
+            log.error(f"Requested interceptor `{mock}` is not available; check `Response.available`")
+            raise InterceptorNotFound(
+                f"Requested interceptor `{mock}` is not available; check `Response.available`"
+            )
         return mock
 
     pass
