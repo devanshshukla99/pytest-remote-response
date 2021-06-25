@@ -1,7 +1,7 @@
 import ast
 import zlib
 from base64 import b64decode, b64encode
-from typing import List, Union
+from typing import List, Tuple
 from datetime import date
 from urllib.parse import urljoin, urlparse
 
@@ -100,7 +100,7 @@ class ResponseDB:
         self._database.upsert(kwargs, where("url") == url)
         return
 
-    def get(self, url: str, **kwargs) -> Union[int, bytes, dict]:
+    def get(self, url: str, **kwargs) -> Tuple[int, bytes, dict]:
         """
         Method for getting response and header for a perticular query `url`.
         Currently working by locating `url` only; multi-query to be implemented later.
