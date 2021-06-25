@@ -24,7 +24,6 @@ class ResponseDB:
     --------
     >>> db = ResponseDB("db.json")
     """
-
     today = date.today().strftime("%Y-%m-%d")
     _path = None
 
@@ -91,7 +90,6 @@ class ResponseDB:
             Status code of the response.
         **kwargs : `dict`
             Any additional parameter to be dumped.
-
         """
         kwargs.update({"url": self._sanatize_url(url)})
         kwargs.update({"cache_date": self.today})

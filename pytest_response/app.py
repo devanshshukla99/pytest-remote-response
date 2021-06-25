@@ -23,7 +23,6 @@ class BaseMockResponse:
     headers : `dict`, optional
         Default to `{}`.
     """
-
     def __init__(self, status: int, data: bytes, headers: dict = {}) -> None:
         self.status = self.status_code = self.code = status
         self.msg = self.reason = "OK"
@@ -112,7 +111,7 @@ class Response:
         self._basepath = pathlib.Path(__file__).parent
         self.db = None
         self._path_to_mocks = self._basepath.joinpath(path)
-        self._available_mocks = [x.name for x in self._get_available_mocks() if x.name != "__init__.py"]
+        self._available_mocks = list(self._get_available_mocks())
         self._registered_mocks = {}
         self.mpatch = MonkeyPatch()
 
@@ -166,12 +165,15 @@ class Response:
 
         Parameters
         ----------
-        remote : `bool`
-            if `False` blocks connection requests.
-        capture : `bool`
-            if `True` captures data and headers in the database.
-        response : `bool`
-            if `True` responds with data and headers from the database.
+        remote : `bool`, optional
+            If `False` blocks connection requests.
+            Defaults to `False`.
+        capture : `bool`, optional
+            If `True` captures data and headers in the database.
+            Defaults to `False`.
+        response : `bool`, optional
+            If `True` responds with data and headers from the database.
+            Defaults to `False`.
         """
         self._remote = remote
         self._capture = capture
@@ -205,7 +207,7 @@ class Response:
         Returns
         -------
         `list` of `pathlib.Path`
-            returns the list of registered interceptors.
+            Returns the list of registered interceptors.
         """
         return self._registered_mocks
 
@@ -236,7 +238,7 @@ class Response:
 
         Parameters
         ----------
-        mocks : `List(str)`
+        mocks : `list`
             List of interceptors to be registered.
         """
         for mock in mocks:
@@ -298,7 +300,7 @@ class Response:
 
     def applyall(self) -> None:
         """
-        Re-iterates over registered mock to applyall.
+        Reiterates over registered mocks to apply them all.
         """
         for mock_lib in self._registered_mocks.values():
             mock_lib.install()
