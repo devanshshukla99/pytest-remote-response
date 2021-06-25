@@ -43,5 +43,7 @@ class DatabaseNotFound(Exception):
     Exception raised when database is not initialized properly.
     """
 
-    def __init__(self, reason="Database not initialized; use ``Response.setup_database``", *args, **kwargs) -> None:
+    def __init__(
+        self, reason="Database not initialized; use ``Response.setup_database``", *args, **kwargs
+    ) -> None:
         super().__init__(reason, *args, **kwargs)
