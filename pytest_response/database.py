@@ -1,14 +1,13 @@
 import ast
 import zlib
 from base64 import b64decode, b64encode
+from typing import List, Union
 from datetime import date
 from urllib.parse import urljoin, urlparse
 
 from tinydb import TinyDB, where
 
 from pytest_response.exceptions import MalformedUrl
-
-# from collections.abc import MutableMapping
 
 
 class ResponseDB:
@@ -27,8 +26,9 @@ class ResponseDB:
 
     today = date.today().strftime("%Y-%m-%d")
     _path = None
+    _database = None
 
-    def __init__(self, path) -> None:
+    def __init__(self, path: str) -> None:
         self._path = path
         self._database = TinyDB(path)
         return
@@ -36,7 +36,7 @@ class ResponseDB:
     def __repr__(self) -> str:
         return f"<database {self._path}>"
 
-    def index(self, index: str = "url"):
+    def index(self, index: str = "url") -> List[str]:
         """
         Returns all occurances of the column `index`.
 
@@ -56,7 +56,7 @@ class ResponseDB:
             _occurances.append(element.get(index))
         return _occurances
 
-    def _sanatize_url(self, url: str):
+    def _sanatize_url(self, url: str) -> str:
         """
         Internal method intended to sanatize urls to a common form:
         Expecting:
@@ -74,7 +74,7 @@ class ResponseDB:
         except Exception:
             raise MalformedUrl
 
-    def insert(self, url: str, response: bytes, headers: dict, status: int = 200, **kwargs):
+    def insert(self, url: str, response: bytes, headers: dict, status: int = 200, **kwargs) -> None:
         """
         Method for dumping url, headers and responses to the database.
         All additonal kwargs are dumped as well.
@@ -100,7 +100,7 @@ class ResponseDB:
         self._database.upsert(kwargs, where("url") == url)
         return
 
-    def get(self, url: str, **kwargs):
+    def get(self, url: str, **kwargs) -> Union[int, bytes, dict]:
         """
         Method for getting response and header for a perticular query `url`.
         Currently working by locating `url` only; multi-query to be implemented later.
@@ -132,7 +132,7 @@ class ResponseDB:
             )
         return 404, b"", {}
 
-    def all(self):
+    def all(self) -> dict:
         """
         Method to return all records in the database.
 
@@ -148,13 +148,15 @@ class ResponseDB:
         """
         return self._database.truncate()
 
-    def close(self):
-        if hasattr(self, "_database"):
-            self._database.close()
+    def close(self) -> None:
+        if isinstance(self._database, TinyDB):
+            if self._database._opened:
+                self._database.close()
 
     def __del__(self):
-        if hasattr(self, "_database"):
-            self._database.close()
+        if isinstance(self._database, TinyDB):
+            if self._database._opened:
+                self._database.close()
         return
 
     pass

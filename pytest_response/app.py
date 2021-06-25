@@ -7,7 +7,7 @@ from typing import Dict, List
 from pytest import MonkeyPatch
 
 from pytest_response.database import ResponseDB
-from pytest_response.exceptions import InterceptorNotFound
+from pytest_response.exceptions import DatabaseNotFound, InterceptorNotFound
 from pytest_response.logger import log
 
 
@@ -110,12 +110,15 @@ class Response:
 
         log.setLevel(log_level.upper())
         log.info("<------------------------------------------------------------------->")
+
         self._basepath = pathlib.Path(__file__).parent
-        self.db = None
+
         self._path_to_mocks = self._basepath.joinpath(path)
         self._available_mocks = list(self._get_available_mocks())
         self._registered_mocks = {}
         self.mpatch = MonkeyPatch()
+
+        self.db = None
 
         self.config = {"url": None, "host": None, "https": None, "headers": None}
 
@@ -223,6 +226,7 @@ class Response:
             Interceptor; check ``Response.available`` for more info.
         """
         mock = self._sanatize_interceptor(mock)
+
         # Load interceptor
         spec = importlib.util.spec_from_file_location(mock.name, str(mock))
         mock_lib = importlib.util.module_from_spec(spec)
@@ -333,6 +337,9 @@ class Response:
         **kwargs : `dict`
             Any additional parameter to be dumped.
         """
+        if not self.db:
+            log.error("`Response.insert` called without setting up the database.")
+            raise DatabaseNotFound
         return self.db.insert(url, response, headers, *args, **kwargs)
 
     def get(self, url, *args, **kwargs):
@@ -353,6 +360,9 @@ class Response:
         headers : `dict`
             Response header.
         """
+        if not self.db:
+            log.error("`Response.get` called without setting up the database.")
+            raise DatabaseNotFound
         return self.db.get(url, *args, **kwargs)
 
     def _sanatize_interceptor(self, mock: str) -> pathlib.Path:
