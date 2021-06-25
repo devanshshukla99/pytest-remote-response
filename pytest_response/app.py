@@ -75,7 +75,7 @@ class Response:
         self._db_path = self._basepath.joinpath(database)
         self.db = None
         self._path_to_mocks = self._basepath.joinpath(path)
-        self._available_mocks = list(self._get_available_mocks())
+        self._available_mocks = [x.name for x in self._get_available_mocks() if x.name != "__init__.py"]
         self._registered_mocks = {}
         self.mpatch = MonkeyPatch()
 
