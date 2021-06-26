@@ -63,5 +63,4 @@ def pytest_unconfigure():
     Pytest hook for cleaning up.
     """
     if config.option.remote_capture or config.option.remote_response:
-        response.unapplyall()
-        response.unregister()
+        response.unpost()
