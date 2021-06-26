@@ -13,7 +13,7 @@ def pytest_addoption(parser):
         action="store",
         type=str,
         default=None,
-        help="Patches interceptors. --remote=[urllib|urllib3|urllib_quick|urllib3_quick|requests_quick]",
+        help="Patches interceptors. --remote=[urllib|urllib3|requests|urllib_full|urllib3_full]",
     )
     parser.addoption(
         "--remote-capture",

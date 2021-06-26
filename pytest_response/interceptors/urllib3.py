@@ -1,40 +1,61 @@
-import sys
+import io
+from functools import wraps
+from urllib.parse import urljoin
 
-from urllib3.connection import HTTPConnection, HTTPSConnection
-from urllib3.connectionpool import HTTPConnectionPool, HTTPSConnectionPool
+import urllib3
 
-from pytest_response.interceptors.urllib import (  # isort:skip
-    ResponseHTTPConnection,
-    ResponseHTTPSConnection,
-)
-
-
-class _Response_HTTPU3_Intercepter(ResponseHTTPConnection, HTTPConnection):
-    def __init__(self, *args, **kwargs):
-        if "strict" in kwargs and sys.version_info > (3, 0):
-            kwargs.pop("strict")
-        kwargs.pop("socket_options", None)
-        ResponseHTTPConnection.__init__(self, *args, **kwargs)
-        HTTPConnection.__init__(self, *args, **kwargs)
+from pytest_response import response
+from pytest_response.app import BaseMockResponse
+from pytest_response.exceptions import RemoteBlockedError, ResponseNotFound
+from pytest_response.logger import log
 
 
-class _Response_HTTPSU3_Intercepter(ResponseHTTPSConnection, HTTPSConnection):
-    is_verified = True
-
-    def __init__(self, *args, **kwargs):
-        if "strict" in kwargs and sys.version_info > (3, 0):
-            kwargs.pop("strict")
-        kwargs.pop("socket_options", None)
-        kwargs.pop("key_password", None)
-        ResponseHTTPSConnection.__init__(self, *args, **kwargs)
-        HTTPSConnection.__init__(self, *args, **kwargs)
+def _build_url(scheme, host, url):
+    _scheme_host = "://".join([scheme, host])
+    return urljoin(_scheme_host, url)
 
 
-def install():
-    HTTPConnectionPool.ConnectionCls = _Response_HTTPU3_Intercepter
-    HTTPSConnectionPool.ConnectionCls = _Response_HTTPSU3_Intercepter
+def urlopen_wrapper(func):
+    @wraps(func)
+    def inner_func(self, method, url, *args, **kwargs):
+        _url = _build_url(self.scheme, self.host, url)
+        if not response.remote:
+            raise RemoteBlockedError
+        if response.response:
+            status, data, headers = response.get(url=_url)
+            if not data:
+                log.error(f"Response not found url:{_url}")
+                raise ResponseNotFound
+            return MockResponse(status, data, headers)
+        _ = func(self, method, url, *args, **kwargs)
+        if not response.capture:
+            return _
+        data = _._fp.read()
+        _._fp = io.BytesIO(data)
+        response.insert(url=_url, response=data, headers=dict(_.headers), status=_.status)
+        return _
+
+    return inner_func
 
 
-def uninstall():
-    HTTPConnectionPool.ConnectionCls = HTTPConnection
-    HTTPSConnectionPool.ConnectionCls = HTTPSConnection
+class MockResponse(BaseMockResponse):
+    def __init__(self, status, data, headers={}):
+        headers = urllib3.response.HTTPHeaderDict(headers)
+        super().__init__(status, data, headers)
+
+
+def install_opener():
+    u3open = urllib3.connectionpool.HTTPConnectionPool.urlopen
+    nurlopen = urlopen_wrapper(u3open)
+    response.mpatch.setattr("urllib3.connectionpool.HTTPConnectionPool.urlopen", nurlopen)
+    log.error("MPATCHED")
+    return
+
+
+def uninstall_opener():
+    response.mpatch.undo()
+    return
+
+
+install = install_opener
+uninstall = uninstall_opener
