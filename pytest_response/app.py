@@ -1,8 +1,10 @@
 import io
+import re
 import pathlib
 import importlib.util
 from types import ModuleType
 from typing import Dict, List
+from functools import wraps
 
 from pytest import MonkeyPatch
 
@@ -267,6 +269,37 @@ class Response:
         self.register(mock)
         self.apply(mock)
         return
+
+    def activate(self, interceptor):
+        """
+        Activate decorator.
+
+        Parameters
+        ----------
+        interceptor : `str`
+            interceptor name.
+
+        Examples
+        --------
+
+        >>> @response.activate("urllib_quick")
+        >>> def test_urllib():
+        >>>     url = "https://www.python.org"
+        >>>     r = urlopen(url)
+        >>>     assert r.status == 200
+        """
+        def wrapper(func):
+            @wraps(func)
+            def _inner_func(*args, **kwargs):
+                nonlocal self, interceptor
+                interceptor = re.split("[,]|[|]", interceptor)
+                self.registermany(interceptor)
+                self.applyall()
+                _ = func(*args, **kwargs)
+                self.unpost()
+                return _
+            return _inner_func
+        return wrapper
 
     def unpost(self) -> None:
         """

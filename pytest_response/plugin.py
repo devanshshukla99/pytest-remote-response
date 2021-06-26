@@ -11,14 +11,6 @@ def pytest_addoption(parser):
     options to pytest.
     """
     parser.addoption(
-        "--remote",
-        dest="remote",
-        action="store",
-        type=str,
-        default=None,
-        help="Patches interceptors. --remote=[urllib|urllib3|requests|aiohttp|urllib_full|urllib3_full]",
-    )
-    parser.addoption(
         "--remote-capture",
         dest="remote_capture",
         action="store_true",
@@ -53,37 +45,23 @@ def pytest_configure(config):
     """
     Pytest hook for setting up :class:`pytest_response.app.Response`
     """
-    if not config.option.remote and config.option.verbose:
-        print(f"Remote:{config.option.remote}")
+    if config.option.remote_capture and config.option.remote_response:
+        # either remote_capture or remote_response
+        assert not config.option.remote_capture and config.option.remote_response
 
-    patch = config.option.remote
-    print(f"Patch:{patch}")
-    if patch:
-        if config.option.remote_capture and config.option.remote_response:
-            # either remote_capture or remote_response
-            assert not config.option.remote_capture and config.option.remote_response
-        mocks = re.split("[,]|[|]", patch)
-        response.registermany(mocks)
-    else:
-        response.registermany(["urllib", "requests"])
-
-    response.setup_database(config.option.remote_db)
-    response.configure(
-        remote=bool(config.option.remote_blocked),
-        capture=bool(config.option.remote_capture),
-        response=config.option.remote_response,
-    )
-    response.applyall()
-
-
-# def pytest_runtest_setup(item):
-
-
-# def pytest_runtest_teardown(item):
+    if config.option.remote_capture or config.option.remote_response:
+        response.setup_database(config.option.remote_db)
+        response.configure(
+            remote=bool(config.option.remote_blocked),
+            capture=bool(config.option.remote_capture),
+            response=config.option.remote_response,
+        )
 
 
 def pytest_unconfigure():
     """
     Pytest hook for cleaning up.
     """
-    response.unpost()
+    if config.option.remote_capture or config.option.remote_response:
+        response.unapplyall()
+        response.unregister()
