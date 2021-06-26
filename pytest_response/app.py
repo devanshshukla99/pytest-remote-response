@@ -10,6 +10,8 @@ from pytest_response.database import ResponseDB
 from pytest_response.exceptions import DatabaseNotFound, InterceptorNotFound
 from pytest_response.logger import log
 
+__all__ = ["BaseMockResponse", "Response"]
+
 
 class BaseMockResponse:
     """

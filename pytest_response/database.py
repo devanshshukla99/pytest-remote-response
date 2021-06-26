@@ -9,6 +9,8 @@ from tinydb import TinyDB, where
 
 from pytest_response.exceptions import MalformedUrl
 
+__all__ = ["ResponseDB"]
+
 
 class ResponseDB:
     """
