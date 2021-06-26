@@ -220,12 +220,12 @@ class Response:
 
     def register(self, mock: str) -> None:
         """
-        Registers interceptor modules; applies using ``pytest_response.app.applies``
+        Registers interceptor modules; applies using :meth:`Response.apply`
 
         Parameters
         ----------
         mock : `str`
-            Interceptor; check ``Response.available`` for more info.
+            Interceptor; check :meth:`Response.available` for more info.
         """
         mock = self._sanatize_interceptor(mock)
 
@@ -241,8 +241,8 @@ class Response:
 
     def registermany(self, mocks: List[str]) -> None:
         """
-        Wrapper for `pytest_response.app.register`
-        Registers interceptor modules; applies using `pytest_response.app.applies`
+        Wrapper for :meth:`Response.register`
+        Registers interceptor modules; applies using :meth:`Response.apply`
 
         Parameters
         ----------
@@ -257,7 +257,7 @@ class Response:
         """
         Registers and applies the mock under the same hood.
 
-        Internally uses ``Response.register`` followed by ``Response.apply``
+        Internally uses :meth:`Response.register` followed by :meth:`Response.apply`
 
         Parameters
         ----------
@@ -272,7 +272,7 @@ class Response:
         """
         Unapplied and unregisters mocks under the same hood.
 
-        Internally uses ``Response.unapplyall()`` followed by ``Response.unregister``
+        Internally uses :meth:`Response.unapplyall` followed by :meth:`Response.unregister`
         """
         self.unapplyall()
         self.unregister()
@@ -302,7 +302,7 @@ class Response:
 
     def unapply(self, *args, **kwargs) -> None:
         """
-        Wrapper method for ``Response.unapplyall()``
+        Wrapper method for :meth:`Response.unapplyall`
         """
         return self.unapplyall(*args, **kwargs)
 
@@ -324,7 +324,7 @@ class Response:
 
     def insert(self, url, response, headers, status, *args, **kwargs):
         """
-        Wrapper function for ``pytest_response.database.db.insert``
+        Wrapper function for :meth:`pytest_response.database.ResponseDB.insert`
 
         Parameters
         ----------
@@ -346,7 +346,7 @@ class Response:
 
     def get(self, url, *args, **kwargs):
         """
-        Wrapper function for ``pytest_response.database.db.get``
+        Wrapper function for :meth:`pytest_response.database.ResponseDB.get`
 
         Parameters
         ----------

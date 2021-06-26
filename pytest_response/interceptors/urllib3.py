@@ -8,6 +8,10 @@ from pytest_response.app import BaseMockResponse
 from pytest_response.exceptions import RemoteBlockedError, ResponseNotFound
 from pytest_response.logger import log
 
+__all__ = [
+    "MockResponse", "urlopen_wrapper", "install", "uninstall"
+]
+
 
 def _build_url(scheme, host, url):
     _scheme_host = "://".join([scheme, host])

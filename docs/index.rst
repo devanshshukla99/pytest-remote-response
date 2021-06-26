@@ -7,13 +7,14 @@ Welcome to pytest-remote-response's documentation!
 ==================================================
 
 .. toctree::
+   :caption: Contents
    :maxdepth: 2
-   :numbered:
-   :glob:
-   :caption: Contents:
 
    code_ref/index
    licence
+
+.. include:: ../README.rst
+
 
 Indices and tables
 ==================

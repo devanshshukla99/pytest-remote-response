@@ -1,10 +1,16 @@
-Plugin
-******
+=================
+API Documentation
+=================
+
+pytest plugin
+*************
 
 .. automodule:: pytest_response.plugin
     :members:
     :undoc-members:
     :show-inheritance:
+
+----------
 
 Response
 ********
@@ -14,6 +20,8 @@ Response
     :undoc-members:
     :show-inheritance:
 
+----------
+
 Database
 ********
 
@@ -22,26 +30,64 @@ Database
     :undoc-members:
     :show-inheritance:
 
+----------
 
 Interceptors
 ************
 
-.. automodapi:: pytest_response.interceptors.urllib_quick
+`urllib` Interceptor Module
+---------------------------
 
 .. automodapi:: pytest_response.interceptors.urllib
+    :no-heading:
 
-.. automodapi:: pytest_response.interceptors.urllib3_quick
+
+`urllib(full)` Interceptor Module
+---------------------------------
+
+.. automodapi:: pytest_response.interceptors.urllib_full
+    :no-heading:
+
+----------
+
+`urllib3` Interceptor Module
+----------------------------
 
 .. automodapi:: pytest_response.interceptors.urllib3
+    :no-heading:
 
-.. automodapi:: pytest_response.interceptors.requests_quick
+----------
 
-.. automodapi:: pytest_response.interceptors.aiohttp_quick
+`urllib3(full)` Interceptor Module
+----------------------------------
 
+.. automodapi:: pytest_response.interceptors.urllib3_full
+    :no-heading:
 
+----------
+
+`requests` Interceptor Module
+-----------------------------
+
+.. automodapi:: pytest_response.interceptors.requests
+    :no-heading:
+
+----------
+
+`aiohttp` Interceptor Module
+----------------------------
+
+.. automodapi:: pytest_response.interceptors.aiohttp
+    :no-heading:
+
+----------
 
 Exceptions
 **********
 
 .. automodapi:: pytest_response.exceptions
+    :no-heading:
     :no-inheritance-diagram:
+
+
+----------
