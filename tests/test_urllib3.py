@@ -1,4 +1,3 @@
-
 import pytest
 
 
@@ -41,14 +40,10 @@ def test_remote_connection(testdir, testcode):
 def test_remote_capresp(testdir, testcode):
     testdir.makepyfile(testcode)
 
-    result = testdir.runpytest(
-        "-q", "--remote=urllib3", "--remote-capture", "-p", "no:warnings"
-    )
+    result = testdir.runpytest("-q", "--remote=urllib3", "--remote-capture", "-p", "no:warnings")
     result.assert_outcomes(passed=3)
 
-    result = testdir.runpytest(
-        "-q", "--remote=urllib3", "--remote-response", "-p", "no:warnings"
-    )
+    result = testdir.runpytest("-q", "--remote=urllib3", "--remote-response", "-p", "no:warnings")
     result.assert_outcomes(passed=3)
 
 
