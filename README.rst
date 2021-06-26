@@ -36,7 +36,7 @@ The plugin works by using interceptors of different libraries which can be check
 
 .. code-block:: bash
 
-    $ pytest --remote="urllib_quick|requests_quick|aiohttp_quick"
+    $ pytest --remote="urllib|requests|aiohttp"
 
 Handling requests:
 

@@ -122,9 +122,9 @@ class ResponseDB:
         query = where("url") == self._sanatize_url(url)  # and where("request") == "req"
         element = self._database.search(query)
         if element:
-            status = element[0].get("status", 200)
-            headers = element[0].get("headers", "[]")
-            res = element[0].get("response")
+            status = element[-1].get("status", 200)
+            headers = element[-1].get("headers", "[]")
+            res = element[-1].get("response")
             return (
                 int(status),
                 zlib.decompress(b64decode(res.encode("utf-8"))),
