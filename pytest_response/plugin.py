@@ -62,7 +62,7 @@ def pytest_configure(config):
         mocks = re.split("[,]|[|]", patch)
         response.registermany(mocks)
     else:
-        response.registermany(["urllib_quick", "requests_quick"])
+        response.registermany(["urllib", "requests"])
 
     response.setup_database(config.option.remote_db)
     response.configure(

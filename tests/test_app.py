@@ -13,8 +13,8 @@ def test_response_obj():
 
     assert res.register("urllib") is None
     assert list(res.registered().keys()) == ["urllib"]
-    assert res.registermany(["urllib_quick", "requests_quick"]) is None
-    assert list(res.registered().keys()) == ["urllib", "urllib_quick", "requests_quick"]
+    assert res.registermany(["urllib3", "requests"]) is None
+    assert list(res.registered().keys()) == ["urllib", "urllib3", "requests"]
 
     res.remote = True
     assert res.remote is True
@@ -30,7 +30,7 @@ def test_response_obj():
 
     res.unapply()
     res.post("urllib3")
-    assert list(res.registered().keys()) == ["urllib", "urllib_quick", "requests_quick", "urllib3"]
+    assert list(res.registered().keys()) == ["urllib", "urllib3", "requests"]
     res.unpost()
     assert list(res.registered().keys()) == []
 
