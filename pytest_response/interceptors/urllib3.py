@@ -1,4 +1,3 @@
-import io
 from functools import wraps
 from urllib.parse import urljoin
 
@@ -30,8 +29,7 @@ def urlopen_wrapper(func):
         _ = func(self, method, url, *args, **kwargs)
         if not response.capture:
             return _
-        data = _._fp.read()
-        _._fp = io.BytesIO(data)
+        data = _.data
         response.insert(url=_url, response=data, headers=dict(_.headers), status=_.status)
         return _
 
@@ -41,14 +39,17 @@ def urlopen_wrapper(func):
 class MockResponse(BaseMockResponse):
     def __init__(self, status, data, headers={}):
         headers = urllib3.response.HTTPHeaderDict(headers)
+        self.data = data
         super().__init__(status, data, headers)
+
+    def get_redirect_location(self, *args, **kwargs):
+        return ""
 
 
 def install_opener():
     u3open = urllib3.connectionpool.HTTPConnectionPool.urlopen
     nurlopen = urlopen_wrapper(u3open)
     response.mpatch.setattr("urllib3.connectionpool.HTTPConnectionPool.urlopen", nurlopen)
-    log.error("MPATCHED")
     return
 
 

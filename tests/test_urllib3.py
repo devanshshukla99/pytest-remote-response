@@ -4,19 +4,22 @@ import pytest
 @pytest.fixture
 def testcode():
     return """
-        import requests
+        import urllib3
         from pytest_response import response
+
         def test_urllib3():
+            http = urllib3.PoolManager()
             url = "http://www.testingmcafeesites.com/testcat_ac.html"
-            res = requests.get(url)
-            assert res.status_code == 200
-            assert res.content
+            res = http.request("GET", url)
+            assert res.status == 200
+            assert res.data
 
         def test_urllib3_ssl():
+            http = urllib3.PoolManager()
             url = "https://www.python.org"
-            res = requests.get(url)
-            assert res.status_code == 200
-            assert res.content
+            res = http.request("GET", url)
+            assert res.status == 200
+            assert res.data
 
         def test_database():
             assert response.db.index() == ["http://www.testingmcafeesites.com/testcat_ac.html",
@@ -26,7 +29,8 @@ def testcode():
 
 def test_remote_blocked(testdir, testcode):
     testdir.makepyfile(testcode)
-    result = testdir.runpytest("-q", "--remote-blocked", "-p", "no:warnings")
+
+    result = testdir.runpytest("-q", "--remote=urllib3", "--remote-blocked", "-p", "no:warnings")
     result.assert_outcomes(failed=3)
 
 
