@@ -15,6 +15,7 @@ def testcode():
             yield loop
             loop.close()
 
+        @response.activate("aiohttp")
         def test_aiohttp_capture(event_loop):
             async def async_whats_this():
                 url = "http://www.testingmcafeesites.com/testcat_ac.html"
@@ -26,6 +27,7 @@ def testcode():
                         assert data
             event_loop.run_until_complete(async_whats_this())
 
+        @response.activate("aiohttp")
         def test_aiohttp_capture_ssl(event_loop):
             async def async_whats_this():
                 url = "https://www.python.org"
@@ -45,20 +47,20 @@ def testcode():
 
 def test_remote_block(testdir, testcode):
     testdir.makepyfile(testcode)
-    result = testdir.runpytest("-q", "--remote=aiohttp", "--remote-blocked", "-p", "no:warnings")
+    result = testdir.runpytest("-q", "--remote-blocked", "-p", "no:warnings")
     result.assert_outcomes(failed=3)
 
 
 def test_remote_connection(testdir, testcode):
     testdir.makepyfile(testcode)
-    result = testdir.runpytest("-q", "--remote=aiohttp", "-p", "no:warnings")
+    result = testdir.runpytest("-q", "-p", "no:warnings")
     result.assert_outcomes(passed=2, failed=1)
 
 
 def test_remote_capresp(testdir, testcode):
     testdir.makepyfile(testcode)
-    result = testdir.runpytest("-q", "--remote=aiohttp", "--remote-capture", "-p", "no:warnings")
+    result = testdir.runpytest("-q", "--remote-capture", "-p", "no:warnings")
     result.assert_outcomes(passed=3)
 
-    result = testdir.runpytest("-q", "--remote=aiohttp", "--remote-response", "-p", "no:warnings")
+    result = testdir.runpytest("-q", "--remote-response", "-p", "no:warnings")
     result.assert_outcomes(passed=3)

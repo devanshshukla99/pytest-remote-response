@@ -6,12 +6,15 @@ def testcode():
     return """
         import requests
         from pytest_response import response
+
+        @response.activate("requests")
         def test_requests():
             url = "http://www.testingmcafeesites.com/testcat_ac.html"
             res = requests.get(url)
             assert res.status_code == 200
             assert res.content
 
+        @response.activate("requests")
         def test_requests_ssl():
             url = "https://www.python.org"
             res = requests.get(url)
@@ -33,15 +36,15 @@ def test_remote_blocked(testdir, testcode):
 def test_remote_connection(testdir, testcode):
     testdir.makepyfile(testcode)
 
-    result = testdir.runpytest("-q", "--remote=requests", "-p", "no:warnings")
+    result = testdir.runpytest("-q", "-p", "no:warnings")
     result.assert_outcomes(passed=2, failed=1)
 
 
 def test_remote_capresp(testdir, testcode):
     testdir.makepyfile(testcode)
 
-    result = testdir.runpytest("-q", "--remote=requests", "--remote-capture", "-p", "no:warnings")
+    result = testdir.runpytest("-q", "--remote-capture", "-p", "no:warnings")
     result.assert_outcomes(passed=3)
 
-    result = testdir.runpytest("-q", "--remote=requests", "--remote-response", "-p", "no:warnings")
+    result = testdir.runpytest("-q", "--remote-response", "-p", "no:warnings")
     result.assert_outcomes(passed=3)
