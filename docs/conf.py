@@ -12,10 +12,10 @@
 
 import os
 import sys
-from pytest_response import __version__
 
 sys.path.insert(0, os.path.abspath(".."))
 
+from pytest_response import __version__  # noqa
 
 # -- Project information -----------------------------------------------------
 
