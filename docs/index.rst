@@ -12,9 +12,9 @@ Welcome to pytest-remote-response's documentation!
 
    code_ref/index
    licence
+   release
 
 .. include:: ../README.rst
-
 
 Indices and tables
 ==================

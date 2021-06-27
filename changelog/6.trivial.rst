@@ -1,1 +1,0 @@
-Now `status` code will also be dumped/responded with along with `data` and `headers`.

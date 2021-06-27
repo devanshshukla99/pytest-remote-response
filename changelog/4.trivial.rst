@@ -1,1 +1,0 @@
-Now the `pytest_response.database.ResponseDB.get` method will automatically rstrip "/", useful in comparing URLs.
