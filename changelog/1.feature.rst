@@ -1,0 +1,1 @@
+Instead of moving through entire pipleline, now the interceptors will return a `pytest_response.app.BaseMockResponse` directly.

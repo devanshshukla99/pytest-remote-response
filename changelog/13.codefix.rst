@@ -1,0 +1,1 @@
+Fixed `pytest_response.app.Response` and added another exception `~pytest_response.exceptions.DatabaseNotFound`.
