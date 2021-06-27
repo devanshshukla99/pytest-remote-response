@@ -6,6 +6,9 @@ from pytest_response import response
 def pytest_addoption(parser):
     """
     Pytest hook for adding cmd-line options.
+
+    Adds ``--remote``, ``--remote-capture``, ``--remote-response``, ``--remote-db`` and ``--remote-blocked``
+    options to pytest.
     """
     parser.addoption(
         "--remote",
@@ -48,7 +51,7 @@ def pytest_addoption(parser):
 
 def pytest_configure(config):
     """
-    Pytest hook for setting up monkeypatch, if ``--intercept-remote`` is ``True``
+    Pytest hook for setting up :class:`pytest_response.app.Response`
     """
     if not config.option.remote and config.option.verbose:
         print(f"Remote:{config.option.remote}")
@@ -79,9 +82,8 @@ def pytest_configure(config):
 # def pytest_runtest_teardown(item):
 
 
-def pytest_unconfigure(config):
+def pytest_unconfigure():
     """
     Pytest hook for cleaning up.
     """
-    response.unapplyall()
-    response.unregister()
+    response.unpost()

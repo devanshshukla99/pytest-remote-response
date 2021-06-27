@@ -7,6 +7,8 @@ from pytest_response.app import BaseMockResponse
 from pytest_response.exceptions import RemoteBlockedError, ResponseNotFound
 from pytest_response.logger import log
 
+__all__ = ["MockResponse", "urlopen_wrapper", "install", "uninstall"]
+
 
 def urlopen_wrapper(func):
     @wraps(func)
