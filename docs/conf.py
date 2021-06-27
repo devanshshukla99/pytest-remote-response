@@ -13,9 +13,9 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(".."))
+from pkg_resources import get_distribution
 
-from pytest_response import __version__  # noqa
+sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
 
@@ -26,8 +26,7 @@ copyright = "2021, devanshshukla99"
 author = "devanshshukla99"
 
 # The full version, including alpha/beta/rc tags
-release = __version__
-
+release = get_distribution("pytest-remote-response").version
 
 # -- General configuration ---------------------------------------------------
 
