@@ -26,6 +26,16 @@ or
 
 The plugin will register automatically with ``pytest`` framework and will be ready to use.
 
+Supported Clients
+-----------------
+
+Currently, pytest-remote-response supports,
+
+- ✔ `urllib`_
+- ✔ `urllib3`_
+- ✔ `requests`_
+- ✔ `aiohttp`_
+
 Usage
 -----
 
@@ -119,3 +129,9 @@ This plugin is licenced under a 3-clause BSD style licence - see the ``LICENCE``
 
 .. |codestyle| image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black
+   
+   
+.. _urllib: https://docs.python.org/3/library/urllib.html
+.. _requests: https://github.com/psf/requests
+.. _aiohttp: https://github.com/aio-libs/aiohttp
+.. _urllib3: https://github.com/urllib3/urllib3
