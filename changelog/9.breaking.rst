@@ -1,0 +1,1 @@
+Renamed package from `pytest-response` to `pytest-remote-response`.

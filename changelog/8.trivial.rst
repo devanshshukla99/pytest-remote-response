@@ -1,0 +1,1 @@
+Simplified GitHub actions as a two step process.
