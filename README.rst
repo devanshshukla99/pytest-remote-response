@@ -2,9 +2,9 @@
 pytest-remote-response
 ======================
 
-|versions|
+|versions| |license|
 
-|license| |build| |coverage| |status| |codestyle|
+|build| |docs| |coverage| |status| |codestyle|
 
 
 This package provides a plugin for ``pytest`` framework for capturing and mocking connection requests during the test run.
@@ -129,7 +129,11 @@ This plugin is licenced under a 3-clause BSD style licence - see the ``LICENCE``
 
 .. |codestyle| image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black
-   
+
+.. |docs| image:: https://readthedocs.org/projects/pytest-remote-response/badge/?version=latest
+    :target: https://pytest-remote-response.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+    
    
 .. _urllib: https://docs.python.org/3/library/urllib.html
 .. _requests: https://github.com/psf/requests
