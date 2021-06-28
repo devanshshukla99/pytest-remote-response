@@ -9,7 +9,8 @@ Welcome to pytest-remote-response's documentation!
 .. toctree::
    :caption: Contents
    :maxdepth: 2
-
+   
+   user_guide
    code_ref/index
    licence
    release
