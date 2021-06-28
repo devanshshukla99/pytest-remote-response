@@ -1,4 +1,3 @@
-=================
 API Documentation
 =================
 
@@ -88,6 +87,3 @@ Exceptions
 .. automodapi:: pytest_response.exceptions
     :no-heading:
     :no-inheritance-diagram:
-
-
-----------

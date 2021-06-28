@@ -254,4 +254,7 @@ htmlhelp_basename = "responsedoc"
 # texinfo_no_detailmenu = False
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {"http://docs.python.org/": None}
+intersphinx_mapping = {
+    "python": ("http://docs.python.org/", None),
+    "pytest": ("https://docs.pytest.org/en/stable/", None),
+}

@@ -11,6 +11,7 @@ Welcome to pytest-remote-response's documentation!
    :maxdepth: 2
    
    user_guide
+   how_it_works
    code_ref/index
    licence
    release

@@ -59,7 +59,9 @@ Once, installed the plugin will register automatically with pytest with its conf
 
     $ pytest --remote={{INTERCEPTOR}}
 
-``--remote`` supports regex expressions for applying multiple interceptors.
+.. note::
+
+    ``--remote`` supports regex expressions for applying multiple interceptors.
 
 
 Handling connection requests
@@ -101,6 +103,9 @@ Standalone Package
 
 The tools implemented in this package can be easily ported to any other application, with mimial config required:
 
+Basic usage:
+^^^^^^^^^^^
+
 .. code-block:: python
 
     from pytest_response import response
@@ -128,8 +133,8 @@ The tools implemented in this package can be easily ported to any other applicat
 
 
 
-Examples
-^^^^^^^^
+Examples:
+^^^^^^^^^
 
 Block connections in `urllib`_
 """"""""""""""""""""""""""""""
