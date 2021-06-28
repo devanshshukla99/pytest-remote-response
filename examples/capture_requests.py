@@ -1,6 +1,7 @@
 # Capture outgoing connections for `requests` library
 
 import requests
+
 from pytest_response import response
 
 # Setup the database file

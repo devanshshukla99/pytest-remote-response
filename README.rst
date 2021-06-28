@@ -7,18 +7,18 @@ pytest-remote-response
 |build| |docs| |coverage| |status| |codestyle|
 
 
-This package provides a plugin for ``pytest`` framework for capturing and mocking connection requests during the test run.
+This package provides a plugin for `pytest`_ framework for capturing and mocking connection requests during the test run.
 
 Installation
 ------------
 
-.. code-block:: bash
+.. code-block:: console
 
     $ pip install pytest-remote-response
     
 or
 
-.. code-block:: bash
+.. code-block:: console
 
     $ git clone https://github.com/devanshshukla99/pytest-remote-response
     $ cd pytest-remote-response
@@ -44,7 +44,7 @@ Pytest plugin
 
 The plugin works by using interceptors of different libraries which can be checked by ``response.available()`` method; these interceptors have to be applied for each pytest run using ``--remote={INTERCEPTOR}``.
 
-.. code-block:: bash
+.. code-block:: console
 
     $ pytest --remote="urllib|requests|aiohttp"
 
@@ -53,14 +53,14 @@ Handling requests:
 - Prevent remote requests:
     all requests are allowed by default; one can disable them using `--remote-blocked` flag.
 
-.. code-block:: bash
+.. code-block:: console
 
     $ pytest --remote={INTERCEPTORS} --remote-blocked
 
 - Capture remote requests:
     the requests can be captured in a ``json`` file using ``--remote-capture`` arg.
 
-.. code-block:: bash
+.. code-block:: console
 
     $ pytest --remote={INTERCEPTORS} --remote-capture
 
@@ -69,7 +69,7 @@ Handling requests:
     
     NOTE: Due to certain limitations, it is advised to not use this plugin in an offline environment.
 
-.. code-block:: bash
+.. code-block:: console
 
     $ pytest --remote={INTERCEPTORS} --remote-response
 
@@ -96,7 +96,7 @@ Testing
 
 Use ``tox`` to make sure the plugin is working:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ git clone https://github.com/devanshshukla99/pytest-remote-response
     $ cd pytest-remote-response
@@ -135,6 +135,7 @@ This plugin is licenced under a 3-clause BSD style licence - see the ``LICENCE``
     :alt: Documentation Status
     
    
+.. _pytest: https://github.com/pytest-dev/pytest
 .. _urllib: https://docs.python.org/3/library/urllib.html
 .. _requests: https://github.com/psf/requests
 .. _aiohttp: https://github.com/aio-libs/aiohttp

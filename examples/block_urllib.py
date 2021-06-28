@@ -1,6 +1,7 @@
 # Block outgoing connections for `urllib` library
 
 from urllib.request import urlopen
+
 from pytest_response import response
 
 # Setup the database file

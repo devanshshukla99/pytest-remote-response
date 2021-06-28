@@ -1,13 +1,14 @@
 # Mock outgoing connections for `urllib3` library
 
 import urllib3
+
 from pytest_response import response
 
 # Setup the database file
 response.setup_database("basedata.json")
 
 # Capture outgoing connections
-response.configure(remote=True, capture=True, response=False)
+response.configure(remote=True, capture=False, response=True)
 
 # Applies the `urllib3` interceptor
 response.post("urllib3")

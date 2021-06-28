@@ -1,5 +1,5 @@
-User Guide
-============
+Getting Started
+===============
 
 Installation
 ************
@@ -30,24 +30,24 @@ or
 Usage
 *****
 
-Available interceptors,
+.. table:: Supported interceptors:
+    :widths: 10 15
 
-
-+-------------+------------------+
-| **Library** | **Interceptors** |
-+-------------+------------------+
-| `urllib`_   | `urllib`         |
-|             |                  |
-|             | `urllib_full`    |
-+-------------+------------------+
-| `urllib3`_  | `urllib3`        |
-|             |                  |
-|             | `urllib3_full`   |
-+-------------+------------------+
-| `requests`_ | `requests`       |
-+-------------+------------------+
-| `aiohttp`_  | `aiohttp`        |
-+-------------+------------------+
+    +-------------+------------------------------------------------------+
+    | **Library** | **Interceptors**                                     |
+    +-------------+------------------------------------------------------+
+    | `urllib`_   | :mod:`~pytest_response.interceptors.urllib`          |
+    |             |                                                      |
+    |             | :mod:`~pytest_response.interceptors.urllib_full`     |
+    +-------------+------------------------------------------------------+
+    | `urllib3`_  | :mod:`~pytest_response.interceptors.urllib3`         |
+    |             |                                                      |
+    |             | :mod:`~pytest_response.interceptors.urllib3_full`    |
+    +-------------+------------------------------------------------------+
+    | `requests`_ | :mod:`~pytest_response.interceptors.requests`        |
+    +-------------+------------------------------------------------------+
+    | `aiohttp`_  | :mod:`~pytest_response.interceptors.aiohttp`         |
+    +-------------+------------------------------------------------------+
 
 
 pytest plugin
