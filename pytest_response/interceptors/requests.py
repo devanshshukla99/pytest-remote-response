@@ -12,6 +12,10 @@ __all__ = ["MockResponse", "requests_wrapper", "install", "uninstall"]
 
 
 def requests_wrapper(func):
+    """
+    Wrapper for :func:`requests.get`
+    """
+
     @wraps(func)
     def inner_func(url, params=None, **kwargs):
         if not response.remote:
@@ -43,6 +47,9 @@ class MockResponse(BaseMockResponse):
 
 
 def install_opener():
+    """
+    Method to monkey patch the library call with the wrapped one.
+    """
     u3open = requests.get
     nurlopen = requests_wrapper(u3open)
     response.mpatch.setattr("requests.get", nurlopen)
@@ -50,6 +57,9 @@ def install_opener():
 
 
 def uninstall_opener():
+    """
+    Method to undo all monkey patches.
+    """
     response.mpatch.undo()
 
 

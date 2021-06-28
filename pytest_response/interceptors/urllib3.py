@@ -17,6 +17,10 @@ def _build_url(scheme, host, url):
 
 
 def urlopen_wrapper(func):
+    """
+    Wrapper for :func:`urllib3.connectionpool.HTTPConnectionPool.urlopen`
+    """
+
     @wraps(func)
     def inner_func(self, method, url, *args, **kwargs):
         _url = _build_url(self.scheme, self.host, url)
@@ -49,6 +53,9 @@ class MockResponse(BaseMockResponse):
 
 
 def install_opener():
+    """
+    Method to monkey patch the library call with the wrapped one.
+    """
     u3open = urllib3.connectionpool.HTTPConnectionPool.urlopen
     nurlopen = urlopen_wrapper(u3open)
     response.mpatch.setattr("urllib3.connectionpool.HTTPConnectionPool.urlopen", nurlopen)
@@ -56,6 +63,9 @@ def install_opener():
 
 
 def uninstall_opener():
+    """
+    Method to undo all monkey patches.
+    """
     response.mpatch.undo()
     return
 

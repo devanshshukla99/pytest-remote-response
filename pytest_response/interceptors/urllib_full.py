@@ -12,7 +12,6 @@ from pytest_response import response
 from pytest_response.exceptions import RemoteBlockedError, ResponseNotFound
 from pytest_response.logger import log
 
-
 __all__ = [
     "ResponseSocketIO",
     "ResponseSocket",

@@ -257,4 +257,7 @@ htmlhelp_basename = "responsedoc"
 intersphinx_mapping = {
     "python": ("http://docs.python.org/", None),
     "pytest": ("https://docs.pytest.org/en/stable/", None),
+    "urllib3": ("https://urllib3.readthedocs.io/en/stable/", None),
+    "requests": ("https://docs.python-requests.org/en/master/", None),
+    "aiohttp": ("https://docs.aiohttp.org/en/stable/", None),
 }
