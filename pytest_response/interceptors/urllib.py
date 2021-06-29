@@ -11,6 +11,10 @@ __all__ = ["MockResponse", "urlopen_wrapper", "install", "uninstall"]
 
 
 def urlopen_wrapper(func):
+    """
+    Wrapper for :py:mod:`urllib.request`
+    """
+
     @wraps(func)
     def inner_func(url, *args, **kwargs):
         if not response.remote:
@@ -43,6 +47,9 @@ class MockResponse(BaseMockResponse):
 
 
 def install_opener():
+    """
+    Method to monkey patch the library call with the wrapped one.
+    """
     uopen = urllib.request.urlopen
     nurlopen = urlopen_wrapper(uopen)
     response.mpatch.setattr("urllib.request.urlopen", nurlopen)
@@ -50,6 +57,9 @@ def install_opener():
 
 
 def uninstall_opener():
+    """
+    Method to undo all monkey patches.
+    """
     response.mpatch.undo()
 
 

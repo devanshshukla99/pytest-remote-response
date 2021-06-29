@@ -1,6 +1,5 @@
-=================
-API Documentation
-=================
+⚙API Documentation
+===================
 
 pytest plugin
 *************
@@ -88,6 +87,3 @@ Exceptions
 .. automodapi:: pytest_response.exceptions
     :no-heading:
     :no-inheritance-diagram:
-
-
-----------

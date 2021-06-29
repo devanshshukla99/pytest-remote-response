@@ -12,6 +12,19 @@ from pytest_response import response
 from pytest_response.exceptions import RemoteBlockedError, ResponseNotFound
 from pytest_response.logger import log
 
+__all__ = [
+    "ResponseSocketIO",
+    "ResponseSocket",
+    "Response_SSLSocket",
+    "ResponseHTTPConnection",
+    "ResponseHTTPHandler",
+    "ResponseHTTPResponse",
+    "ResponseHTTPSConnection",
+    "ResponseHTTPSHandler",
+    "install",
+    "uninstall",
+]
+
 EBADF = getattr(errno, "EBADF", 9)
 EAGAIN = getattr(errno, "EAGAIN", 11)
 EWOULDBLOCK = getattr(errno, "EWOULDBLOCK", 11)

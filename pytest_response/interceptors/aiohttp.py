@@ -27,6 +27,10 @@ class MockResponse(BaseMockResponse):
 
 
 def create_wrapper(func):
+    """
+    Wrapper for :meth:`aiohttp.ClientResponse.text`
+    """
+
     @wraps(func)
     def inner_func(self, url, *args, **kwargs):
         if not response.remote:
@@ -43,6 +47,10 @@ def create_wrapper(func):
 
 
 def get_wrapper(func):
+    """
+    Wrapper for :meth:`aiohttp.ClientSession.get`
+    """
+
     @wraps(func)
     async def inner_func(self, *args, **kwargs):
         if not response.remote:
@@ -61,6 +69,9 @@ def get_wrapper(func):
 
 
 def install():
+    """
+    Method to monkey patch the library call with the wrapped one.
+    """
     _aiohttpget = aiohttp.ClientResponse.text
     naiohttpget = get_wrapper(_aiohttpget)
 
@@ -73,5 +84,8 @@ def install():
 
 
 def uninstall():
+    """
+    Method to undo all monkey patches.
+    """
     response.mpatch.undo()
     return

@@ -3,16 +3,19 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to pytest-remote-response's documentation!
-==================================================
+pytest-remote-response
+======================
 
 .. toctree::
    :caption: Contents
    :maxdepth: 2
-
+   
+   user_guide
+   why
+   how_it_works
    code_ref/index
-   licence
    release
+   license
 
 .. include:: ../README.rst
 
