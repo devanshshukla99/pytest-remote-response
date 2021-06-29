@@ -11,6 +11,8 @@ This package provides a plugin for `pytest`_ framework for capturing and mocking
 
 Inspired by `pook`_ and `pytest-responses`_.
 
+Get started using the `documentation`_ and `getting-started`_.
+
 🔌Installation
 ---------------
 
@@ -145,3 +147,5 @@ This plugin is licenced under a 3-clause BSD style licence - see the ``LICENCE``
 .. _urllib3: https://github.com/urllib3/urllib3
 .. _pytest-responses: https://github.com/getsentry/pytest-responses
 .. _pook: https://github.com/h2non/pook
+.. _documentation: https://pytest-remote-response.readthedocs.io/en/latest/
+.. _getting-started: https://pytest-remote-response.readthedocs.io/en/latest/user_guide.html
