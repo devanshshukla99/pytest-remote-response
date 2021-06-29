@@ -6,3 +6,4 @@
     :maxdepth: 1
 
     changelog
+    1.0
