@@ -7,7 +7,7 @@ from pytest_response import response
 # Setup the database file
 response.setup_database("basedata.json")
 
-# Capture outgoing connections
+# Spoof outgoing connections
 response.configure(remote=True, capture=False, response=True)
 
 # Applies the `urllib3` interceptor
