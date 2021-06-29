@@ -1,5 +1,5 @@
-How it works?
-=============
+❓How it works?
+===============
 
 `pytest-remote-response` works on top of interceptors specific for each library.
 
@@ -13,6 +13,7 @@ This approach certainly has some benefits and limitations; for instance, it's su
 for countering this, `pytest-remote-response` ships with two more deep interceptors :mod:`~pytest_response.interceptors.urllib_full` and :mod:`~pytest_response.interceptors.urllib3_full`. 
 
 .. warning::
+
     :mod:`~pytest_response.interceptors.urllib_full` and :mod:`~pytest_response.interceptors.urllib3_full` are more low-level but are plagued with threading issues; use them carefully!
 
 

@@ -11,8 +11,8 @@ This package provides a plugin for `pytest`_ framework for capturing and mocking
 
 Inspired by `pook`_ and `pytest-responses`_.
 
-Installation
-------------
+🔌Installation
+---------------
 
 .. code-block:: console
 
@@ -28,21 +28,21 @@ or
 
 The plugin will register automatically with ``pytest`` framework and will be ready to use.
 
-Supported Clients
------------------
+💁🏻‍♀️Supported Clients
+------------------------
 
-Currently, pytest-remote-response supports,
+Currently, `pytest-remote-response` supports,
 
 - ✔ `urllib`_
 - ✔ `urllib3`_
 - ✔ `requests`_
 - ✔ `aiohttp`_
 
-Usage
------
+💨Usage
+--------
 
-Pytest plugin
-*************
+🐍🧪Pytest plugin
+******************
 
 The plugin works by using interceptors of different libraries which can be checked by ``response.available()`` method; these interceptors have to be applied for each pytest run using ``--remote={INTERCEPTOR}``.
 
@@ -52,7 +52,7 @@ The plugin works by using interceptors of different libraries which can be check
 
 Handling requests:
 
-- Prevent remote requests:
+- Block remote requests:
     all requests are allowed by default; one can disable them using `--remote-blocked` flag.
 
 .. code-block:: console
@@ -76,12 +76,13 @@ Handling requests:
     $ pytest --remote={INTERCEPTORS} --remote-response
 
 
-Standalone package
-******************
+🐱‍👤Standalone package
+***********************
 
 The tools implemented in this package can be easily ported to any other application, with mimial config required.
 
 Configuration:
+^^^^^^^^^^^^^^
 
 .. code-block:: python
 
@@ -93,8 +94,8 @@ Configuration:
     response.unpost()
 
 
-Testing
--------
+🧪 Testing
+-----------
 
 Use ``tox`` to make sure the plugin is working:
 

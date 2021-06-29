@@ -1,8 +1,8 @@
-Getting Started
-===============
+⛷️Getting Started
+==================
 
-Installation
-************
+🔌Installation
+***************
 
 PyPI
 ----
@@ -27,8 +27,8 @@ or
     $ pip install -e git+git://github.com/devanshshukla99/pytest-remote-response.git#egg=pytest-remote-response
 
 
-Usage
-*****
+💨Usage
+********
 
 .. table:: Supported interceptors:
     :widths: 10 15
@@ -50,8 +50,8 @@ Usage
     +-------------+------------------------------------------------------+
 
 
-pytest plugin
--------------
+🐍🧪pytest plugin
+------------------
 
 Once, installed the plugin will register automatically with pytest with its configuration options available via ``pytest --help``.
 
@@ -98,8 +98,8 @@ Examples
     $ pytest --remote="urllib|urllib3|requests" --remote-response
 
 
-Standalone Package
-------------------
+🐱‍👤Standalone Package
+-----------------------
 
 The tools implemented in this package can be easily ported to any other application, with mimial config required:
 

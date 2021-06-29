@@ -11,10 +11,11 @@ pytest-remote-response
    :maxdepth: 2
    
    user_guide
+   why
    how_it_works
    code_ref/index
-   licence
    release
+   license
 
 .. include:: ../README.rst
 

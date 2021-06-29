@@ -1,6 +1,6 @@
-***************
-Release History
-***************
+******************
+🏭Release History
+******************
 
 .. toctree::
     :maxdepth: 1
