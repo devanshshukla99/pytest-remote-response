@@ -1,0 +1,9 @@
+include README.rst LICENSE
+# Exclude specific files
+# All files which are tracked by git and not explicitly excluded here are included by setuptools_scm
+exclude .codecov.yml
+exclude .gitignore
+exclude .readthedocs.yaml
+# Prune folders
+prune .github
+prune changelog
