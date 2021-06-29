@@ -9,6 +9,8 @@ pytest-remote-response
 
 This package provides a plugin for `pytest`_ framework for capturing and mocking connection requests during the test run.
 
+Inspired by `pook`_ and `pytest-responses`_.
+
 Installation
 ------------
 
@@ -140,3 +142,5 @@ This plugin is licenced under a 3-clause BSD style licence - see the ``LICENCE``
 .. _requests: https://github.com/psf/requests
 .. _aiohttp: https://github.com/aio-libs/aiohttp
 .. _urllib3: https://github.com/urllib3/urllib3
+.. _pytest-responses: https://github.com/getsentry/pytest-responses
+.. _pook: https://github.com/h2non/pook
