@@ -1,16 +1,16 @@
 How it works?
 =============
 
-`pytest-remote-response` works on a top of interceptors, which are specific for each library and contain the intercept and response codes.
+`pytest-remote-response` works on top of interceptors specific for each library.
 
-In a nutshell, interceptors wraps the library calls allowing it to mock or capture the request.
+In a nutshell, interceptors wrap the library calls, thereby attaching additional mock/capture logic.
 
 .. note::
 
-    For some nerds, interceptors actually uses :class:`~pytest.MonkeyPatch` to monkey patch the original library with a wrapped one.
+    For some nerds, interceptors uses :class:`~pytest.MonkeyPatch` to monkey patch the original library with a wrapped one.
 
-This approach certainly has some benefits and limitations, for instance, its surprisingly easy to write new interceptors as its basically a wrapper method but its only useful when that method is being called explicitly;
-for countering this, `pytest-remote-response` actually ships with two more deep interceptors :mod:`~pytest_response.interceptors.urllib_full` and :mod:`~pytest_response.interceptors.urllib3_full`. 
+This approach certainly has some benefits and limitations; for instance, it's surprisingly easy to write new interceptors as it's only a wrapper method but it's only applicable when that method is called explicitly;
+for countering this, `pytest-remote-response` ships with two more deep interceptors :mod:`~pytest_response.interceptors.urllib_full` and :mod:`~pytest_response.interceptors.urllib3_full`. 
 
 .. warning::
     :mod:`~pytest_response.interceptors.urllib_full` and :mod:`~pytest_response.interceptors.urllib3_full` are more low-level but are plagued with threading issues; use them carefully!
@@ -21,7 +21,7 @@ Custom interceptor
 
 .. note::
 
-    Any custom intercept must have atleast ``install`` and ``uninstall`` methods and should return a :class:`~pytest_response.app.BaseMockResponse`
+    Any custom intercept must have at-least ``install`` and ``uninstall`` methods and should return a :class:`~pytest_response.app.BaseMockResponse`
 
 Example
 -------
@@ -30,7 +30,8 @@ Example
 
     from functools import warps
 
-    # Import `response` instance to get :class:`~pytest.MonkeyPatch` and :class:`~pytest_response.database.ResponseDB` objs access
+    # Import `response` instance to get access to :class:`~pytest.MonkeyPatch` and
+    # :class:`~pytest_response.database.ResponseDB`
     from pytest_response import response
 
     # Library wrapper
