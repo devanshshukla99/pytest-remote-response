@@ -10,16 +10,16 @@ Bug Fixes
 Added/Improved Documentation
 ----------------------------
 
-- More simplified `README.rst` page. (`#7 <https://github.com/devanshshukla99/pytest-remote-response/pull/7>`__)
+- More simplified ``README.rst`` page. (`#7 <https://github.com/devanshshukla99/pytest-remote-response/pull/7>`__)
 - Added more informative doc-strings. (`#10 <https://github.com/devanshshukla99/pytest-remote-response/pull/10>`__)
 - Added a supported clients list in the documentation. (`#18 <https://github.com/devanshshukla99/pytest-remote-response/pull/18>`__)
-- Documentation now hosts getting started, why? and how it works? pages! (`#21 <https://github.com/devanshshukla99/pytest-remote-response/pull/21>`__)
-
+- Documentation now hosts :ref:`getting-started`, :ref:`why` and :ref:`how-it-works` pages! (`#21 <https://github.com/devanshshukla99/pytest-remote-response/pull/21>`__)
+- Added documentation and example usage of :class:`~pytest_response.database.ResponseDB` in the :ref:`how-it-works` page. (`#23 <https://github.com/devanshshukla99/pytest-remote-response/pull/23>`__)
 
 Backwards Incompatible Changes
 ------------------------------
 
-- Renamed package from `pytest-response` to `pytest-remote-response`. (`#9 <https://github.com/devanshshukla99/pytest-remote-response/pull/9>`__)
+- Renamed package from ``pytest-response`` to ``pytest-remote-response``. (`#9 <https://github.com/devanshshukla99/pytest-remote-response/pull/9>`__)
 - Renamed interceptors to a more clear norm. (`#15 <https://github.com/devanshshukla99/pytest-remote-response/pull/15>`__)
 
 
@@ -28,7 +28,7 @@ Features
 
 - Instead of moving through entire pipleline, now the interceptors will return a :class:`pytest_response.app.BaseMockResponse` directly. (`#1 <https://github.com/devanshshukla99/pytest-remote-response/pull/1>`__)
 - Added a :meth:`pytest_response.app.Response.configure` method for setting values of remote, capture and response. (`#3 <https://github.com/devanshshukla99/pytest-remote-response/pull/3>`__)
-- Added interceptor for `aiohttp` library. (`#4 <https://github.com/devanshshukla99/pytest-remote-response/pull/4>`__)
+- Added interceptor for :mod:`aiohttp` library. (`#4 <https://github.com/devanshshukla99/pytest-remote-response/pull/4>`__)
 
 
 Trivial/Internal Changes
@@ -36,5 +36,5 @@ Trivial/Internal Changes
 
 - Similified :obj:`pytest_response.logger.log` use. (`#3 <https://github.com/devanshshukla99/pytest-remote-response/pull/3>`__)
 - Now the :meth:`pytest_response.database.ResponseDB.get` method will automatically rstrip "/", useful in comparing URLs. (`#4 <https://github.com/devanshshukla99/pytest-remote-response/pull/4>`__)
-- Now `status` code will also be dumped/responded with along with `data` and `headers`. (`#6 <https://github.com/devanshshukla99/pytest-remote-response/pull/6>`__)
+- Now ``status`` code will also be dumped/responded with along with ``data`` and ``headers``. (`#6 <https://github.com/devanshshukla99/pytest-remote-response/pull/6>`__)
 - Simplified GitHub actions as a two step process. (`#8 <https://github.com/devanshshukla99/pytest-remote-response/pull/8>`__)
