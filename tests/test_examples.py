@@ -18,8 +18,12 @@ def test_examples(testdir):
         def test_response_urllib3():
             from examples import response_urllib3  # noqa
             return
+
+        def test_insert_get_database():
+            from examples import insert_get_database  # noqa
+            return
         """
     )
 
     result = testdir.runpytest("-q", "-p", "no:warnings")
-    result.assert_outcomes(passed=3)
+    result.assert_outcomes(passed=4)
