@@ -81,8 +81,9 @@ Example
 📁Database
 ***********
 
-Data is transacted using :meth:`~pytest_response.database.ResponseDB.insert` and :meth:`~pytest_response.database.ResponseDB.get` into the database, internally it uses :class:`~tinydb.database.TinyDB`.
+``pytest-remote-response`` has :class:`~pytest_response.database.ResponseDB` to facilitate talking to the database. Internally it uses :class:`~tinydb.database.TinyDB`.
 
+Primary communication methods are :meth:`~pytest_response.database.ResponseDB.insert` and :meth:`~pytest_response.database.ResponseDB.get`.
 
 .. note::
 
