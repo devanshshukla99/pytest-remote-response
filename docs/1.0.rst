@@ -14,7 +14,7 @@ Added/Improved Documentation
 - Added more informative doc-strings. (`#10 <https://github.com/devanshshukla99/pytest-remote-response/pull/10>`__)
 - Added a supported clients list in the documentation. (`#18 <https://github.com/devanshshukla99/pytest-remote-response/pull/18>`__)
 - Documentation now hosts getting started, why? and how it works? pages! (`#21 <https://github.com/devanshshukla99/pytest-remote-response/pull/21>`__)
-
+- Added documentation and example usage of :class:`~pytest_response.database.ResponseDB` in the ``How it Works?`` page. (`#23 <https://github.com/devanshshukla99/pytest-remote-response/pull/23>`__)
 
 Backwards Incompatible Changes
 ------------------------------
