@@ -1,0 +1,1 @@
+Added documentation and example usage of :class:`~pytest_response.database.ResponseDB` in the ``How it Works?`` page.
