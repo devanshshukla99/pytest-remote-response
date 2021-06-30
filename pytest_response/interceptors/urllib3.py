@@ -18,7 +18,7 @@ def _build_url(scheme, host, url):
 
 def urlopen_wrapper(func):
     """
-    Wrapper for :func:`urllib3.connectionpool.HTTPConnectionPool.urlopen`
+    Wrapper for :meth:`urllib3.HTTPConnectionPool.urlopen`
     """
 
     @wraps(func)
