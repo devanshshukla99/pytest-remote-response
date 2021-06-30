@@ -1,3 +1,5 @@
+.. _how-it-works:
+
 ❓How it works?
 ===============
 

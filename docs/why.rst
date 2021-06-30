@@ -1,3 +1,5 @@
+.. _why:
+
 🤔Why pytest-remote-response?
 ==============================
 
