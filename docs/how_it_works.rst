@@ -17,8 +17,8 @@ for countering this, `pytest-remote-response` ships with two more deep intercept
     :mod:`~pytest_response.interceptors.urllib_full` and :mod:`~pytest_response.interceptors.urllib3_full` are more low-level but are plagued with threading issues; use them carefully!
 
 
-Custom interceptor
-******************
+🕸️Interceptor
+*************
 
 .. note::
 
@@ -75,3 +75,45 @@ Example
     def uninstall():
         # A basic uninstall method
         response.mpatch.undo()
+
+
+
+📁Database
+***********
+
+Data is transacted using :meth:`~pytest_response.database.ResponseDB.insert` and :meth:`~pytest_response.database.ResponseDB.get` into the database, internally it uses :class:`~tinydb.database.TinyDB`.
+
+
+.. note::
+
+    Some fields such as ``headers`` and ``data`` are compressed using :mod:`zlib` to reduce the 
+    over-all 🦶footprint.
+
+.. list-table:: Database fields
+    :widths: 10 20
+    :header-rows: 1
+
+    * - Fields
+      - Dumped as
+
+    * - url
+      - :class:`str`
+
+    * - cache_date
+      - :class:`str`
+    
+    * - status
+      - :class:`str`
+
+    * - headers
+      - :class:`str` -- :func:`base64.b64encode` serialized after :func:`zlib.compress`
+
+
+    * - response
+      - :class:`str` -- :func:`base64.b64encode` serialized after :func:`zlib.compress`
+
+
+Example
+-------
+
+.. literalinclude:: ../examples/insert_get_database.py
