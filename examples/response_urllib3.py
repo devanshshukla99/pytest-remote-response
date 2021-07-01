@@ -1,6 +1,5 @@
 # Mock outgoing connections for `urllib3` library
 
-
 from pytest_response import response
 
 # Setup the database file
