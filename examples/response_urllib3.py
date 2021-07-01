@@ -1,6 +1,5 @@
 # Mock outgoing connections for `urllib3` library
 
-import urllib3
 
 from pytest_response import response
 
@@ -12,6 +11,10 @@ response.configure(remote=True, capture=False, response=True)
 
 # Applies the `urllib3` interceptor
 response.post("urllib3")
+
+# It's important to import the function after setting up `response`,
+# to make sure the monkey patched version is used
+import urllib3  # noqa
 
 http = urllib3.PoolManager()
 url = "https://www.python.org"
