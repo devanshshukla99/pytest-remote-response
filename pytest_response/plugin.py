@@ -1,5 +1,3 @@
-import re
-
 from pytest_response import response
 
 
@@ -7,9 +5,15 @@ def pytest_addoption(parser):
     """
     Pytest hook for adding cmd-line options.
 
-    Adds ``--remote``, ``--remote-capture``, ``--remote-response``, ``--remote-db`` and ``--remote-blocked``
-    options to pytest.
+    Adds relevent cmd-line and ini-config options.
     """
+    parser.addoption(
+        "--response",
+        dest="init_response",
+        action="store_true",
+        default=False,
+        help="Initializes the plugin.",
+    )
     parser.addoption(
         "--remote-capture",
         dest="remote_capture",
@@ -45,11 +49,11 @@ def pytest_configure(config):
     """
     Pytest hook for setting up :class:`pytest_response.app.Response`
     """
+    # either remote_capture or remote_response
     if config.option.remote_capture and config.option.remote_response:
-        # either remote_capture or remote_response
         assert not config.option.remote_capture and config.option.remote_response
 
-    if config.option.remote_capture or config.option.remote_response:
+    if config.option.init_response:
         response.setup_database(config.option.remote_db)
         response.configure(
             remote=bool(config.option.remote_blocked),

@@ -19,9 +19,6 @@ pytest-remote-response
 
 .. include:: ../README.rst
 
-.. include:: ../README.rst
-
-
 Indices and tables
 ==================
 

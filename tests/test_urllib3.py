@@ -60,39 +60,39 @@ def testcode_full():
 def test_remote_blocked(testdir, testcode):
     testdir.makepyfile(testcode)
 
-    result = testdir.runpytest("-q", "--remote-blocked", "-p", "no:warnings")
+    result = testdir.runpytest("-q", "--response", "--remote-blocked", "-p", "no:warnings")
     result.assert_outcomes(failed=3)
 
 
 def test_remote_connection(testdir, testcode):
     testdir.makepyfile(testcode)
 
-    result = testdir.runpytest("-q", "-p", "no:warnings")
+    result = testdir.runpytest("-q", "--response", "-p", "no:warnings")
     result.assert_outcomes(passed=2, failed=1)
 
 
 def test_remote_capresp(testdir, testcode):
     testdir.makepyfile(testcode)
 
-    result = testdir.runpytest("-q", "--remote-capture", "-p", "no:warnings")
+    result = testdir.runpytest("-q", "--response", "--remote-capture", "-p", "no:warnings")
     result.assert_outcomes(passed=3)
 
-    result = testdir.runpytest("-q", "--remote-response", "-p", "no:warnings")
+    result = testdir.runpytest("-q", "--response", "--remote-response", "-p", "no:warnings")
     result.assert_outcomes(passed=3)
 
 
 def test_remote_connection_full(testdir, testcode):
     testdir.makepyfile(testcode)
 
-    result = testdir.runpytest("-q", "-p", "no:warnings")
+    result = testdir.runpytest("-q", "--response", "-p", "no:warnings")
     result.assert_outcomes(passed=2, failed=1)
 
 
 def test_remote_capresp_full(testdir, testcode):
     testdir.makepyfile(testcode)
 
-    result = testdir.runpytest("-q", "--remote-capture", "-p", "no:warnings")
+    result = testdir.runpytest("-q", "--response", "--remote-capture", "-p", "no:warnings")
     result.assert_outcomes(passed=3)
 
-    result = testdir.runpytest("-q", "--remote-response", "-p", "no:warnings")
+    result = testdir.runpytest("-q", "--response", "--remote-response", "-p", "no:warnings")
     result.assert_outcomes(passed=3)

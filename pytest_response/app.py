@@ -120,6 +120,7 @@ class Response:
         self._path_to_mocks = self._basepath.joinpath(path)
         self._available_mocks = list(self._get_available_mocks())
         self._registered_mocks = {}
+        self._applied_mocks = []
         self.mpatch = MonkeyPatch()
 
         self.db = None
@@ -168,9 +169,67 @@ class Response:
     def available(self) -> List[str]:
         return self._available_mocks
 
+    def setup_database(self, path: str) -> None:
+        """
+        Method to setup-up database.
+
+        Parameters
+        ----------
+        path : `str`
+            Path for the database.
+        """
+        self._db_path = path
+        self.db = ResponseDB(self._db_path)
+        return
+
+    def insert(self, url, response, headers, status, *args, **kwargs):
+        """
+        Wrapper function for :meth:`pytest_response.database.ResponseDB.insert`
+
+        Parameters
+        ----------
+        url : `str`
+            URL of the dump.
+        response : `bytes`
+            Data captured.
+        headers : `str`
+            Headers captured.
+        status : `int`
+            Status code of the response.
+        **kwargs : `dict`
+            Any additional parameter to be dumped.
+        """
+        if not self.db:
+            log.error("`Response.insert` called without setting up the database.")
+            raise DatabaseNotFound
+        return self.db.insert(url, response, headers, *args, **kwargs)
+
+    def get(self, url, *args, **kwargs):
+        """
+        Wrapper function for :meth:`pytest_response.database.ResponseDB.get`
+
+        Parameters
+        ----------
+        url : `str`
+            URL to be queried.
+
+        Returns
+        -------
+        status : `int`
+            Status code
+        data : `bytes`
+            Response data.
+        headers : `dict`
+            Response header.
+        """
+        if not self.db:
+            log.error("`Response.get` called without setting up the database.")
+            raise DatabaseNotFound
+        return self.db.get(url, *args, **kwargs)
+
     def configure(self, remote: bool = False, capture: bool = False, response: bool = False) -> None:
         """
-        Helper method to configure interceptors.
+        Helper method for configuring interceptors.
 
         Parameters
         ----------
@@ -188,19 +247,6 @@ class Response:
         self._capture = capture
         self._response = response
         log.info(f"Remote:{remote}, Capture:{capture}, Response:{response}")
-        return
-
-    def setup_database(self, path: str) -> None:
-        """
-        Method to setup-up database.
-
-        Parameters
-        ----------
-        path : `str`
-            Path for the database.
-        """
-        self._db_path = path
-        self.db = ResponseDB(self._db_path)
         return
 
     def _get_available_mocks(self) -> List[str]:
@@ -270,7 +316,7 @@ class Response:
         self.apply(mock)
         return
 
-    def activate(self, interceptor):
+    def activate(self, interceptors):
         """
         Activate decorator.
 
@@ -291,12 +337,17 @@ class Response:
         def wrapper(func):
             @wraps(func)
             def _inner_func(*args, **kwargs):
-                nonlocal self, interceptor
-                interceptor = re.split("[,]|[|]", interceptor)
-                self.registermany(interceptor)
-                self.applyall()
+                nonlocal self, interceptors
+
+                for interceptor in re.split("[,]|[|]", interceptors):
+                    if interceptor not in self._registered_mocks:
+                        self.register(interceptor)
+                    self.apply(interceptor)
+
+                # Call the original function
                 _ = func(*args, **kwargs)
-                self.unpost()
+
+                self.unapplyall()
                 return _
             return _inner_func
         return wrapper
@@ -331,6 +382,7 @@ class Response:
         mock_lib = self._registered_mocks.get(mock, None)
         if mock_lib:
             mock_lib.install()
+            self._applied_mocks.append(mock_lib)
         return
 
     def unapply(self, *args, **kwargs) -> None:
@@ -351,54 +403,9 @@ class Response:
         """
         Un-applies interceptor modules.
         """
-        for mock_lib in self._registered_mocks.values():
+        for mock_lib in self._applied_mocks:
             mock_lib.uninstall()
         log.debug("interceptors unapplied")
-
-    def insert(self, url, response, headers, status, *args, **kwargs):
-        """
-        Wrapper function for :meth:`pytest_response.database.ResponseDB.insert`
-
-        Parameters
-        ----------
-        url : `str`
-            URL of the dump.
-        response : `bytes`
-            Data captured.
-        headers : `str`
-            Headers captured.
-        status : `int`
-            Status code of the response.
-        **kwargs : `dict`
-            Any additional parameter to be dumped.
-        """
-        if not self.db:
-            log.error("`Response.insert` called without setting up the database.")
-            raise DatabaseNotFound
-        return self.db.insert(url, response, headers, *args, **kwargs)
-
-    def get(self, url, *args, **kwargs):
-        """
-        Wrapper function for :meth:`pytest_response.database.ResponseDB.get`
-
-        Parameters
-        ----------
-        url : `str`
-            URL to be queried.
-
-        Returns
-        -------
-        status : `int`
-            Status code
-        data : `bytes`
-            Response data.
-        headers : `dict`
-            Response header.
-        """
-        if not self.db:
-            log.error("`Response.get` called without setting up the database.")
-            raise DatabaseNotFound
-        return self.db.get(url, *args, **kwargs)
 
     def _sanatize_interceptor(self, mock: str) -> pathlib.Path:
         """
