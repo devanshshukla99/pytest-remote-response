@@ -32,6 +32,12 @@ def test_response_obj():
     res.post("urllib3")
     assert list(res.registered().keys()) == ["urllib", "urllib3", "requests"]
     res.unpost()
+
+    res.registermany(["urllib", "urllib3", "requests", "aiohttp"])
+    res.applyall()
+    assert list(res.registered().keys()) == ["urllib", "urllib3", "requests", "aiohttp"]
+
+    res.unpost()
     assert list(res.registered().keys()) == []
 
 
