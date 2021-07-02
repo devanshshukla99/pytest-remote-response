@@ -334,6 +334,7 @@ class Response:
         >>>     r = urlopen(url)
         >>>     assert r.status == 200
         """
+
         def wrapper(func):
             @wraps(func)
             def _inner_func(*args, **kwargs):
@@ -349,7 +350,9 @@ class Response:
 
                 self.unapplyall()
                 return _
+
             return _inner_func
+
         return wrapper
 
     def unpost(self) -> None:
