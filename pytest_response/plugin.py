@@ -62,7 +62,7 @@ def pytest_configure(config):
         )
 
 
-def pytest_unconfigure():
+def pytest_unconfigure(config):
     """
     Pytest hook for cleaning up.
     """
