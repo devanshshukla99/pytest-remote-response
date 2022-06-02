@@ -1,5 +1,5 @@
-def test_examples(testdir):
-    testdir.makepyfile(
+def test_examples(pytester):
+    pytester.makepyfile(
         """
         import pytest
         from pytest_response import response
@@ -19,11 +19,15 @@ def test_examples(testdir):
             from examples import response_urllib3  # noqa
             return
 
+        def test_response_decorator_urllib3():
+            from examples import response_decorator_urllib3  # noqa
+            return
+
         def test_insert_get_database():
             from examples import insert_get_database  # noqa
             return
         """
     )
 
-    result = testdir.runpytest("-q", "-p", "no:warnings")
-    result.assert_outcomes(passed=4)
+    result = pytester.runpytest("-q", "-p", "no:warnings")
+    result.assert_outcomes(passed=5)

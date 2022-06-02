@@ -3,7 +3,7 @@ import io
 import pytest
 
 from pytest_response.app import BaseMockResponse, Response
-from pytest_response.exceptions import DatabaseNotFound, InterceptorNotFound
+from pytest_response.exceptions import InterceptorNotFound, MalformedUrl
 
 
 def test_response_obj():
@@ -13,7 +13,7 @@ def test_response_obj():
 
     assert res.register("urllib") is None
     assert list(res.registered().keys()) == ["urllib"]
-    assert res.registermany(["urllib3", "requests"]) is None
+    assert res.register(["urllib3", "requests"]) is None
     assert list(res.registered().keys()) == ["urllib", "urllib3", "requests"]
 
     res.remote = True
@@ -33,8 +33,8 @@ def test_response_obj():
     assert list(res.registered().keys()) == ["urllib", "urllib3", "requests"]
     res.unpost()
 
-    res.registermany(["urllib", "urllib3", "requests", "aiohttp"])
-    res.applyall()
+    res.register(["urllib", "urllib3", "requests", "aiohttp"])
+    res.apply()
     assert list(res.registered().keys()) == ["urllib", "urllib3", "requests", "aiohttp"]
 
     res.unpost()
@@ -56,10 +56,10 @@ def test_response_exceptions():
     with pytest.raises(TypeError):
         res.response = "Invalid"
 
-    with pytest.raises(DatabaseNotFound):
+    with pytest.raises(MalformedUrl):
         res.insert("", b"", {}, 200)
 
-    with pytest.raises(DatabaseNotFound):
+    with pytest.raises(MalformedUrl):
         res.get("")
 
 

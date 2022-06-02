@@ -2,7 +2,7 @@
 from pytest_response.database import ResponseDB
 
 # Setup the database
-db = ResponseDB(path="basedata.json")
+db = ResponseDB(path="database.json")
 
 # Insert new element
 url = "https://www.python.org"

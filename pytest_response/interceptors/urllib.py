@@ -17,6 +17,7 @@ def urlopen_wrapper(func):
 
     @wraps(func)
     def inner_func(url, *args, **kwargs):
+        log.debug(f"Intercepting call to {url}")
         if not response.remote:
             log.error(f"RemoteBlockedError remote:{response.remote}")
             raise RemoteBlockedError

@@ -9,9 +9,9 @@ def testcode():
         import asyncio
         from pytest_response import response
 
-        @pytest.fixture(scope="module")
+        @pytest.fixture(scope="function")
         def event_loop():
-            loop = loop = asyncio.new_event_loop()
+            loop = asyncio.new_event_loop()
             yield loop
             loop.close()
 

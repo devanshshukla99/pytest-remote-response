@@ -33,7 +33,7 @@ def pytest_addoption(parser):
         dest="remote_db",
         action="store",
         type=str,
-        default="basedata.json",
+        default="database.json",
         help="Dumps the captured data to this file. --remote-db=[DUMPFILE]",
     )
     parser.addoption(

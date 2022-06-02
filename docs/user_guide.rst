@@ -113,7 +113,7 @@ Basic usage:
     from pytest_response import response
 
     # Setup the database file
-    response.setup_database("basedata.json")
+    response.setup_database("database.json")
     
     # Block outgoing connections
     response.configure(remote=False, capture=False, response=False)
