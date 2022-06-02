@@ -34,22 +34,22 @@ Database
 Interceptors
 ************
 
-`urllib` Interceptor Module
+`urllib` Interceptor module
 ---------------------------
 
 .. automodapi:: pytest_response.interceptors.urllib
     :no-heading:
 
 
-`urllib(full)` Interceptor Module
----------------------------------
+`urllib` Interceptor module (`unstable`)
+--------------------------------------
 
-.. automodapi:: pytest_response.interceptors.urllib_full
+.. automodapi:: pytest_response.interceptors._urllib
     :no-heading:
 
 ----------
 
-`urllib3` Interceptor Module
+`urllib3` Interceptor module
 ----------------------------
 
 .. automodapi:: pytest_response.interceptors.urllib3
@@ -57,10 +57,10 @@ Interceptors
 
 ----------
 
-`urllib3(full)` Interceptor Module
-----------------------------------
+`urllib3` Interceptor module (`unstable`)
+-------------------------------------------------
 
-.. automodapi:: pytest_response.interceptors.urllib3_full
+.. automodapi:: pytest_response.interceptors._urllib3
     :no-heading:
 
 ----------
