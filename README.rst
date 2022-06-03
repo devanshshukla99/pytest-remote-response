@@ -49,30 +49,49 @@ Currently, `pytest-remote-response` supports,
 The plugin works by applying monkeypatches of interceptors for different libraries using a wrapper ``response.activate``.
 The interceptors when applied can capture, prevent or mock the connection request. 
 
-The available interceptors are listed in ``response.avaiable`` method.
+The available interceptors are listed in ``response.available`` method.
 
-Example of activating interceptor:
+Example of using the decorator:
 
-.. literalinclude:: ../examples/response_decorator_urllib3.py
+.. code-block:: python
+
+    import urllib3
+    from pytest_response import response
+
+    response.configure(remote=True, capture=True, response=False)
+
+    @response.activate("urllib3")
+    def get_url():
+        http = urllib3.PoolManager()
+        url = "https://www.python.org"
+
+        # Since the interceptors are in response mode, the response data and headers
+        # will be spoofed with saved data in the database;
+        # if the query comes back empty, this request will
+        # error out with :class:`pytest_response.exceptions.ResponseNotFound`
+        res = http.request("GET", url)
+        assert res.status == 200
+        assert res.data
+
 
 Handling requests:
 
 - Block remote requests:
-    all requests are allowed by default; one can disable them using `--remote-block` flag.
+    all requests are allowed by default; one can disable them using `--remote-block` flag
 
 .. code-block:: console
 
     $ pytest --remote-block
 
 - Capture remote requests:
-    the requests can be captured in a ``json`` file using ``--remote-capture`` arg.
+    the requests can be captured in a ``json`` file using ``--remote-capture`` arg
 
 .. code-block:: console
 
     $ pytest --remote-capture
 
 - Mock remote requests:
-    the requests can be mocked using ``--remote-response`` flag.
+    the requests can be mocked using ``--remote-response`
     
     NOTE: Due to certain limitations, it is advised to not use this plugin in an offline environment.
 

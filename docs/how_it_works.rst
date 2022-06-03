@@ -12,11 +12,11 @@ In a nutshell, interceptors wrap the library calls, thereby attaching additional
     For some nerds, interceptors uses :class:`~pytest.MonkeyPatch` to monkey patch the original library with a wrapped one.
 
 This approach certainly has some benefits and limitations; for instance, it's surprisingly easy to write new interceptors as it's only a wrapper method but it's only applicable when that method is called explicitly;
-for countering this, `pytest-remote-response` ships with two more deep interceptors :mod:`~pytest_response.interceptors.urllib_full` and :mod:`~pytest_response.interceptors.urllib3_full`. 
+for countering this, `pytest-remote-response` ships with two more deep interceptors :mod:`~pytest_response.interceptors._urllib` and :mod:`~pytest_response.interceptors._urllib3`. 
 
 .. warning::
 
-    :mod:`~pytest_response.interceptors.urllib_full` and :mod:`~pytest_response.interceptors.urllib3_full` are more low-level but are plagued with threading issues; use them carefully!
+    :mod:`~pytest_response.interceptors._urllib` and :mod:`~pytest_response.interceptors._urllib3` are more low-level but are plagued with threading issues; use them carefully!
 
 
 🕸️Interceptor

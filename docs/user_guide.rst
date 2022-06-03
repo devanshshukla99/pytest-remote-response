@@ -40,11 +40,11 @@ or
     +-------------+------------------------------------------------------+
     | `urllib`_   | :mod:`~pytest_response.interceptors.urllib`          |
     |             |                                                      |
-    |             | :mod:`~pytest_response.interceptors.urllib_full`     |
+    |             | :mod:`~pytest_response.interceptors._urllib`         |
     +-------------+------------------------------------------------------+
     | `urllib3`_  | :mod:`~pytest_response.interceptors.urllib3`         |
     |             |                                                      |
-    |             | :mod:`~pytest_response.interceptors.urllib3_full`    |
+    |             | :mod:`~pytest_response.interceptors._urllib3`        |
     +-------------+------------------------------------------------------+
     | `requests`_ | :mod:`~pytest_response.interceptors.requests`        |
     +-------------+------------------------------------------------------+
