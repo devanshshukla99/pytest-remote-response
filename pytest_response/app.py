@@ -282,14 +282,14 @@ class Response:
         log.info(f"Remote:{remote}, Capture:{capture}, Response:{response}")
         return
 
-    def activate(self, interceptors: str):
+    def activate(self, interceptors: Union[str, list]):
         """
-        Activate decorator.
+        Wrapper to apply the interceptor decorator.
 
         Parameters
         ----------
-        interceptor : `str`
-            interceptor name.
+        interceptor : `str`, `list`
+            interceptors to apply
 
         Examples
         --------
@@ -304,11 +304,13 @@ class Response:
             @wraps(func)
             def _response_wrapper(*args, **kwargs):
                 nonlocal self, interceptors
-
-                for interceptor in re.split("[,]|[|]", interceptors):
-                    if interceptor not in self._registered_mocks:
-                        self.register(interceptor)
-                    self.apply(interceptor)
+                
+                if type(interceptors) is str:
+                    interceptors = re.split("[,]|[|]", interceptors)
+                for _interceptor in interceptors:
+                    if _interceptor not in self._registered_mocks:
+                        self.register(_interceptor)
+                    self.apply(_interceptor)
 
                 # Call the original function
                 try:
@@ -355,8 +357,22 @@ class Response:
         self._registered_mocks[mock.stem] = mock_lib
         log.debug(f"{mock.name} registered")
         return
+    
+    def _apply(self, mock_lib: str) -> bool:
+        """
+        Internal method to apply a single interceptor.
 
-    def apply(self, mock: Optional[str] = None) -> None:
+        Parameters
+        ----------
+        mock_lib : `pathlib.Path`
+            Path to the mock interceptor.
+        """
+        mock_lib.install()
+        self._applied_mocks.append(mock_lib)
+        log.debug(f"{mock_lib.__name__} applied")
+        return True
+
+    def apply(self, mock: Optional[Union[str, list]] = None) -> bool:
         """
         Activates intercepter module provided in `mock` otherwise
         activates all.
@@ -366,21 +382,23 @@ class Response:
         mock : `str`, optional
             Applies the mock.
         """
-        if mock:
-            mock_lib = self._registered_mocks.get(mock, None)
-            if mock_lib:
-                mock_lib.install()
-                self._applied_mocks.append(mock_lib)
-                log.debug(f"{mock_lib.__name__} applied")
-            return
-        for mock_lib in self._registered_mocks.values():
-            if mock_lib:
-                mock_lib.install()
-                self._applied_mocks.append(mock_lib)
-                log.debug(f"{mock_lib.__name__} applied")
-        return
+        if not mock:
+            # If `mock` is not specified then apply all
+            for mock_lib in self._registered_mocks.values():
+                self._apply(mock_lib)
+            return True
 
-    def post(self, mock: str) -> None:
+        # if `mock` is specified check if its a `list` => apply it
+        if type(mock) is list:
+            for _mock in mock:
+                self._apply(self._registered_mocks.get(_mock, None))
+            return True
+
+        # if `mock` is specified and its `str` => apply it
+        self._apply(self._registered_mocks.get(mock, None))
+        return True
+
+    def post(self, mock: Union[str, list]) -> None:
         """
         Registers and applies the mock under the same hood.
 

@@ -31,20 +31,20 @@ def testcode():
 
 def test_remote_block(pytester, testcode):
     pytester.makepyfile(testcode)
-    result = pytester.runpytest("-q", "--response", "--remote-blocked", "-p", "no:warnings")
+    result = pytester.runpytest("-q", "--remote-block", "-p", "no:warnings")
     result.assert_outcomes(failed=3)
 
 
 def test_remote_connection(pytester, testcode):
     pytester.makepyfile(testcode)
-    result = pytester.runpytest("-q", "--response", "-p", "no:warnings")
+    result = pytester.runpytest("-q", "-p", "no:warnings")
     result.assert_outcomes(passed=2, failed=1)
 
 
 def test_remote_capresp(pytester, testcode):
     pytester.makepyfile(testcode)
-    result = pytester.runpytest("-q", "--response", "--remote-capture", "-p", "no:warnings")
+    result = pytester.runpytest("-q", "--remote-capture", "-p", "no:warnings")
     result.assert_outcomes(passed=3)
 
-    result = pytester.runpytest("-q", "--response", "--remote-response", "-p", "no:warnings")
+    result = pytester.runpytest("-q", "--remote-response", "-p", "no:warnings")
     result.assert_outcomes(passed=3)

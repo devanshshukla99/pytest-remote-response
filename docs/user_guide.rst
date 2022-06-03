@@ -59,12 +59,9 @@ Once, installed the plugin will register automatically with pytest with its conf
 
 .. code-block:: console
 
-    $ pytest --remote={{INTERCEPTOR}}
+    $ pytest --help
 
-.. note::
-
-    ``--remote`` supports regex expressions for applying multiple interceptors.
-
+The plugin is only applicable to function wrapped with the :func:`pytest_response.app.Response.activate` decorator.
 
 Handling connection requests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -73,31 +70,39 @@ Handling connection requests
 
 .. code-block:: console
 
-    $ pytest --remote={INTERCEPTOR} --remote-blocked
-
+    $ pytest --remote-block
 
 - **Capture remote requests:**
 
 .. code-block:: console
 
-    $ pytest --remote={INTERCEPTOR} --remote-capture
+    $ pytest --remote-capture
 
 - **Mock remote requests:**
 
 .. code-block:: console
 
-    $ pytest --remote={INTERCEPTOR} --remote-response
+    $ pytest --remote-response
 
 
 Examples
 ^^^^^^^^
 
+.. code-block:: python
+    from pytest_response import response
+
+    @response.activate("urllib")
+    def test_urllib():
+        url = "https://www.python.org"
+        res = urllib.request.urlopen(url)
+        assert res.status == 200
+        assert res.read()
+
 .. code-block:: console
 
-    $ pytest --remote="urllib|urllib3|requests"
-    $ pytest --remote="urllib|urllib3|requests" --remote-blocked
-    $ pytest --remote="urllib|urllib3|requests" --remote-capture
-    $ pytest --remote="urllib|urllib3|requests" --remote-response
+    $ pytest --remote-blocked
+    $ pytest --remote-capture
+    $ pytest --remote-response
 
 
 🐱‍👤Standalone Package
@@ -133,6 +138,8 @@ Basic usage:
     # Cleanup
     response.unpost()
 
+.. note:: Here {INTERCEPTORS} can be `str` or `list`
+
 
 
 Examples:
@@ -152,6 +159,16 @@ Mock connections in `urllib3`_
 """"""""""""""""""""""""""""""""
 
 .. literalinclude:: ../examples/response_urllib3.py
+
+Mock connections in `urllib3`_ using decorator
+""""""""""""""""""""""""""""""""""""""""""""""
+
+.. literalinclude:: ../examples/response_decorator_urllib3.py
+
+Using :class:`~pytest_response.database.ResponseDB`
+""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. literalinclude:: ../examples/insert_get_database.py
 
 
 .. _urllib: https://docs.python.org/3/library/urllib.html
