@@ -8,13 +8,6 @@ def pytest_addoption(parser):
     Adds relevent cmd-line and ini-config options.
     """
     parser.addoption(
-        "--response",
-        dest="init_response",
-        action="store_true",
-        default=False,
-        help="Initializes the plugin.",
-    )
-    parser.addoption(
         "--remote-capture",
         dest="remote_capture",
         action="store_true",
@@ -26,19 +19,19 @@ def pytest_addoption(parser):
         dest="remote_response",
         action="store_true",
         default=False,
-        help="Mocks connection requests.",
+        help="Mocks connection requests from database",
     )
     parser.addoption(
-        "--remote-db",
+        "--remote-database",
         dest="remote_db",
         action="store",
         type=str,
         default="database.json",
-        help="Dumps the captured data to this file. --remote-db=[DUMPFILE]",
+        help="Filename to store and mock the connections requests --remote-database=[DUMPFILE]",
     )
     parser.addoption(
-        "--remote-blocked",
-        dest="remote_blocked",
+        "--remote-block",
+        dest="remote_block",
         action="store_false",
         default=True,
         help="Blocks remote connection requests for all interceptors.",
@@ -53,14 +46,13 @@ def pytest_configure(config):
     if config.option.remote_capture and config.option.remote_response:
         assert not config.option.remote_capture and config.option.remote_response
 
-    if config.option.init_response:
-        response.setup_database(config.option.remote_db)
-        response.configure(
-            remote=bool(config.option.remote_blocked),
-            capture=bool(config.option.remote_capture),
-            response=config.option.remote_response,
-        )
-
+    # if config.option.init_response:
+    response.setup_database(config.option.remote_db)
+    response.configure(
+        remote=bool(config.option.remote_block),
+        capture=bool(config.option.remote_capture),
+        response=config.option.remote_response,
+    )
 
 def pytest_unconfigure(config):
     """

@@ -300,10 +300,9 @@ class Response:
         >>>     r = urlopen(url)
         >>>     assert r.status == 200
         """
-
         def wrapper(func):
             @wraps(func)
-            def _inner_func(*args, **kwargs):
+            def _response_wrapper(*args, **kwargs):
                 nonlocal self, interceptors
 
                 for interceptor in re.split("[,]|[|]", interceptors):
@@ -317,9 +316,7 @@ class Response:
                 finally:
                     self.unapply()
                 return _
-
-            return _inner_func
-
+            return _response_wrapper
         return wrapper
 
     def registered(self) -> Dict[str, ModuleType]:
