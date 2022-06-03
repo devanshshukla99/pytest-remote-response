@@ -2,8 +2,8 @@
 
 from pytest_response import response
 
-# Setup the database file
-response.setup_database("basedata.json")
+# Setting up a clean database
+response.setup_database("database.json")
 
 # Block outgoing connections
 response.configure(remote=False, capture=False, response=False)

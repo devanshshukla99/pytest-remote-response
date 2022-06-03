@@ -46,27 +46,30 @@ Currently, `pytest-remote-response` supports,
 🐍🧪Pytest plugin
 ******************
 
-The plugin works by using interceptors of different libraries which can be checked by ``response.available()`` method; these interceptors have to be applied for each pytest run using ``--remote={INTERCEPTOR}``.
+The plugin works by applying monkeypatches of interceptors for different libraries using a wrapper ``response.activate``.
+The interceptors when applied can capture, prevent or mock the connection request. 
 
-.. code-block:: console
+The available interceptors are listed in ``response.avaiable`` method.
 
-    $ pytest --remote="urllib|requests|aiohttp"
+Example of activating interceptor:
+
+.. literalinclude:: ../examples/response_decorator_urllib3.py
 
 Handling requests:
 
 - Block remote requests:
-    all requests are allowed by default; one can disable them using `--remote-blocked` flag.
+    all requests are allowed by default; one can disable them using `--remote-block` flag.
 
 .. code-block:: console
 
-    $ pytest --remote={INTERCEPTORS} --remote-blocked
+    $ pytest --remote-block
 
 - Capture remote requests:
     the requests can be captured in a ``json`` file using ``--remote-capture`` arg.
 
 .. code-block:: console
 
-    $ pytest --remote={INTERCEPTORS} --remote-capture
+    $ pytest --remote-capture
 
 - Mock remote requests:
     the requests can be mocked using ``--remote-response`` flag.
@@ -75,7 +78,7 @@ Handling requests:
 
 .. code-block:: console
 
-    $ pytest --remote={INTERCEPTORS} --remote-response
+    $ pytest --remote-response
 
 
 🐱‍👤Standalone package

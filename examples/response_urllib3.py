@@ -2,9 +2,6 @@
 
 from pytest_response import response
 
-# Setup the database file
-response.setup_database("basedata.json")
-
 # Spoof outgoing connections
 response.configure(remote=True, capture=False, response=True)
 
@@ -23,6 +20,7 @@ url = "https://www.python.org"
 # if the query comes back empty, this request will
 # error out with :class:`pytest_response.exceptions.ResponseNotFound`
 res = http.request("GET", url)
+assert res.status == 200
 
 # Cleanup
 response.unpost()

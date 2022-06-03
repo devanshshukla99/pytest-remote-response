@@ -1,5 +1,3 @@
-import re
-
 from pytest_response import response
 
 
@@ -7,17 +5,8 @@ def pytest_addoption(parser):
     """
     Pytest hook for adding cmd-line options.
 
-    Adds ``--remote``, ``--remote-capture``, ``--remote-response``, ``--remote-db`` and ``--remote-blocked``
-    options to pytest.
+    Adds relevent cmd-line and ini-config options.
     """
-    parser.addoption(
-        "--remote",
-        dest="remote",
-        action="store",
-        type=str,
-        default=None,
-        help="Patches interceptors. --remote=[urllib|urllib3|requests|aiohttp|urllib_full|urllib3_full]",
-    )
     parser.addoption(
         "--remote-capture",
         dest="remote_capture",
@@ -30,19 +19,19 @@ def pytest_addoption(parser):
         dest="remote_response",
         action="store_true",
         default=False,
-        help="Mocks connection requests.",
+        help="Mocks connection requests from database",
     )
     parser.addoption(
-        "--remote-db",
+        "--remote-database",
         dest="remote_db",
         action="store",
         type=str,
-        default="basedata.json",
-        help="Dumps the captured data to this file. --remote-db=[DUMPFILE]",
+        default="database.json",
+        help="Filename to store and mock the connections requests --remote-database=[DUMPFILE]",
     )
     parser.addoption(
-        "--remote-blocked",
-        dest="remote_blocked",
+        "--remote-block",
+        dest="remote_block",
         action="store_false",
         default=True,
         help="Blocks remote connection requests for all interceptors.",
@@ -53,37 +42,22 @@ def pytest_configure(config):
     """
     Pytest hook for setting up :class:`pytest_response.app.Response`
     """
-    if not config.option.remote and config.option.verbose:
-        print(f"Remote:{config.option.remote}")
+    # either remote_capture or remote_response
+    if config.option.remote_capture and config.option.remote_response:
+        assert not config.option.remote_capture and config.option.remote_response
 
-    patch = config.option.remote
-    print(f"Patch:{patch}")
-    if patch:
-        if config.option.remote_capture and config.option.remote_response:
-            # either remote_capture or remote_response
-            assert not config.option.remote_capture and config.option.remote_response
-        mocks = re.split("[,]|[|]", patch)
-        response.registermany(mocks)
-    else:
-        response.registermany(["urllib", "requests"])
-
+    # if config.option.init_response:
     response.setup_database(config.option.remote_db)
     response.configure(
-        remote=bool(config.option.remote_blocked),
+        remote=bool(config.option.remote_block),
         capture=bool(config.option.remote_capture),
         response=config.option.remote_response,
     )
-    response.applyall()
 
 
-# def pytest_runtest_setup(item):
-
-
-# def pytest_runtest_teardown(item):
-
-
-def pytest_unconfigure():
+def pytest_unconfigure(config):
     """
     Pytest hook for cleaning up.
     """
-    response.unpost()
+    if config.option.remote_capture or config.option.remote_response:
+        response.unpost()

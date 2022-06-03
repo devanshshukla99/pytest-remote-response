@@ -22,8 +22,10 @@ def urlopen_wrapper(func):
     """
 
     @wraps(func)
-    def inner_func(self, method, url, *args, **kwargs):
+    def inner_func(self, method, url, timeout=5, *args, **kwargs):
+        kwargs["timeout"] = timeout
         _url = _build_url(self.scheme, self.host, url)
+        log.debug(f"Intercepting call to {_url}")
         if not response.remote:
             raise RemoteBlockedError
         if response.response:

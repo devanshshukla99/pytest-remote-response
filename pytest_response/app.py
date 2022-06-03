@@ -1,8 +1,10 @@
 import io
+import re
 import pathlib
 import importlib.util
 from types import ModuleType
-from typing import Dict, List
+from typing import Dict, List, Union, Optional
+from functools import wraps
 
 from pytest import MonkeyPatch
 
@@ -108,6 +110,7 @@ class Response:
         remote: bool = False,
         response: bool = False,
         log_level: str = "debug",
+        database: str = "database.json",
     ) -> None:
 
         log.setLevel(log_level.upper())
@@ -118,13 +121,45 @@ class Response:
         self._path_to_mocks = self._basepath.joinpath(path)
         self._available_mocks = list(self._get_available_mocks())
         self._registered_mocks = {}
+        self._applied_mocks = []
         self.mpatch = MonkeyPatch()
 
         self.db = None
-
         self.config = {"url": None, "host": None, "https": None, "headers": None}
 
         self.configure(remote=remote, capture=capture, response=response)
+        self.setup_database(database)
+        return
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} Remote:{self._remote} Capture:{self._capture} Response:{self._response}>"
+
+    def __call__(self, remote: bool = False, capture: bool = False, response: bool = False):
+        return self.configure(remote, capture, response)
+
+    def _get_available_mocks(self) -> List[str]:
+        """
+        Internal method to get available interceptors.
+        """
+        return self._path_to_mocks.rglob("*.py")
+
+    def _sanatize_interceptor(self, mock: str) -> pathlib.Path:
+        """
+        Internal method for sanatizing and validating interceptor
+        """
+        mock = self._path_to_mocks.joinpath(mock)
+
+        if not mock.suffix:
+            # If supplied mock-name is missing .py, add it.
+            mock = mock.with_suffix(".py")
+
+        if mock not in self._get_available_mocks():
+            # If interceptor is not available raise/
+            log.error(f"Requested interceptor `{mock}` is not available; check `Response.available`")
+            raise InterceptorNotFound(
+                f"Requested interceptor `{mock}` is not available; check `Response.available`"
+            )
+        return mock
 
     @property
     def remote(self) -> bool:
@@ -166,29 +201,7 @@ class Response:
     def available(self) -> List[str]:
         return self._available_mocks
 
-    def configure(self, remote: bool = False, capture: bool = False, response: bool = False) -> None:
-        """
-        Helper method to configure interceptors.
-
-        Parameters
-        ----------
-        remote : `bool`, optional
-            If `False` blocks connection requests.
-            Defaults to `False`.
-        capture : `bool`, optional
-            If `True` captures data and headers in the database.
-            Defaults to `False`.
-        response : `bool`, optional
-            If `True` responds with data and headers from the database.
-            Defaults to `False`.
-        """
-        self._remote = remote
-        self._capture = capture
-        self._response = response
-        log.info(f"Remote:{remote}, Capture:{capture}, Response:{response}")
-        return
-
-    def setup_database(self, path: str) -> None:
+    def setup_database(self, path: str) -> bool:
         """
         Method to setup-up database.
 
@@ -199,130 +212,9 @@ class Response:
         """
         self._db_path = path
         self.db = ResponseDB(self._db_path)
-        return
+        return True
 
-    def _get_available_mocks(self) -> List[str]:
-        """
-        Internal method to get available interceptors.
-        """
-        return self._path_to_mocks.rglob("*.py")
-
-    def registered(self) -> Dict[str, ModuleType]:
-        """
-        Returns registered modules.
-
-        Returns
-        -------
-        `list` of `pathlib.Path`
-            Returns the list of registered interceptors.
-        """
-        return self._registered_mocks
-
-    def register(self, mock: str) -> None:
-        """
-        Registers interceptor modules; applies using :meth:`Response.apply`
-
-        Parameters
-        ----------
-        mock : `str`
-            Interceptor; check :meth:`Response.available` for more info.
-        """
-        mock = self._sanatize_interceptor(mock)
-
-        # Load interceptor
-        spec = importlib.util.spec_from_file_location(mock.name, str(mock))
-        mock_lib = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mock_lib)
-
-        # Register for future use.
-        self._registered_mocks[mock.stem] = mock_lib
-        log.debug(f"{mock.name} registered")
-        return
-
-    def registermany(self, mocks: List[str]) -> None:
-        """
-        Wrapper for :meth:`Response.register`
-        Registers interceptor modules; applies using :meth:`Response.apply`
-
-        Parameters
-        ----------
-        mocks : `list`
-            List of interceptors to be registered.
-        """
-        for mock in mocks:
-            self.register(mock)
-        return
-
-    def post(self, mock: str) -> None:
-        """
-        Registers and applies the mock under the same hood.
-
-        Internally uses :meth:`Response.register` followed by :meth:`Response.apply`
-
-        Parameters
-        ----------
-        mock : `str`
-            Registers and applies the mock.
-        """
-        self.register(mock)
-        self.apply(mock)
-        return
-
-    def unpost(self) -> None:
-        """
-        Unapplied and unregisters mocks under the same hood.
-
-        Internally uses :meth:`Response.unapplyall` followed by :meth:`Response.unregister`
-        """
-        self.unapplyall()
-        self.unregister()
-
-    def unregister(self) -> None:
-        """
-        Deactivates interceptor modules.
-        """
-        for lib in self._registered_mocks.values():
-            lib.uninstall()
-            log.debug(f"{lib.__name__} unregistered")
-        self._registered_mocks = {}
-
-    def apply(self, mock) -> None:
-        """
-        Activates intercepter modules.
-
-        Parameters
-        ----------
-        mock : `str`
-            Applies the mock.
-        """
-        mock_lib = self._registered_mocks.get(mock, None)
-        if mock_lib:
-            mock_lib.install()
-        return
-
-    def unapply(self, *args, **kwargs) -> None:
-        """
-        Wrapper method for :meth:`Response.unapplyall`
-        """
-        return self.unapplyall(*args, **kwargs)
-
-    def applyall(self) -> None:
-        """
-        Reiterates over registered mocks to apply them all.
-        """
-        for mock_lib in self._registered_mocks.values():
-            mock_lib.install()
-        return
-
-    def unapplyall(self) -> None:
-        """
-        Un-applies interceptor modules.
-        """
-        for mock_lib in self._registered_mocks.values():
-            mock_lib.uninstall()
-        log.debug("interceptors unapplied")
-
-    def insert(self, url, response, headers, status, *args, **kwargs):
+    def insert(self, url: str, response: bytes, headers: str, status: int, *args, **kwargs) -> bool:
         """
         Wrapper function for :meth:`pytest_response.database.ResponseDB.insert`
 
@@ -342,9 +234,10 @@ class Response:
         if not self.db:
             log.error("`Response.insert` called without setting up the database.")
             raise DatabaseNotFound
+        log.debug(f"Inserted {url} into database")
         return self.db.insert(url, response, headers, *args, **kwargs)
 
-    def get(self, url, *args, **kwargs):
+    def get(self, url: str, *args, **kwargs):
         """
         Wrapper function for :meth:`pytest_response.database.ResponseDB.get`
 
@@ -367,22 +260,190 @@ class Response:
             raise DatabaseNotFound
         return self.db.get(url, *args, **kwargs)
 
-    def _sanatize_interceptor(self, mock: str) -> pathlib.Path:
+    def configure(self, remote: bool = False, capture: bool = False, response: bool = False) -> None:
         """
-        Internal method for sanatizing and validating interceptor
+        Helper method for configuring interceptors.
+
+        Parameters
+        ----------
+        remote : `bool`, optional
+            If `False` blocks connection requests.
+            Defaults to `False`.
+        capture : `bool`, optional
+            If `True` captures data and headers in the database.
+            Defaults to `False`.
+        response : `bool`, optional
+            If `True` responds with data and headers from the database.
+            Defaults to `False`.
         """
-        mock = self._path_to_mocks.joinpath(mock)
+        self._remote = remote
+        self._capture = capture
+        self._response = response
+        log.info(f"Remote:{remote}, Capture:{capture}, Response:{response}")
+        return
 
-        if not mock.suffix:
-            # If supplied mock-name is missing .py, add it.
-            mock = mock.with_suffix(".py")
+    def activate(self, interceptors: Union[str, list]):
+        """
+        Wrapper to apply the interceptor decorator.
 
-        if mock not in self._get_available_mocks():
-            # If interceptor is not available raise/
-            log.error(f"Requested interceptor `{mock}` is not available; check `Response.available`")
-            raise InterceptorNotFound(
-                f"Requested interceptor `{mock}` is not available; check `Response.available`"
-            )
-        return mock
+        Parameters
+        ----------
+        interceptor : `str`, `list`
+            interceptors to apply
+
+        Examples
+        --------
+
+        >>> @response.activate("urllib_quick")
+        >>> def test_urllib():
+        >>>     url = "https://www.python.org"
+        >>>     r = urlopen(url)
+        >>>     assert r.status == 200
+        """
+
+        def wrapper(func):
+            @wraps(func)
+            def _response_wrapper(*args, **kwargs):
+                nonlocal self, interceptors
+
+                if type(interceptors) is str:
+                    interceptors = re.split("[,]|[|]", interceptors)
+                for _interceptor in interceptors:
+                    if _interceptor not in self._registered_mocks:
+                        self.register(_interceptor)
+                    self.apply(_interceptor)
+
+                # Call the original function
+                try:
+                    _ = func(*args, **kwargs)
+                finally:
+                    self.unapply()
+                return _
+
+            return _response_wrapper
+
+        return wrapper
+
+    def registered(self) -> Dict[str, ModuleType]:
+        """
+        Returns registered modules.
+
+        Returns
+        -------
+        `list` of `pathlib.Path`
+            Returns the list of registered interceptors.
+        """
+        return self._registered_mocks
+
+    def register(self, mock: Union[str, list]) -> None:
+        """
+        Registers interceptor modules; applies using :meth:`Response.apply`
+
+        Parameters
+        ----------
+        mock : `str`, `list`
+            Interceptor; check :meth:`Response.available` for more info.
+        """
+        if type(mock) is list:
+            for _mock in mock:
+                self.register(_mock)
+            return
+        mock = self._sanatize_interceptor(mock)
+
+        # Load interceptor
+        spec = importlib.util.spec_from_file_location(mock.name, str(mock))
+        mock_lib = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mock_lib)
+        mock_lib.response = self
+
+        # Register for future use.
+        self._registered_mocks[mock.stem] = mock_lib
+        log.debug(f"{mock.name} registered")
+        return
+
+    def _apply(self, mock_lib: str) -> bool:
+        """
+        Internal method to apply a single interceptor.
+
+        Parameters
+        ----------
+        mock_lib : `pathlib.Path`
+            Path to the mock interceptor.
+        """
+        mock_lib.install()
+        self._applied_mocks.append(mock_lib)
+        log.debug(f"{mock_lib.__name__} applied")
+        return True
+
+    def apply(self, mock: Optional[Union[str, list]] = None) -> bool:
+        """
+        Activates intercepter module provided in `mock` otherwise
+        activates all.
+
+        Parameters
+        ----------
+        mock : `str`, optional
+            Applies the mock.
+        """
+        if not mock:
+            # If `mock` is not specified then apply all
+            for mock_lib in self._registered_mocks.values():
+                self._apply(mock_lib)
+            return True
+
+        # if `mock` is specified check if its a `list` => apply it
+        if type(mock) is list:
+            for _mock in mock:
+                self._apply(self._registered_mocks.get(_mock, None))
+            return True
+
+        # if `mock` is specified and its `str` => apply it
+        self._apply(self._registered_mocks.get(mock, None))
+        return True
+
+    def post(self, mock: Union[str, list]) -> None:
+        """
+        Registers and applies the mock under the same hood.
+
+        Internally uses :meth:`Response.register` followed by :meth:`Response.apply`
+
+        Parameters
+        ----------
+        mock : `str`
+            Registers and applies the mock.
+        """
+        self.register(mock)
+        self.apply(mock)
+        return
+
+    def unregister(self) -> bool:
+        """
+        Deactivates interceptor modules.
+        """
+        for lib in self._registered_mocks.values():
+            lib.uninstall()
+            log.debug(f"{lib.__name__} unregistered")
+        self._registered_mocks = {}
+        return True
+
+    def unapply(self, *args, **kwargs) -> bool:
+        """
+        Un-applies interceptor modules.
+        """
+        for _ in range(0, len(self._applied_mocks)):
+            mock_lib = self._applied_mocks.pop()
+            mock_lib.uninstall()
+            log.debug(f"{mock_lib.__name__} unapplied")
+        return True
+
+    def unpost(self) -> bool:
+        """
+        Unapplied and unregisters mocks under the same hood.
+
+        Internally uses :meth:`Response.unapply` followed by :meth:`Response.unregister`
+        """
+        self.unapply()
+        self.unregister()
+        return True
 
     pass

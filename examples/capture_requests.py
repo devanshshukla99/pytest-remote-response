@@ -2,8 +2,8 @@
 
 from pytest_response import response
 
-# Setup the database file
-response.setup_database("basedata.json")
+# Setting up a clean database
+response.setup_database("database.json")
 
 # Capture outgoing connections
 response.configure(remote=True, capture=True, response=False)
@@ -16,7 +16,7 @@ response.post("requests")
 import requests  # noqa
 
 # Since the interceptors are in capture mode, the response data and headers
-# will be dumped in the database file, i.e. basedata.json
+# will be dumped in the database file, i.e. database.json
 r = requests.get("https://www.python.org")
 
 # Cleanup

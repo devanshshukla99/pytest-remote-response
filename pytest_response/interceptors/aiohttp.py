@@ -37,7 +37,7 @@ def create_wrapper(func):
             raise RemoteBlockedError
         if response.response:
             status, data, headers = response.get(url=str(url))
-            self.status = status
+            # self.status = status
             if not data:
                 raise ResponseNotFound
             return MockResponse(200, data, headers)
