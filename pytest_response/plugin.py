@@ -54,6 +54,7 @@ def pytest_configure(config):
         response=config.option.remote_response,
     )
 
+
 def pytest_unconfigure(config):
     """
     Pytest hook for cleaning up.

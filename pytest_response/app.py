@@ -300,11 +300,12 @@ class Response:
         >>>     r = urlopen(url)
         >>>     assert r.status == 200
         """
+
         def wrapper(func):
             @wraps(func)
             def _response_wrapper(*args, **kwargs):
                 nonlocal self, interceptors
-                
+
                 if type(interceptors) is str:
                     interceptors = re.split("[,]|[|]", interceptors)
                 for _interceptor in interceptors:
@@ -318,7 +319,9 @@ class Response:
                 finally:
                     self.unapply()
                 return _
+
             return _response_wrapper
+
         return wrapper
 
     def registered(self) -> Dict[str, ModuleType]:
@@ -357,7 +360,7 @@ class Response:
         self._registered_mocks[mock.stem] = mock_lib
         log.debug(f"{mock.name} registered")
         return
-    
+
     def _apply(self, mock_lib: str) -> bool:
         """
         Internal method to apply a single interceptor.
