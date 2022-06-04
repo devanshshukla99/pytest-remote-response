@@ -1,0 +1,12 @@
+[32m2022-06-04 20:11:23,759 - app.__init__() - INFO - <-------------------------------------------------------------------> (app.py:117)[0m
+[32m2022-06-04 20:11:23,759 - app.configure() - INFO - Remote:True, Capture:False, Response:False (app.py:282)[0m
+[36m2022-06-04 20:11:26,357 - app.register() - DEBUG - urllib.py registered (app.py:361)[0m
+[36m2022-06-04 20:11:26,357 - app._apply() - DEBUG - urllib.py applied (app.py:375)[0m
+[36m2022-06-04 20:11:26,377 - app.register() - DEBUG - urllib3.py registered (app.py:361)[0m
+[36m2022-06-04 20:11:26,377 - app._apply() - DEBUG - urllib3.py applied (app.py:375)[0m
+[36m2022-06-04 20:11:26,377 - app.unapply() - DEBUG - urllib3.py unapplied (app.py:436)[0m
+[36m2022-06-04 20:11:26,377 - app.unapply() - DEBUG - urllib.py unapplied (app.py:436)[0m
+[36m2022-06-04 20:11:34,883 - app._apply() - DEBUG - urllib.py applied (app.py:375)[0m
+[36m2022-06-04 20:11:34,883 - app._apply() - DEBUG - urllib3.py applied (app.py:375)[0m
+[36m2022-06-04 20:11:34,884 - app.unapply() - DEBUG - urllib3.py unapplied (app.py:436)[0m
+[36m2022-06-04 20:11:34,884 - app.unapply() - DEBUG - urllib.py unapplied (app.py:436)[0m
