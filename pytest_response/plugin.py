@@ -26,7 +26,7 @@ def pytest_addoption(parser):
         dest="remote_db",
         action="store",
         type=str,
-        default="database.json",
+        default="database.db",
         help="Filename to store and mock the connections requests --remote-database=[DUMPFILE]",
     )
     parser.addoption(

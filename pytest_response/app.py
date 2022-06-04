@@ -110,7 +110,7 @@ class Response:
         remote: bool = False,
         response: bool = False,
         log_level: str = "debug",
-        database: str = "database.json",
+        database: str = "database.db",
     ) -> None:
 
         log.setLevel(log_level.upper())

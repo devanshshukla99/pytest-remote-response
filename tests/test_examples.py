@@ -2,6 +2,8 @@ def test_examples(pytester):
     pytester.makepyfile(
         """
         import pytest
+        from base64 import b64encode
+
         from pytest_response import response
         from pytest_response.exceptions import RemoteBlockedError
 
@@ -12,7 +14,7 @@ def test_examples(pytester):
 
         def test_capture_requests():
             from examples import capture_requests  # noqa
-            assert response.db.index() == ["https://www.python.org"]
+            assert response.db.index() == [b64encode(b"https://www.python.org").decode()]
             return
 
         def test_response_urllib3():

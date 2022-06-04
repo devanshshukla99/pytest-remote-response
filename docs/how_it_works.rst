@@ -83,7 +83,7 @@ Example
 📁Database
 ***********
 
-``pytest-remote-response`` has :class:`~pytest_response.database.ResponseDB` to facilitate talking to the database. Internally it uses :class:`~tinydb.database.TinyDB`.
+``pytest-remote-response`` has :class:`~pytest_response.database.ResponseDB` to facilitate talking to the database. Internally, its actually a wrapper for :mod:`sqlite3`.
 
 Primary communication methods are :meth:`~pytest_response.database.ResponseDB.insert` and :meth:`~pytest_response.database.ResponseDB.get`.
 
@@ -100,7 +100,7 @@ Primary communication methods are :meth:`~pytest_response.database.ResponseDB.in
       - Dumped as
 
     * - url
-      - :class:`str`
+      - :class:`str` -- :func:`base64.b64encode` serialized
 
     * - cache_date
       - :class:`str`

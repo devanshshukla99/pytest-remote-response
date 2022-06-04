@@ -5,6 +5,8 @@ import pytest
 def testcode():
     return """
         import requests
+        from base64 import b64encode
+
         from pytest_response import response
 
         @response.activate("requests")
@@ -22,8 +24,8 @@ def testcode():
             assert res.content
 
         def test_database():
-            assert response.db.index() == ["http://www.testingmcafeesites.com/testcat_ac.html",
-                                           "https://www.python.org"]
+            assert response.db.index() == [b64encode(b"http://www.testingmcafeesites.com/testcat_ac.html").decode(),
+                                           b64encode(b"https://www.python.org").decode()]
         """
 
 
