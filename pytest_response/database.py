@@ -1,9 +1,9 @@
 import ast
 import zlib
 import sqlite3
-from datetime import date
 from base64 import b64decode, b64encode
-from typing import List, Optional, Tuple
+from typing import List, Tuple, Optional
+from datetime import date
 from urllib.parse import urljoin, urlparse
 
 from pytest_response.exceptions import MalformedUrl
@@ -29,7 +29,7 @@ class ResponseDB:
 
     Examples
     --------
-    >>> db = ResponseDB("db.json")
+    >>> db = ResponseDB("database.db")
     """
 
     today = date.today().strftime("%Y-%m-%d")
@@ -122,7 +122,7 @@ class ResponseDB:
             Headers captured.
         status : `int`
             Status code of the response.
-        **kwargs : `dict`
+        kwargs : `dict`
             Any additional parameter to be dumped.
         """
         _kwargs = [
