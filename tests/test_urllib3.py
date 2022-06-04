@@ -1,4 +1,5 @@
 import pytest
+
 from pytest_response.logger import log
 
 

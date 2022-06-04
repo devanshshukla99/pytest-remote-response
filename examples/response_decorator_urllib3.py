@@ -1,4 +1,5 @@
 import urllib3  # noqa
+
 from pytest_response import response
 
 response.configure(remote=True, capture=True, response=False)
