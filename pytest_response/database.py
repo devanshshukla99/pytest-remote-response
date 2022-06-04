@@ -20,7 +20,7 @@ def dict_factory(cursor, row):
 
 class ResponseDB:
     """
-    Wrapper database for sqlite3.
+    Wrapper class for sqlite3
 
     Parameters
     ----------
