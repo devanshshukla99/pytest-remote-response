@@ -1,1 +1,0 @@
-Moving from :mod:`tinydb` to :mod:`sqlite3` for better threading support and reliability; no changes in public API.

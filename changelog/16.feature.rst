@@ -1,1 +1,0 @@
-pytest-remote-response now has a decorator :func:`~pytest_response.Response.activate` to apply interceptors on individual functions. It supports string, regex pattern or list of interceptors as argument.

@@ -1,1 +1,0 @@
-Renamed `urllib_full` and `urllib3_full` to `_urllib` and `_urllib3` respectively, to indicate their threading instability.

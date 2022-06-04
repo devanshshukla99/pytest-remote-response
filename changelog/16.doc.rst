@@ -1,1 +1,0 @@
-Added documentation and examples for :func:`~pytest_response.Response.activate`.
