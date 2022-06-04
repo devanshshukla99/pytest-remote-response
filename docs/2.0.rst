@@ -1,0 +1,37 @@
+2.0.0 (2022-06-04)
+==================
+
+Added/Improved Documentation
+----------------------------
+
+- Added documentation and examples for :func:`~pytest_response.Response.activate`. (`#16 <https://github.com/devanshshukla99/pytest-remote-response/pull/16>`__)
+
+
+Backwards Incompatible Changes
+------------------------------
+
+- Renamed `urllib_full` and `urllib3_full` to `_urllib` and `_urllib3` respectively, to indicate their threading instability. (`#16 <https://github.com/devanshshukla99/pytest-remote-response/pull/16>`__)
+
+
+Deprecations and Removals
+-------------------------
+
+- Ability to activate interceptors via command-line argument `--remote={INTERCEPTOR}` has been removed in favour of activating via :func:`~pytest_response.Response.activate` decorator. (`#16 <https://github.com/devanshshukla99/pytest-remote-response/pull/16>`__)
+
+
+Features
+--------
+
+- pytest-remote-response now has a decorator :func:`~pytest_response.Response.activate` to apply interceptors on individual functions. It supports string, regex pattern or list of interceptors as argument. (`#16 <https://github.com/devanshshukla99/pytest-remote-response/pull/16>`__)
+
+
+Bug Fixes
+---------
+
+- Fixed the documentation examples. (`#26 <https://github.com/devanshshukla99/pytest-remote-response/pull/26>`__)
+
+
+Trivial/Internal Changes
+------------------------
+
+- Moving from :mod:`tinydb` to :mod:`sqlite3` for better threading support and reliability; no changes in public API. (`#28 <https://github.com/devanshshukla99/pytest-remote-response/pull/28>`__)
