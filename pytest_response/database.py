@@ -1,9 +1,9 @@
 import ast
 import zlib
 import sqlite3
-from base64 import b64decode, b64encode
-from typing import List, Tuple
 from datetime import date
+from base64 import b64decode, b64encode
+from typing import List, Optional, Tuple
 from urllib.parse import urljoin, urlparse
 
 from pytest_response.exceptions import MalformedUrl
@@ -20,7 +20,7 @@ def dict_factory(cursor, row):
 
 class ResponseDB:
     """
-    Basic database class for `pytest_response`
+    Wrapper database for sqlite3.
 
     Parameters
     ----------
@@ -46,6 +46,9 @@ class ResponseDB:
         return f"<database {self._path}>"
 
     def setup(self) -> bool:
+        """
+        Function to setup the database table.
+        """
         self._database.cursor().executescript(
             """
             CREATE TABLE IF NOT EXISTS records (
@@ -61,7 +64,7 @@ class ResponseDB:
         self._database.row_factory = dict_factory
         return True
 
-    def index(self, index: str = "url") -> List[str]:
+    def index(self, index: Optional[str] = "url") -> List[str]:
         """
         Returns all occurances of the column `index`.
 
@@ -91,6 +94,11 @@ class ResponseDB:
         ----------
         url : `str`
             URL to be sanatized.
+        
+        Returns
+        -------
+        _url : `str`
+            Sanatized URL
         """
         try:
             _urlparsed = urlparse(url)
@@ -99,7 +107,7 @@ class ResponseDB:
         except Exception:
             raise MalformedUrl
 
-    def insert(self, url: str, response: bytes, headers: dict, status: int = 200, **kwargs) -> None:
+    def insert(self, url: str, response: bytes, headers: dict, status: Optional[int] = 200, **kwargs) -> None:
         """
         Method for dumping url, headers and responses to the database.
         All additonal kwargs are dumped as well.
@@ -117,12 +125,6 @@ class ResponseDB:
         **kwargs : `dict`
             Any additional parameter to be dumped.
         """
-        kwargs.update({"url": self._sanatize_url(url)})
-        kwargs.update({"cache_date": self.today})
-        kwargs.update({"status": str(status)})
-        kwargs.update({"headers": b64encode(zlib.compress(str(headers).encode("utf-8"))).decode("utf-8")})
-        kwargs.update({"response": b64encode(zlib.compress(response)).decode("utf-8")})
-
         _kwargs = [
             b64encode(self._sanatize_url(url).encode()).decode(),
             self.today,
@@ -155,8 +157,6 @@ class ResponseDB:
         headers : `dict`
             Response header.
         """
-        # query = where("url") == self._sanatize_url(url)  # and where("request") == "req"
-        # element = self._database.search(query)
         url = b64encode(self._sanatize_url(url).encode()).decode()
         element = self._database.execute(f"SELECT * FROM records WHERE url='{url}';").fetchall()
         if element:
@@ -180,7 +180,7 @@ class ResponseDB:
         """
         return self._database.execute("SELECT * FROM records").fetchall()
 
-    def truncate(self):
+    def truncate(self) -> bool:
         """
         Method to purge all records in the database.
         """
@@ -189,16 +189,10 @@ class ResponseDB:
 
     def close(self) -> None:
         self._database.close()
+        return
 
-        # if isinstance(self._database, TinyDB):
-        #     if self._database._opened:
-        #         self._database.close()
-
-    def __del__(self):
+    def __del__(self) -> None:
         self._database.close()
-        # if isinstance(self._database, TinyDB):
-        #     if self._database._opened:
-        #         self._database.close()
         return
 
     pass
