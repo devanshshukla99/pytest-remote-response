@@ -94,7 +94,7 @@ class ResponseDB:
         ----------
         url : `str`
             URL to be sanatized.
-        
+
         Returns
         -------
         _url : `str`

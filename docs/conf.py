@@ -260,5 +260,5 @@ intersphinx_mapping = {
     "urllib3": ("https://urllib3.readthedocs.io/en/stable/", None),
     "requests": ("https://docs.python-requests.org/en/master/", None),
     "aiohttp": ("https://docs.aiohttp.org/en/stable/", None),
-    "tinydb": ("https://tinydb.readthedocs.io/en/stable/", None),
+    "sqlite3": ("https://docs.python.org/3/library/sqlite3.html", None),
 }
