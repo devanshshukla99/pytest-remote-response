@@ -63,3 +63,5 @@ pip-wheel-metadata/
 
 # vscode
 .vscode
+
+*.log

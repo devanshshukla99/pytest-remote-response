@@ -7,9 +7,6 @@ Added/Improved Documentation
 - Added documentation and examples for :func:`~pytest_response.Response.activate`. (`#16 <https://github.com/devanshshukla99/pytest-remote-response/pull/16>`__)
 
 
-1.0.1.dev6+gc724ec7.d20220603 (2022-06-04)
-==========================================
-
 Backwards Incompatible Changes
 ------------------------------
 
