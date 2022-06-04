@@ -10,11 +10,13 @@ from pytest_response.exceptions import MalformedUrl
 
 __all__ = ["ResponseDB"]
 
+
 def dict_factory(cursor, row):
     d = {}
     for idx, col in enumerate(cursor.description):
         d[col[0]] = row[idx]
     return d
+
 
 class ResponseDB:
     """
@@ -42,9 +44,10 @@ class ResponseDB:
 
     def __repr__(self) -> str:
         return f"<database {self._path}>"
-    
+
     def setup(self) -> bool:
-        self._database.cursor().executescript("""
+        self._database.cursor().executescript(
+            """
             CREATE TABLE IF NOT EXISTS records (
             url TEXT PRIMARY KEY NOT NULL,
             cache_date DATE NOT NULL,
@@ -52,7 +55,8 @@ class ResponseDB:
             headers TEXT NOT NULL,
             response TEXT NOT NULL
         );
-        """)
+        """
+        )
         self._database.commit()
         self._database.row_factory = dict_factory
         return True
@@ -119,8 +123,16 @@ class ResponseDB:
         kwargs.update({"headers": b64encode(zlib.compress(str(headers).encode("utf-8"))).decode("utf-8")})
         kwargs.update({"response": b64encode(zlib.compress(response)).decode("utf-8")})
 
-        _kwargs = [b64encode(self._sanatize_url(url).encode()).decode(), self.today, str(status), b64encode(zlib.compress(str(headers).encode("utf-8"))).decode("utf-8"), b64encode(zlib.compress(response)).decode("utf-8")]
-        self._database.execute("REPLACE INTO records(url, cache_date, status, headers, response) VALUES (?,?,?,?,?)", _kwargs)
+        _kwargs = [
+            b64encode(self._sanatize_url(url).encode()).decode(),
+            self.today,
+            str(status),
+            b64encode(zlib.compress(str(headers).encode("utf-8"))).decode("utf-8"),
+            b64encode(zlib.compress(response)).decode("utf-8"),
+        ]
+        self._database.execute(
+            "REPLACE INTO records(url, cache_date, status, headers, response) VALUES (?,?,?,?,?)", _kwargs
+        )
         self._database.commit()
         return
 

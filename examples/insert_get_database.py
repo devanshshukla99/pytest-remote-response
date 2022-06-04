@@ -1,4 +1,6 @@
 # Import the database interface :class:`pytest_response.database.ResponseDB`
+from base64 import b64encode
+
 from pytest_response.database import ResponseDB
 
 # Setup the database
@@ -12,7 +14,7 @@ data = b""
 db.insert(url=url, status=status, response=data, headers=headers)
 
 # Verify the index
-assert url in db.index()
+assert b64encode(url.encode()).decode() in db.index()
 
 # Query for an URL
 url = "https://www.python.org"

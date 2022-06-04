@@ -4,9 +4,11 @@ import pytest
 @pytest.fixture
 def testcode():
     return """
-        import aiohttp
         import pytest
+        import aiohttp
         import asyncio
+        from base64 import b64encode
+
         from pytest_response import response
 
         @pytest.fixture(scope="function")
@@ -40,8 +42,8 @@ def testcode():
             event_loop.run_until_complete(async_whats_this())
 
         def test_database():
-            assert response.db.index() == ["http://www.testingmcafeesites.com/testcat_ac.html",
-                                           "https://www.python.org"]
+            assert response.db.index() == [b64encode(b"http://www.testingmcafeesites.com/testcat_ac.html").decode(),
+                                           b64encode(b"https://www.python.org").decode()]
         """
 
 
