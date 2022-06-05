@@ -1,5 +1,7 @@
 from pytest_response import response
 
+_DEFAULT_DATABASE = "database.db"
+
 
 def pytest_addoption(parser):
     """
@@ -22,19 +24,17 @@ def pytest_addoption(parser):
         help="Mocks connection requests from database",
     )
     parser.addoption(
-        "--remote-database",
-        dest="remote_db",
-        action="store",
-        type=str,
-        default="database.db",
-        help="Filename to store and mock the connections requests --remote-database=[DUMPFILE]",
-    )
-    parser.addoption(
         "--remote-block",
         dest="remote_block",
         action="store_false",
         default=True,
         help="Blocks remote connection requests for all interceptors.",
+    )
+    parser.addini(
+        "remote_response_database",
+        type="string",
+        default=_DEFAULT_DATABASE,
+        help="File to store the connections requests",
     )
 
 
@@ -47,7 +47,7 @@ def pytest_configure(config):
         assert not config.option.remote_capture and config.option.remote_response
 
     # if config.option.init_response:
-    response.setup_database(config.option.remote_db)
+    response.setup_database(config.getini("remote_response_database"))
     response.configure(
         remote=bool(config.option.remote_block),
         capture=bool(config.option.remote_capture),

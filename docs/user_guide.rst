@@ -84,6 +84,12 @@ Handling connection requests
 
     $ pytest --remote-response
 
+- **Database dump:**
+
+The database dump file can be specified using the ``remote_response_database`` ini-config option with pytest.
+These config options can be set through ``pytest.ini``, ``pyproject.toml``, ``tox.ini`` or ``setup.cfg``.
+Follow the `pytest_config`_ docs for more info.
+
 
 Examples
 ^^^^^^^^
@@ -100,7 +106,7 @@ Examples
 
 .. code-block:: console
 
-    $ pytest --remote-blocked
+    $ pytest --remote-block
     $ pytest --remote-capture
     $ pytest --remote-response
 
@@ -175,3 +181,4 @@ Using :class:`~pytest_response.database.ResponseDB`
 .. _requests: https://github.com/psf/requests
 .. _aiohttp: https://github.com/aio-libs/aiohttp
 .. _urllib3: https://github.com/urllib3/urllib3
+.. _pytest_config: https://docs.pytest.org/en/6.2.x/customize.html#configuration-file-formats
