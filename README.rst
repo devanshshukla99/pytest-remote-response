@@ -77,23 +77,21 @@ Example of using the decorator:
 Handling requests:
 
 - Block remote requests:
-    all requests are allowed by default; one can disable them using `--remote-block` flag
+    all requests are allowed by default; one can disable them using ``--remote-block`` flag
 
 .. code-block:: console
 
     $ pytest --remote-block
 
 - Capture remote requests:
-    the requests can be captured in a ``json`` file using ``--remote-capture`` arg
+    the requests can be captured in a ``sqlite3`` database using ``--remote-capture`` arg
 
 .. code-block:: console
 
     $ pytest --remote-capture
 
 - Mock remote requests:
-    the requests can be mocked using ``--remote-response`
-    
-    NOTE: Due to certain limitations, it is advised to not use this plugin in an offline environment.
+    the requests can be mocked using ``--remote-response``
 
 .. code-block:: console
 
