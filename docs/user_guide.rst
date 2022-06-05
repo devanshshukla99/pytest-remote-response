@@ -86,9 +86,9 @@ Handling connection requests
 
 - **Database dump:**
 
-The database dump file can be specified using the `remote_response_database` ini-config option with pytest.
-These config options can be set through `pytest.ini`, `pyproject.toml`, `tox.ini` or `setup.cfg`,
-follow the `pytest_config`_ docs for more info.
+The database dump file can be specified using the ``remote_response_database`` ini-config option with pytest.
+These config options can be set through ``pytest.ini``, ``pyproject.toml``, ``tox.ini`` or ``setup.cfg``.
+Follow the `pytest_config`_ docs for more info.
 
 
 Examples
