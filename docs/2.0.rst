@@ -10,13 +10,15 @@ Added/Improved Documentation
 Backwards Incompatible Changes
 ------------------------------
 
-- Renamed `urllib_full` and `urllib3_full` to `_urllib` and `_urllib3` respectively, to indicate their threading instability. (`#16 <https://github.com/devanshshukla99/pytest-remote-response/pull/16>`__)
+- Renamed ``urllib_full`` to ``_urllib`` and ``urllib3_full`` to ``_urllib3``, to indicate their threading instability. (`#16 <https://github.com/devanshshukla99/pytest-remote-response/pull/16>`__)
+
+- Moving away from commandline arguments ``--remote-db`` / ``--remote-database`` in favour of ini-config option ``remote_response_database`` set through pytest with default value ``database.db``. (`#30 <https://github.com/devanshshukla99/pytest-remote-response/pull/30>`__)
 
 
 Deprecations and Removals
 -------------------------
 
-- Ability to activate interceptors via command-line argument `--remote={INTERCEPTOR}` has been removed in favour of activating via :func:`~pytest_response.Response.activate` decorator. (`#16 <https://github.com/devanshshukla99/pytest-remote-response/pull/16>`__)
+- Ability to activate interceptors via command-line argument ``--remote={INTERCEPTOR}`` has been removed in favour of activating via :func:`~pytest_response.Response.activate` decorator. (`#16 <https://github.com/devanshshukla99/pytest-remote-response/pull/16>`__)
 
 
 Features
