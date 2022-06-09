@@ -2,7 +2,7 @@
 pytest-remote-response
 ======================
 
-|versions| |license|
+|versions| |license| |doi|
 
 |build| |docs| |coverage| |status| |codestyle|
 
@@ -158,7 +158,10 @@ This plugin is licenced under a 3-clause BSD style licence - see the ``LICENCE``
 .. |docs| image:: https://readthedocs.org/projects/pytest-remote-response/badge/?version=latest
     :target: https://pytest-remote-response.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
-    
+
+.. |doi| image:: https://zenodo.org/badge/373798755.svg
+   :target: https://zenodo.org/badge/latestdoi/373798755
+   :alt: Digital Object Identifier
    
 .. _pytest: https://github.com/pytest-dev/pytest
 .. _urllib: https://docs.python.org/3/library/urllib.html

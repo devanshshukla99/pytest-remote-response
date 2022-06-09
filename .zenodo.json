@@ -1,0 +1,14 @@
+{
+    "description": "A pytest plugin for capturing and mocking connection requests during the test run.", 
+    "license": "BSD-3-Clause",
+    "title": "pytest-remote-response", 
+    "upload_type": "software",
+    "creators": [
+        {
+            "orcid": "0000-0003-0610-9747",
+            "affiliation": "Sardar Vallabhbhai National Institute of Technology Surat, India",
+            "name": "Shukla, Devansh"
+        }
+    ],
+    "access_right": "open"
+}
