@@ -112,7 +112,6 @@ class Response:
         log_level: str = "debug",
         database: str = "database.db",
     ) -> None:
-
         log.setLevel(log_level.upper())
         log.info("<------------------------------------------------------------------->")
 

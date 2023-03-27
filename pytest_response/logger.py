@@ -28,7 +28,6 @@ class Formatter(logging.Formatter):
 
 
 def _init_log(level="info"):
-
     log = logging.getLogger("pytest_response")
     log.setLevel(getattr(logging, level.upper()))
     fh = logging.FileHandler(".pytest_response.log")
