@@ -1,6 +1,6 @@
 .. _getting-started:
 
-⛷️Getting Started
+⛷️Getting started
 ==================
 
 🔌Installation
@@ -111,7 +111,7 @@ Examples
     $ pytest --remote-response
 
 
-🐱‍👤Standalone Package
+🐱‍👤Standalone package
 -----------------------
 
 The tools implemented in this package can be easily ported to any other application, with mimial config required:
