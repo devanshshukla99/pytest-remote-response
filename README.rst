@@ -132,7 +132,7 @@ See `tox <https://github.com/tox-dev/tox>`_ for more info.
 
 Licence
 -------
-This plugin is licenced under a 3-clause BSD style licence - see the ``LICENCE`` file.
+This plugin is licenced under a MIT licence - see the ``LICENCE`` file.
 
 .. |build| image:: https://github.com/devanshshukla99/pytest-remote-response/actions/workflows/main.yml/badge.svg
 
