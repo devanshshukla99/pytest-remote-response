@@ -148,7 +148,7 @@ This plugin is licenced under a MIT licence - see the ``LICENCE`` file.
     :target: https://pypi.org/project/pytest-remote-response/
     :alt: Python versions supported
 
-.. |license| image:: https://img.shields.io/badge/License-BSD%203--Clause-blue.svg 
+.. |license| image:: https://img.shields.io/pypi/l/pytest-remote-response 
     :target: https://pypi.org/project/pytest-remote-response/
     :alt: License
 
