@@ -1,10 +1,12 @@
 [build-system]
 requires = [
-         "setuptools",
          "setuptools_scm",
          "wheel"
          ]
-build-backend = 'setuptools.build_meta'
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+write_to = "pytest_response/_version.py"
 
 [tool.black]
 line-length = 110
