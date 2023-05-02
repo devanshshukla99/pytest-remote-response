@@ -95,6 +95,7 @@ Examples
 ^^^^^^^^
 
 .. code-block:: python
+
     from pytest_response import response
 
     @response.activate("urllib")

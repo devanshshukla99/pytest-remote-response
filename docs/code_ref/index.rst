@@ -42,7 +42,7 @@ Interceptors
 
 
 `urllib` Interceptor module (`unstable`)
---------------------------------------
+----------------------------------------
 
 .. automodapi:: pytest_response.interceptors._urllib
     :no-heading:
@@ -58,7 +58,7 @@ Interceptors
 ----------
 
 `urllib3` Interceptor module (`unstable`)
--------------------------------------------------
+-----------------------------------------
 
 .. automodapi:: pytest_response.interceptors._urllib3
     :no-heading:
