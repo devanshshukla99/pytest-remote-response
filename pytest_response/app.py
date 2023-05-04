@@ -112,9 +112,6 @@ class Response:
         log_level: str = "debug",
         database: str = "database.db",
     ) -> None:
-        log.setLevel(log_level.upper())
-        log.info("<------------------------------------------------------------------->")
-
         self._basepath = pathlib.Path(__file__).parent
 
         self._path_to_mocks = self._basepath.joinpath(path)
