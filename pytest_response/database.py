@@ -5,6 +5,7 @@ from base64 import b64decode, b64encode
 from typing import List, Tuple, Optional
 from datetime import date
 from urllib.parse import urljoin, urlparse
+from loguru import logger as log
 
 from pytest_response.exceptions import MalformedUrl
 
@@ -48,6 +49,7 @@ class ResponseDB:
         """
         Function to setup the database table.
         """
+        log.debug("setting up database")
         self._database = sqlite3.connect(self._path)
         self._database.cursor().executescript(
             """
