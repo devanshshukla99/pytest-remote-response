@@ -48,6 +48,7 @@ extensions = [
     "sphinx.ext.viewcode",
 ]
 
+
 numpydoc_show_class_members = False
 
 # Add any paths that contain templates here, relative to this directory.
@@ -56,7 +57,7 @@ numpydoc_show_class_members = False
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns = ["changes"]
 
 
 # -- Options for HTML output -------------------------------------------------

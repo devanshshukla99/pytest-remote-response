@@ -29,11 +29,11 @@ jobs:
       - name: Running tox
         run: |
           tox -e ${{ matrix.toxenv }}
-      - uses: codecov/codecov-action@v3
-        with:
-          fail_ci_if_error: true
-          files: coverage.xml
-          name: codecov
+      # - uses: codecov/codecov-action@v3
+      #   with:
+      #     fail_ci_if_error: true
+      #     files: coverage.xml
+      #     name: codecov
 
   codestyle:
     runs-on: ubuntu-latest
