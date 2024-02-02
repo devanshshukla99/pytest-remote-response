@@ -31,6 +31,12 @@ def pytest_addoption(parser):
         help="Blocks remote connection requests for all interceptors.",
     )
     parser.addini(
+        "enable_remote_response",
+        type="bool",
+        default=False,
+        help="Activate remote-response plugin",
+    )
+    parser.addini(
         "remote_response_database",
         type="string",
         default=_DEFAULT_DATABASE,
@@ -42,6 +48,8 @@ def pytest_configure(config):
     """
     Pytest hook for setting up :class:`pytest_response.app.Response`
     """
+    if not config.getini("enable_remote_response"):
+        return
     # either remote_capture or remote_response
     if config.option.remote_capture and config.option.remote_response:
         assert not config.option.remote_capture and config.option.remote_response
