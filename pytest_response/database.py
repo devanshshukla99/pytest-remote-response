@@ -5,6 +5,7 @@ from base64 import b64decode, b64encode
 from typing import List, Tuple, Optional
 from datetime import date
 from urllib.parse import urljoin, urlparse
+from loguru import logger as log
 
 from pytest_response.exceptions import MalformedUrl
 
@@ -38,8 +39,7 @@ class ResponseDB:
 
     def __init__(self, path: str) -> None:
         self._path = path
-        self._database = sqlite3.connect(path)
-        self.setup()
+        self._database = None
         return
 
     def __repr__(self) -> str:
@@ -49,6 +49,8 @@ class ResponseDB:
         """
         Function to setup the database table.
         """
+        log.debug("setting up database")
+        self._database = sqlite3.connect(self._path)
         self._database.cursor().executescript(
             """
             CREATE TABLE IF NOT EXISTS records (
@@ -78,6 +80,8 @@ class ResponseDB:
         _occurances : `list`
             All occurances of the selected column `index`.
         """
+        if not self._database:
+            self.setup()
         elements = self._database.execute("SELECT * FROM records;").fetchall()
         _occurances = []
         for element in elements:
@@ -125,6 +129,8 @@ class ResponseDB:
         kwargs : `dict`
             Any additional parameter to be dumped.
         """
+        if not self._database:
+            self.setup()
         _kwargs = [
             b64encode(self._sanatize_url(url).encode()).decode(),
             self.today,
@@ -157,6 +163,8 @@ class ResponseDB:
         headers : `dict`
             Response header.
         """
+        if not self._database:
+            self.setup()
         url = b64encode(self._sanatize_url(url).encode()).decode()
         element = self._database.execute(f"SELECT * FROM records WHERE url='{url}';").fetchall()
         if element:
@@ -178,21 +186,27 @@ class ResponseDB:
         -------
         Return list of all elements.
         """
+        if not self._database:
+            self.setup()
         return self._database.execute("SELECT * FROM records").fetchall()
 
     def truncate(self) -> bool:
         """
         Method to purge all records in the database.
         """
+        if not self._database:
+            self.setup()
         self._database.execute("DELETE FROM records;")
         return self._database.commit()
 
     def close(self) -> None:
-        self._database.close()
-        return
+        if not self._database:
+            return True
+        return self._database.close()
 
     def __del__(self) -> None:
-        self._database.close()
-        return
+        if not self._database:
+            return True
+        return self._database.close()
 
     pass
